@@ -6,8 +6,279 @@
     <description>Recent content on My New Hugo Site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 20 Feb 2017 11:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Mon, 20 Feb 2017 14:12:34 -0600</lastBuildDate>
     <atom:link href="https://bheisler.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Writing a Raytracer in Rust - Part 2 - Light and Shadow</title>
+      <link>https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/</link>
+      <pubDate>Mon, 20 Feb 2017 14:12:34 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/</guid>
+      <description>
+
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&amp;rsquo;t
+already, you may wish to read &lt;a href=&#34;https://bheisler.github.io/post/writing-raytracer-in-rust/&#34;&gt;Part 1&lt;/a&gt;.
+Previously, we implemented a basic raytracer which can render only a single
+sphere with no lighting. This time, we&amp;rsquo;ll add multiple objects, planes, and
+basic lighting.&lt;/p&gt;
+
+&lt;h2 id=&#34;multiple-objects&#34;&gt;Multiple Objects&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s pretty easy to change our scene definition to contain a Vec of spheres
+instead of just a single one. Once we have multiple spheres, however, we need to
+know which one our ray hit. This is easy if they don&amp;rsquo;t overlap on the screen.
+If they do, we can find the correct sphere by taking the nearest intersection
+to our camera. That means we need to know the distance to the intersection, not
+just whether there is an intersection or not.&lt;/p&gt;
+
+&lt;p&gt;This requires a bit more geometry. Recall from last time that we detect an
+intersection by constructing a right triangle between the camera origin and the
+center of the sphere. We can calculate the distance between the center of the
+sphere and the camera, and the distance between the camera and the right angle
+of our triangle. From there, we can use Pythagoras&amp;rsquo; Theorem to calculate the
+length of the opposite side of the triangle. If the length is greater than the
+radius of the sphere, there is no intersection.&lt;/p&gt;
+
+&lt;p&gt;There are more right triangles formed by the ray than just this one, however.
+If we instead create a triangle between the point that the ray intersects the
+sphere and the center of the sphere, we can again use Pythagoras&amp;rsquo; Theorem to
+calculate the distance from our right angle to the intersection point.
+Subtracting that from the distance from the camera to the right angle gives the
+distance to the intersection point.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/intersection-distance.png&#34; alt=&#34;Intersection Distance&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;To put that in code, here are the changes to our Sphere intersection method:&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/27f0fc17de209662a04cd6393a8731c3.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Now that we know the distance to the intersection, we need a method to perform
+the iteration and return the nearest intersection. It&amp;rsquo;s also useful to return
+a reference to the object itself (for example, so we can use the right color).
+Notice that we have to use partial_cmp and unwrap to compare the distances. This
+is an instance where Rust&amp;rsquo;s strict type safety sort of gets in the way - because
+some values (NaN, +-Infinity) can&amp;rsquo;t be correctly compared, f64 doesn&amp;rsquo;t implement
+the Cmp trait. In this case, no valid intersection can ever contain those values
+so we should be safe just using unwrap. It&amp;rsquo;s a bit ugly, but
+it&amp;rsquo;s probably better than tracking down strange bugs related to NaN-safety later.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/95ffb04905984a10fe00580851e19380.js&#34;&gt;&lt;/script&gt;
+
+&lt;h2 id=&#34;planes&#34;&gt;Planes&lt;/h2&gt;
+
+&lt;p&gt;Next up we&amp;rsquo;ll add Planes as an object to test our rays against. There are a few
+ways to represent planes in 3D space, but for our purposes the most convenient
+is to define a point on the plane, and the normal of the surface. Before we
+implement the intersection test though, we need to adapt our scene structure
+so it can contain an arbitrary number of spheres or planes.&lt;/p&gt;
+
+&lt;p&gt;We could try adding another Vec of Plane structures, but that gets annoying
+quickly. We&amp;rsquo;d have to duplicate some logic (eg. the trace method) to apply to
+both the spheres and the planes. Some sort of dynamic dispatch is appropriate
+here. Rust provides two ways to do this. We could either wrap each object in a
+variant of an Enum or we could use
+&lt;a href=&#34;https://doc.rust-lang.org/book/trait-objects.html&#34;&gt;Trait Objects&lt;/a&gt;. I&amp;rsquo;ve chosen
+to go with the former, but it&amp;rsquo;s mostly a matter of personal preference.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/7c4f1d7580a79c636d8b1ddfaecd652f.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Now that we have our Plane structure, how can we test for an intersection?
+One convenient property of planes is that they&amp;rsquo;re infinitely large. If a plane
+isn&amp;rsquo;t perfectly parallel to our ray, it will always intersect eventually.
+We can test this with the dot product - if the dot product between the ray and
+the normal of the plane is zero (give or take a bit to account for
+floating-point error) then it&amp;rsquo;s parallel and thus there is no intersection.
+Otherwise, there is an intersection somewhere.&lt;/p&gt;
+
+&lt;p&gt;However, we need to know where that intersection is. I&amp;rsquo;m afraid that I haven&amp;rsquo;t
+been able to find a good intuitive or geometric explanation of why this works,
+so I&amp;rsquo;ll just have to direct you to
+&lt;a href=&#34;https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection&#34;&gt;Scratchapixel&lt;/a&gt;,
+where they show the full derivation of the equation.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/388e88f4cb2ecb391c63aabd76859c5f.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Now that all of that&amp;rsquo;s done, let&amp;rsquo;s take a moment to admire our handywork.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/spheres-and-planes.png&#34; alt=&#34;Spheres and Planes&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Yeah, I know. Five minutes in MS Paint, amirite? It will look better once we
+start adding lighting effects.&lt;/p&gt;
+
+&lt;h2 id=&#34;directional-lights&#34;&gt;Directional Lights&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ll start by adding a single directional light to our scene. Directional lights
+approximate light from the sun or stars - objects so far away that their light
+rays are effectively parallel to each other and at an approximately-constant
+intensity level. As a result, they&amp;rsquo;re also simpler than closer point-source
+lights.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/5884657ad43bb968c8dbcedddfe72faf.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Next we need to know the surface normal of the object at the point our ray
+intersected with it.&lt;/p&gt;
+
+&lt;p&gt;Sphere:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fn surface_normal(&amp;amp;self, hit_point: &amp;amp;Point) -&amp;gt; Vector3 {
+    (*hit_point - self.center).normalize()
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Plane:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;fn surface_normal(&amp;amp;self, _: &amp;amp;Point) -&amp;gt; Vector3 {
+    -self.normal
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we&amp;rsquo;ll need to add an albedo to our Spheres and Planes. This is simply
+a parameter which specifies how much light energy is reflected by an object and
+how much is absorbed.&lt;/p&gt;
+
+&lt;p&gt;Now to actually implement the shading. First some preparation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let intersection = scene.trace(&amp;amp;ray);
+let hit_point = ray.origin + (ray.direction * intersection.distance)
+let surface_normal = intersection.element.surface_normal(&amp;amp;hit_point)
+let direction_to_light = -scene.light.direction
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we calculate the amount of light that lands on this point. This is
+proportional to the cosine of the angle between the surface normal and the
+direction to the light (&lt;a href=&#34;https://en.wikipedia.org/wiki/Lambert%27s_cosine_law&#34;&gt;Lambert&amp;rsquo;s Cosine Law&lt;/a&gt;).
+The dot product is the length of one vector times the
+cosine of the angle between them, but because we use normalized vectors the
+length will be one. We also add a factor for the brightness of the light.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let light_power = (surface_normal.dot(&amp;amp;direction_to_light) as f32) *
+    scene.light.intensity;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then we calculate the proportion of the light which is reflected. This is equal
+to the albedo of the object divided by Pi. Once again I have to admit that I
+can&amp;rsquo;t find a good explanation of this formula. If you&amp;rsquo;re really interested, you
+can once again check out Scratchapixel&amp;rsquo;s
+&lt;a href=&#34;https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/diffuse-lambertian-shading&#34;&gt;derivation&lt;/a&gt;
+(be warned - this one contains integrals). The short version is that dividing by
+Pi ensures that the object doesn&amp;rsquo;t reflect away more energy than it receives.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let light_reflected = intersection.element.albedo() / std::f32::consts::PI;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally we accumulate this together into the final color for the pixel.
+We represent colors as (R, G, B) triplets where each value is in the range
+0.0&amp;hellip;1.0. We can multiply colors by multiplying each value - eg. if the red
+component of a light is 0.5 and the object reflects 0.5 of red light, the viewer
+will receive a red value of 0.25.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let color = intersection.element.color() * scene.light.color *
+            light_power * light_reflected;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Or, all together:&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/7fe4960b607344aa57a06d4712685ab5.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/directional-lighting.png&#34; alt=&#34;Directional Lighting&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s still not quite right though - none of the spheres are casting shadows, on
+the lower plane or on each other.&lt;/p&gt;
+
+&lt;h2 id=&#34;shadows&#34;&gt;Shadows&lt;/h2&gt;
+
+&lt;p&gt;Calculating shadows in a raytracer is really easy. Simply trace another ray from
+the intersection of the prime ray and the object back to the light. If there is
+another object between the intersection and the light, the point is in shadow.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/14fae787f7092ad068a572d9b406d10f.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/shadow-acne.png&#34; alt=&#34;Shadow Acne&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Well, that&amp;rsquo;s not quite right. We have shadows on the lower plane and the green
+sphere, but also a lot of noise. The dark noise is called &amp;lsquo;shadow acne&amp;rsquo; and
+it occurs because our floating point values have limited precision. Sometimes,
+the hit point will be ever so slightly inside the intersected object and so the
+shadow ray will intersect with the same object the prime ray did. It might seem
+like we could simply ignore that object when tracing the shadow ray, and for
+this simple geometry we could. If we had more complex objects though (eg. a model of
+a tree) we would want an object to be able to cast shadows on itself, so that
+won&amp;rsquo;t work. Instead, we simply add a tiny fudge factor and adjust the origin
+of the shadow ray a short distance along the surface normal so that we can be
+sure it&amp;rsquo;s outside the object. It doesn&amp;rsquo;t have to be much - I&amp;rsquo;ve found that bias
+values as small as 1e-13 were enough to eliminate visible shadow acne.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let shadow_ray = Ray {
+    origin: hit_point + (surface_normal * scene.shadow_bias),
+    direction: direction_to_light,
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/shadows.png&#34; alt=&#34;Shadows&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;multiple-lights&#34;&gt;Multiple Lights&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s pretty easy to implement multiple lights as well. The light the camera sees
+from any particular point is equal to the sum of the contributions from each
+individual light source. We can just iterate through the lights, accumulating
+together the color values from each.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/c6186ef183ed98fccd02c119c2cc01a4.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;This produces the following image - notice the two sets of shadows.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/multiple-lights.png&#34; alt=&#34;Multiple Lights&#34; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;spherical-lights&#34;&gt;Spherical Lights&lt;/h2&gt;
+
+&lt;p&gt;Finally, we&amp;rsquo;ll add Spherical Lights (or point lights). First some definitions.
+Again, I&amp;rsquo;m using an enum for dynamic dispatch.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/2aad485bfef7087438c493e3ca6a5bdc.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Next up, we need to know the direction to the light. This is easily calculated:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(s.position - *hit_point).normalize()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The intensity of these lights obeys the
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Inverse-square_law&#34;&gt;Inverse Square Law&lt;/a&gt;, so we
+calculate the intensity by dividing the light&amp;rsquo;s intensity value by 4*Pi*distance^2.
+Incidentally, this means that the intensity values of spherical lights in your
+scene definition must be much larger than for directional lights.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let r2 = (s.position - *hit_point).norm() as f32;
+s.intensity / (4.0 * ::std::f32::consts::PI * r2)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Additionally, our shadow test needs to be changed a bit. For directional lights,
+we only had to check if there was any intersection in the direction of the light.
+That won&amp;rsquo;t work now - what if there&amp;rsquo;s an object on the far side of the light?
+Instead we check if the nearest intersection is closer than the light itself is.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;let shadow_intersection = scene.trace(&amp;amp;shadow_ray);
+let in_light = shadow_intersection.is_none() ||
+    shadow_intersection.unwrap().distance &amp;gt; light.distance(&amp;amp;hit_point);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Putting that all together produces this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/spherical-lights.png&#34; alt=&#34;Spherical Lights&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Try doing that in five minutes in MS Paint!&lt;/p&gt;
+
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ve taken this toy raytracer from producing an image of a green circle to a
+nicely-lit scene containing multiple objects. The last entry in this series will
+go on to add texturing as well as simple reflection and refraction simulations.
+As before, if you want to try playing around with the code yourself, you can
+check out the &lt;a href=&#34;https://github.com/bheisler/raytracer&#34;&gt;GitHub Repository&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Writing a Raytracer in Rust - Part 1 - First Rays</title>
@@ -79,15 +350,16 @@ prime rays:&lt;/p&gt;
 &lt;p&gt;By convention, the camera is aligned along the negative z-axis, with positive x
 towards the right and positive y being up. That&amp;rsquo;s why the sphere is at
 (0.0, 0.0, -5.0) - it&amp;rsquo;s directly centered, five units away from the camera.
-We&amp;rsquo;ll start by pretending there&amp;rsquo;s a two-unit by two-unit screen one unit in
-front of the camera, dividing that into pixels, and using the directions to each
+We&amp;rsquo;ll start by pretending there&amp;rsquo;s a two-unit by two-unit square one unit in
+front of the camera. This square represents the image sensor or film of our camera.
+Then we&amp;rsquo;ll divide that sensor square into pixels, and use the directions to each
 pixel as our rays. We need to translate the (0&amp;hellip;800, 0&amp;hellip;600) coordinates of our
-pixels to the (-1.0&amp;hellip;1.0, -1.0&amp;hellip;1.0) coordinates of that screen. I&amp;rsquo;ll start
+pixels to the (-1.0&amp;hellip;1.0, -1.0&amp;hellip;1.0) coordinates of the sensor. I&amp;rsquo;ll start
 with the finished code for this step, then explain it in more detail.&lt;/p&gt;
 
 &lt;script src=&#34;//gist.github.com/bheisler/be79c6e0871e4308443c0d4e61318fed.js&#34;&gt;&lt;/script&gt;
 
-&lt;p&gt;Let&amp;rsquo;s unpack that a bit and focus on just the x component. The y component is
+&lt;p&gt;Let&amp;rsquo;s unpack that a bit and focus on only the x component. The y component is
 almost exactly the same.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;let pixel_center = x as f64 + 0.5;
@@ -97,7 +369,7 @@ let adjusted_screen_pos = (normalized_to_width * 2.0) - 1.0;
 
 &lt;p&gt;First, we cast to float and add 0.5 (one half-pixel) because we want our ray to
 pass through the center (rather than the corner) of the pixel on our imaginary
-screen. Then we divide by the screen width to convert from our original
+sensor. Then we divide by the image width to convert from our original
 coordinates (0&amp;hellip;800) to (0.0&amp;hellip;1.0). That&amp;rsquo;s almost, but not quite, the
 (-1.0&amp;hellip;1.0) coordinates we want, so we multiply by two and subtract one. That&amp;rsquo;s
 all there is to it! The y calculation follows the same basic process except the
@@ -112,17 +384,17 @@ the last step of the calculation.&lt;/p&gt;
 
 &lt;p&gt;Then we pack the x and y components into a vector (z is -1.0 because all
 of our prime rays should go forward from the camera) and normalize it to get a
-nice direction vector. Simple, right? This is why the 2x2 screen 1 unit from the
+nice direction vector. Simple, right? This is why the 2x2 sensor 1 unit from the
 camera convention is convenient. If we&amp;rsquo;d used any other set of coordinates than
-(-1.0&amp;hellip;1.0, -1.0&amp;hellip;1.0) then the screen would be off center and/or we&amp;rsquo;d have to
-do more calculations to avoid distorting the image.&lt;/p&gt;
+(-1.0&amp;hellip;1.0, -1.0&amp;hellip;1.0) then the image would be off center and/or we&amp;rsquo;d have to
+do more calculations to avoid distorting it.&lt;/p&gt;
 
 &lt;p&gt;We could actually stop here - this is a working prime ray generation function.
 However, it assumes that the image we&amp;rsquo;re generating is perfectly square and that
 the field of view is precisely 90 degrees. It&amp;rsquo;s probably worth adding a
 correction for other aspect ratios and different fields of view.&lt;/p&gt;
 
-&lt;p&gt;To adjust for different aspect ratios, we just calculate the aspect ratio and
+&lt;p&gt;To adjust for different aspect ratios, we calculate the aspect ratio and
 multiply it by the x coordinate. We&amp;rsquo;re assuming that the image will be wider than
 it is tall, but most images are so that&amp;rsquo;s good enough for now. If we didn&amp;rsquo;t do
 this, the rays would be closer together in the x direction than in the y, which
@@ -158,6 +430,8 @@ the sphere, the ray must intersect the sphere. In practice, we actually do the
 check on length-squared values because square roots are expensive to calculate,
 but it&amp;rsquo;s the same idea.&lt;/p&gt;
 
+&lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/sphere-intersection-test.png&#34; alt=&#34;Sphere Intersection Test&#34; /&gt;&lt;/p&gt;
+
 &lt;script src=&#34;//gist.github.com/bheisler/2fd3e237481614d13a34dc184cb5d106.js&#34;&gt;&lt;/script&gt;
 
 &lt;h2 id=&#34;finishing-the-render-method&#34;&gt;Finishing the Render Method&lt;/h2&gt;
@@ -172,13 +446,18 @@ rendered image to a file, we get the resulting image:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;https://bheisler.github.io/static/raytracer-first-render.png&#34; alt=&#34;First Rendered Image&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;It isn&amp;rsquo;t very impressive yet, but we&amp;rsquo;ll add more detail to it as we go.&lt;/p&gt;
+&lt;p&gt;It isn&amp;rsquo;t very impressive yet, but we&amp;rsquo;ll add more detail to it as we go. In the
+&lt;a href=&#34;https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/&#34;&gt;next post&lt;/a&gt;,
+we&amp;rsquo;ll add planes, multiple spheres, and some basic lighting effects.&lt;/p&gt;
 
 &lt;p&gt;If you want to try playing around with the code yourself, you can check out the
 &lt;a href=&#34;https://github.com/bheisler/raytracer&#34;&gt;GitHub Repository&lt;/a&gt;. If you want to learn
 more about 3D rendering in general or raytracing in particular, check out
 &lt;a href=&#34;https://www.scratchapixel.com/index.php&#34;&gt;Scratchapixel&lt;/a&gt;, which is the resource
 I used while working on this.&lt;/p&gt;
+
+&lt;p&gt;Thanks to Scott Olson and Daniel Hogan for suggesting improvements to an
+earlier version of this article.&lt;/p&gt;
 </description>
     </item>
     
