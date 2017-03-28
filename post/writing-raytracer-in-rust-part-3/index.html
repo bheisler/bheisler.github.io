@@ -4,23 +4,24 @@
     <meta name="generator" content="Hugo 0.18.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posts | bheisler.github.io</title>
+    <title>Writing a Raytracer in Rust - Part 3 - Reflection and Refraction | bheisler.github.io</title>
     
     
     
     
-    
-      <meta name="robots" content="noindex">
     
     
 
-  <meta name="author" content="">
+  <meta name="author" content="Brook Heisler">
 
 
-    <meta property="og:title" content="Posts" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/post/" />
+    <meta property="og:title" content="Writing a Raytracer in Rust - Part 3 - Reflection and Refraction" />
+<meta property="og:description" content="Introduction Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
+First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/" />
+
+  <meta property="og:image" content="https://bheisler.github.io/static/complete-refraction.png" />
 
 
 <meta property="og:updated_time" content="2017-03-27T00:00:00-06:00"/>
@@ -33,14 +34,15 @@
 
 
 
+
     
 
-  <meta property="og:image" content="
+
+
+
     
     
-      <link href="https://bheisler.github.io/post/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
-    
-    <link rel="canonical" href="https://bheisler.github.io/post/">
+    <link rel="canonical" href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/">
     
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
@@ -262,16 +264,24 @@ jJasrM9JHpMQoTocKVCL4IPr/fOT+fzoT3p+SelrFs2odf2vmwZACVzT9SAJ8iKO6OCx+/tKkw2M
 
 </header>
     <main>
-  <header>
-    <h1>Posts</h1>
-  </header>
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="headline">
-      <a href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
-    </h2>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
+<meta itemprop="name" content="Writing a Raytracer in Rust - Part 3 - Reflection and Refraction">
+<meta itemprop="description" content="Introduction Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
+First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.">
+
+
+<meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00" />
+<meta itemprop="wordCount" content="2237">
+
+  <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
+
+
+
+<meta itemprop="keywords" content="" />
+
+    <header>
+      <h1 itemprop="headline">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</h1>
       <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
@@ -286,95 +296,393 @@ jJasrM9JHpMQoTocKVCL4IPr/fOT+fzoT3p+SelrFs2odf2vmwZACVzT9SAJ8iKO6OCx+/tKkw2M
   
 
 </p>
+    </header>
     
-  </header>
-  
-  <div itemprop="description">
-    Introduction Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
-First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.
-  </div>
-  
-    <p><a itemprop="url" href="/post/writing-raytracer-in-rust-part-3/">Read More&nbsp;&raquo;</a></p>
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="headline">
-      <a href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
-    </h2>
     
-      <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>9 minute read</span>
+    <div itemprop="articleBody">
+      
 
-  <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-    <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-  </svg>
-  
-    <span>Published: <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time></span>
-  
+<h2 id="introduction">Introduction</h2>
 
+<p>Hello again, and welcome to the final part of my series on writing a raytracer
+in Rust (<a href="/post/writing-raytracer-in-rust-part-1/">Part 1</a>,
+<a href="/post/writing-raytracer-in-rust-part-2/">Part 2</a>). Previously we implemented
+a basic raytracer which could handle diffuse shading of planes and spheres with
+multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection
+and transparent objects.</p>
+
+<p>First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate
+structure. Since this post is all about handling more complex surface properties,
+we&rsquo;ll need a structure to represent them and avoid duplication.</p>
+
+<script src="//gist.github.com/bheisler/f49634600ec7910c149e577804a5e3cc.js"></script>
+
+<h2 id="texturing">Texturing</h2>
+
+<p>In order to texture our objects, we need to do two things. First, we need to
+calculate the texture coordinates corresponding to the point on the object that
+the ray intersected. Then we need to look up the color at those coordinates.
+We&rsquo;ll start by introducing a structure to contain our texture coordinates and a
+function to calculate them.</p>
+
+<script src="//gist.github.com/bheisler/952f43be37463e22d7db93800f12ee21.js"></script>
+
+<h3 id="spheres">Spheres</h3>
+
+<p>The texture coordinates of a sphere are simply the spherical coordinates of the
+intersection point. If our sphere were the Earth, these would be akin to the
+latitude and longitude.</p>
+
+<p>We can compute the (x, y, z) coordinates of the intersection relative to the
+center of the sphere by using the vector subtraction of the hit point and the
+center of the sphere. Then, we can convert those to the spherical coordinates
+using these formulas:</p>
+
+<pre><code>phi = atan(z, x)
+theta = acos(y/R) //Where R is the radius of the sphere
+</code></pre>
+
+<p>If your trigonometry is rusty, check out <a href="https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/spherical-coordinates-and-trigonometric-functions">this explanation</a>
+at (you guessed it)
+Scratchapixel. If you do though, be aware that their coordinates have the Z and
+Y axes swapped so they have slightly different formulas.</p>
+
+<p>These formulas produce values in the range (-pi&hellip;pi) and (0&hellip;pi) respectively.
+We want (0&hellip;1) instead so we&rsquo;ll adjust the formula to remap the values to the
+correct range:</p>
+
+<pre><code>tex.x = (1 + atan(z, x) / pi) * 0.5
+tex.y = acos(y) / pi
+</code></pre>
+
+<p>Now we have something we can implement in code, like so:</p>
+
+<script src="//gist.github.com/bheisler/fe8a5ba0f4ee0f7d835b100126220636.js"></script>
+
+<h3 id="planes">Planes</h3>
+
+<p>To calculate the texture coordinates on a plane, we first need to construct a
+coordinate system (that is, two perpendicular unit vectors) aligned with that
+plane. This can be done using the cross product, which takes two vectors and
+produces a new vector which is perpendicular to them. In this case, we use the
+surface normal and the forward vector (unless the normal is equal to the forward
+vector, in which case use the up vector). This produces one vector parallel to
+the plane to be our X axis. To get the other vector, we can just cross the
+normal with the X axis.</p>
+
+<script src="//gist.github.com/bheisler/0c2213af556812edd3bae4f9827a666c.js"></script>
+
+<p>Then we can compute the texture coordinates by taking the dot product of the
+vector from the hit location to the origin against the axes (effectively
+separating the hit vector into its X and Y components).</p>
+
+<script src="//gist.github.com/bheisler/c6f60e809599459aa216bfb0391b3adf.js"></script>
+
+<p>It might be useful to add a scaling factor and an offset to allow the user to
+adjust the position and size of the texture, but this is left as an exercise for
+the reader.</p>
+
+<p>Next we need to add the texture to our scene.</p>
+
+<script src="//gist.github.com/bheisler/655602ee3ed04f35a98a2e4d7a5240a4.js"></script>
+
+<p>Then we can look up the color based on the texture coordinates.</p>
+
+<script src="//gist.github.com/bheisler/f7aa43da0d4a535085b3af2b01538224.js"></script>
+
+<p><img src="/static/textured-objects.png" alt="Textured Objects" /></p>
+
+<h2 id="reflection">Reflection</h2>
+
+<p>Conceptually, implementing reflection in a raytracer is quite simple. When a ray
+hits a reflective object, just trace another ray out from the intersection at
+the appropriate angle - recursively if necessary - and mix the color value from
+that ray in with the color value of the first ray.</p>
+
+<p>As usual, the first thing to do is extend the scene definition. Since the
+reflection process is recursive, we also add a value for the maximum recursion
+depth. Deeper recursion will produce a more accurate image, but at the cost of
+increased rendering time.</p>
+
+<script src="//gist.github.com/bheisler/0ff69bf512f8f62ce59d09ec79f222ad.js"></script>
+
+<p>The reflectivity controls how much of the final pixel color comes from the
+reflection and how much from the object itself. If the reflectivity is zero,
+we&rsquo;ll use the diffuse color and there will be no reflection. If the reflectivity
+is one, we&rsquo;ll use the reflected color and the object will appear to be a
+perfect mirror. If the value is somewhere in between, we could get effects
+ranging from &lsquo;glossy surface&rsquo; to &lsquo;tinted chrome.&rsquo;</p>
+
+<p>Since the last part, I&rsquo;ve extracted most of what was in get_color into a function
+for doing diffuse shading so that we can use get_color for mixing together the
+reflection and diffuse colors.</p>
+
+<p>As you can see, we construct a reflection ray and trace it through the scene
+like with our prime ray, then mix it in with the diffuse color. We also track
+the current recursion depth and simply return black if we reach the limit.</p>
+
+<script src="//gist.github.com/bheisler/ed31642dcd5a3b58ea1912348e5ae70c.js"></script>
+
+<p>The more interesting question here is how to compute the reflection ray. If
+you&rsquo;ve taken physics, you may remember the mantra that the angle of incidence
+equals the angle of reflection. That&rsquo;s helpful enough as far as it goes, but
+how do we actually calculate that in terms of vectors?</p>
+
+<p><img src="/static/reflection-ray.png" alt="Reflection Ray" align="right"></p>
+
+<p>We can separate the incident vector I into two vectors, A and B (see figure)
+such that I = A + B. The reflection vector R is then equal to A - B.</p>
+
+<pre><code>I = A + B
+R = A - B
+</code></pre>
+
+<p>We can compute B quite easily - it&rsquo;s the projection of I onto the surface normal,
+or the dot product of I and N multiplied by N.</p>
+
+<pre><code>B = (I.N)N
+</code></pre>
+
+<p>Substitute that into both equations:</p>
+
+<pre><code>I = A + (I.N)N
+R = A - (I.N)N
+</code></pre>
+
+<p>Then solve the first equation for A:</p>
+
+<pre><code>A = I - (I.N)N
+</code></pre>
+
+<p>And substitute into the second equation:</p>
+
+<pre><code>R = I - (I.N)N - (I.N)N
+R = I - 2(I.N)N
+</code></pre>
+
+<script src="//gist.github.com/bheisler/3a29db0b3104d4420e80523268f3607a.js"></script>
+
+<p>We also adjust the origin slightly along the surface normal to avoid the same
+floating-point precision problems we had with our shadows earlier.</p>
+
+<p><a href="http://imgur.com/a/Kuwks"><img src="/static/reflective-objects.png" alt="Reflective Objects" /></a>
+Click to see high-resolution image. Note the recursive reflections between the
+center sphere and the floor.</p>
+
+<h2 id="refraction">Refraction</h2>
+
+<p>Refraction is again conceptually simple in a raytracer - trace a secondary ray
+(called the transmission ray) through the object in the appropriate direction
+and mix it in with the color of the object. Unfortunately, the math to construct
+the transmission ray is a lot more complex than it is to construct the
+reflection ray. But first, some definitions:</p>
+
+<script src="//gist.github.com/bheisler/04fc2c624e4c3cfae1171a2660a16c2a.js"></script>
+
+<p>The transparency is the same as the reflectivity from before - the fraction of
+the final color that comes from refraction. Refraction is governed by a parameter
+called the index of refraction. When a ray of light passes from one transparent
+substance to another, it bends at an angle described by Snell&rsquo;s Law:</p>
+
+<p><img src="/static/Snells_law2.svg" alt="Snell's Law" align="right"></p>
+
+<pre><code>sin(theta_i)/sin(theta_t) = eta_t/eta_i
+</code></pre>
+
+<p>Where theta_i and theta_t are the angle of incidence and angle of transmission,
+and eta_i and eta_t are the indices of refraction for the incident substance and
+the transmitting substance. We could calculate the angle of transmission using
+this equation, but we&rsquo;ll need to do more to convert that angle into a vector.</p>
+
+<p>As with reflection, refraction is really a two-dimensional process in the plane
+formed by the incident vector and the surface normal. This means that we can
+think of our transmitted ray as having a horizontal component (A) and vertical
+component (B). B is relatively simple to calculate:</p>
+
+<pre><code>B = cos(theta_t) * -N
+</code></pre>
+
+<p>This makes some intuitive sense - the transmitted ray will be on the opposite
+side of the surface from the incident ray, so it&rsquo;s vertical component will be
+some fraction of the inverse of the surface normal. We use the cosine of the
+transmission angle because that&rsquo;s how you calculate the vertical distance.</p>
+
+<p>We can use this same approach to get the horizontal component A, but first we
+need to construct a horizontal unit vector (M). To do this, we first take the
+incident vector and subtract it&rsquo;s vertical component, leaving only the
+horizontal component. We can calculate the vertical component of I easily -
+it&rsquo;s (I.N)N, just like before. Then we normalize this horizontal vector to get
+the horizontal unit vector we need. We can slightly cheat here, though - the
+length of the horizontal component of I will be equal to sin(theta_i), so we
+can normalize using that instead of computing the vector length the slow way.</p>
+
+<pre><code>M = (I - -N(I.N)) / sin(theta_i) = (I + N(I.N)) / sin(theta_i)
+A = sin(theta_t) * M
+B = cos(theta_t) * -N
+</code></pre>
+
+<p>Putting this all back together, we get:</p>
+
+<pre><code>T = A + B
+T = (sin(theta_t) * M) - N * cos(theta_t)
+T = (sin(theta_t) * (I + N(I.N)) / sin(theta_i)) - N * cos(theta_t)
+</code></pre>
+
+<p>We can use Snell&rsquo;s Law to replace that sin(theta_t) / sin(theta_i) with
+eta_i/eta_t, like so:</p>
+
+<pre><code>T = (I + N(I.N)) * eta_i/eta_t - N * cos(theta_t)
+</code></pre>
+
+<p>We could calculate cos(theta_t) from Snell&rsquo;s Law and theta_i, but this involves
+lots of trigonometry, and ain&rsquo;t nobody got time for that. Instead, we can
+express that in terms of a dot-product. We know from trigonometry that:</p>
+
+<pre><code>cos^2(theta_t) + sin^2(theta_t) = 1
+cos(theta_t) = sqrt(1 - sin^2(theta_t))
+</code></pre>
+
+<p>And from Snell&rsquo;s Law we know that:</p>
+
+<pre><code>sin(theta_t) = (eta_i/eta_t) * sin(theta_i)
+</code></pre>
+
+<p>Therefore:</p>
+
+<pre><code>cos(theta_t) = sqrt( 1 - (eta_i/eta_t)^2 * sin^2(theta_1) )
+</code></pre>
+
+<p>Then we can use the same trigonometric identity from above to convert that sin
+to a cosine:</p>
+
+<pre><code>cos(theta_t) = sqrt( 1 - (eta_i/eta_t)^2 * (1 - cos^2(theta_i)) )
+</code></pre>
+
+<p>And since cos(theta_i) = I.N, we get:</p>
+
+<pre><code>cos(theta_t) = sqrt( 1 - (eta_i/eta_t)^2 * (1 - I.N^2) )
+</code></pre>
+
+<p>And so, finally, we arrive at this monster of an equation (but look, no trigonometry):</p>
+
+<pre><code>T = (I + N(I.N)) * eta_i/eta_t - N * sqrt( 1 - (eta_i/eta_t)^2 * (1 - I.N^2) )
+</code></pre>
+
+<p>Now, there are a couple of wrinkles left to sort out. First, sometimes our ray
+will be leaving the transparent object rather than entering it. This is easy
+enough to handle, just invert the normal and swap the indices of refraction. We
+also need to handle total internal reflection. In some cases, if the angle of
+incidence is shallow enough, the refracted light ray actually reflects off the
+surface instead of passing through and travels back into the object. We can
+detect this when the term inside the sqrt is negative. Again, this makes
+intuitive sense - if that&rsquo;s negative, the vertical component of the transmission
+vector would be positive (remember, B is a multiple of -N) and therefore on the
+same side of the surface as the incident vector. In fact, however, we can handle
+this by completely ignoring it, and I&rsquo;ll explain why later.</p>
+
+<p>Whew! Now that we have that giant equation, we can implement it in code, like so:</p>
+
+<script src="//gist.github.com/bheisler/ceba1d949b9b766a03d275534f016fd3.js"></script>
+
+<p>I also discovered a nasty bug in my sphere-intersection code while testing this.
+If you&rsquo;re following along at home, this could be a good opportunity to practice
+your debugging. Go ahead, I&rsquo;ll wait.</p>
+
+<p>Hint: What happens if the ray origin is inside the sphere?</p>
+
+<p>Find it? It turns out that the sphere-intersection test will return a point
+behind the origin of the ray if the origin is inside the sphere. The refraction
+ray will then intersect the sphere again, creating another refraction ray and
+so on until we hit the recursion limit. This took hours of painful debugging to
+find because I was looking for bugs in the create_transmission function. I
+didn&rsquo;t realize that it was something else until I tried to create a refractive
+plane and noticed that it appeared to behave correctly.</p>
+
+<p>Anyway, here&rsquo;s the corrected sphere-intersection function:</p>
+
+<script src="//gist.github.com/bheisler/393169985793f91cdd71b5616faace99.js"></script>
+
+<p><a href="http://imgur.com/a/T9F6O"><img src="/static/initial-refraction.png" alt="Initial Refraction" /></a>
+Click to see high-resolution image. Notice the refracted image of the floor in
+the transparent sphere.</p>
+
+<h2 id="fresnel">Fresnel</h2>
+
+<p>However, we&rsquo;re not quite done yet. If you&rsquo;ve ever noticed how glass buildings or
+smooth lakes look like mirrors far away but clear up close, you know that
+transparent surfaces reflect light as well as transmitting it. It&rsquo;s often even
+possible to see this effect in the polished floors of long hallways. These
+reflections are governed by the <a href="https://en.wikipedia.org/wiki/Fresnel_equations">Fresnel Equations</a>
+and we&rsquo;ll have to simulate them to render refractive objects more accurately.
+Incidentally, this is why we can ignore total internal reflection
+in our transmission code above - the Fresnel code will cover that for us.
+We already know how to handle reflection in our code, but we need to calculate
+how much of a ray&rsquo;s color comes from the refraction and how much from the
+reflection.</p>
+
+<p>The derivation of the Fresnel Equations is hairy enough that Scratchapixel
+doesn&rsquo;t even try to explain it. Serious physics-lovers might want to check out
+<a href="http://physics.gmu.edu/~ellswort/p263/feqn.pdf">this derivation</a> (PDF), but
+this is getting out of my depth so I&rsquo;ll just take the final equations as given.</p>
+
+<p><img src="/static/fresnel-equations.png" alt="Fresnel Equations" align="center"></p>
+
+<p>Fortunately for me, Scratchapixel does include some C++ code implementing these
+equations that I can simply translate to Rust:</p>
+
+<script src="//gist.github.com/bheisler/767895b07240a346bcf4353826d269f3.js"></script>
+
+<p>And now that we have that, we can put it all together:</p>
+
+<script src="//gist.github.com/bheisler/2d072e000863e30c7337d3588ff81291.js"></script>
+
+<p><a href="http://imgur.com/EvmGhQW"><img src="/static/complete-refraction.png" alt="Complete Refraction" /></a>
+Click to see high-resolution image</p>
+
+<p>Beautiful, isn&rsquo;t it?</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>This is the end of my series on raytracing, at least for now. There are many,
+many things I didn&rsquo;t even begin to cover here. For instance, you might notice
+how the two lights in this scene don&rsquo;t glint off the reflective objects the
+way real lights would, and how the glass sphere on the right doesn&rsquo;t focus
+light rays on the floor like real glass would. If you&rsquo;re interested, I encourage
+you to dig deeper - I may return to this subject myself in the future. Until
+then, I hope you&rsquo;ve enjoyed reading.</p>
+
+<p>As before, if you want to try playing around with the code yourself, you can
+check out the <a href="https://github.com/bheisler/raytracer">GitHub Repository</a>.</p>
+
+    </div>
+    <article>
+      
+    </article>
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    by <span itemprop="author">Brook Heisler</span>
+  
+  
+    
+      on <time datetime="2017-03-27T00:00:00-06:00">27 Mar, 2017</time>
+    
+  
+  
+  
+  using <span itemprop="wordCount">2237</span> words.
 </p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Introduction Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.
-  </div>
-  
-    <p><a itemprop="url" href="/post/writing-raytracer-in-rust-part-2/">Read More&nbsp;&raquo;</a></p>
-  
-</article>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="headline">
-      <a href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>7 minute read</span>
+      
 
-  <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-    <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-  </svg>
-  
-    <span>Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time></span>
-  
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Introduction Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
-So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
-  </div>
-  
-    <p><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></p>
-  
-</article>
 
-  
+    </footer>
+  </article>
 </main>
     <footer>
-  <nav>
-  <p>
-    
-    <span>Page 1 of 1</span>
-    
-  </p>
-</nav>
-
   
   <p class="muted">
     This page was generated by
