@@ -252,6 +252,13 @@ jJasrM9JHpMQoTocKVCL4IPr/fOT+fzoT3p+SelrFs2odf2vmwZACVzT9SAJ8iKO6OCx+/tKkw2M
 </style>
 
     
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
   </head>
   <body class="hack dark main container">
     <header>
@@ -272,7 +279,7 @@ First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separ
 
 
 <meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00" />
-<meta itemprop="wordCount" content="2237">
+<meta itemprop="wordCount" content="2450">
 
   <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
 
@@ -286,7 +293,7 @@ First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separ
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>11 minute read</span>
+<span>12 minute read</span>
 
   <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
     <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
@@ -641,6 +648,36 @@ Click to see high-resolution image</p>
 
 <p>Beautiful, isn&rsquo;t it?</p>
 
+<h2 id="addendum-gamma-correction">Addendum - Gamma Correction</h2>
+
+<p>After I posted this article, <a href="https://github.com/fstirlitz">fstirlitz</a>
+<a href="https://github.com/bheisler/raytracer/issues/2">pointed out</a> that the lighting
+was a bit off because my code wasn&rsquo;t handling Gamma Correction correctly (or at
+all). I had noticed the strange lighting effects but had simply assumed they
+were an artifact of my relatively simple rendering process, and that a more
+advanced renderer would solve them.</p>
+
+<p>I&rsquo;ll spare you a detailed discussion of what Gamma Correction is (if you&rsquo;re
+interested, see <a href="http://blog.johnnovak.net/2016/09/21/what-every-coder-should-know-about-gamma/">What Every Coder Should Know About Gamma</a> by John Novak).
+The short version is that human perception of light is non-linear. Our screens
+account for that by applying a power-law formula to the pixel values before
+displaying them. Correspondingly, image formats expect the pixel values to be
+in this non-linear color space, where my raytracer was writing out pixels in a
+linear color space. Likewise, when reading textures, it was reading non-linear
+color values and treating them as if they were linear. This mismatch caused
+the image to be generally darker, with sharper divisions between light and dark
+shades than the human eye would have seen.</p>
+
+<p>Fortunately, this is pretty easy to fix:</p>
+
+<script src="//gist.github.com/bheisler/972da2540646d4195b23a76db9fdd3ac.js"></script>
+
+<p>I&rsquo;ve only implemented the basic power-law formula rather than the more complex
+sRGB conversion, but it&rsquo;s good enough for now.</p>
+
+<p><a href="http://imgur.com/a/tNhlk"><img src="/static/gamma-corrected.png" alt="Gamma Corrected" /></a>
+Click to see high-resolution image</p>
+
 <h2 id="conclusion">Conclusion</h2>
 
 <p>This is the end of my series on raytracing, at least for now. There are many,
@@ -672,7 +709,7 @@ check out the <a href="https://github.com/bheisler/raytracer">GitHub Repository<
   
   
   
-  using <span itemprop="wordCount">2237</span> words.
+  using <span itemprop="wordCount">2450</span> words.
 </p>
 
       
