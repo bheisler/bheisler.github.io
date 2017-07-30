@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>bheisler.github.io</title>
-    <link>https://bheisler.github.io/index.xml</link>
-    <description>Recent content on bheisler.github.io</description>
+    <title>Code on bheisler.github.io</title>
+    <link>https://bheisler.github.io/categories/code/index.xml</link>
+    <description>Recent content in Code on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 30 Jul 2017 02:11:19 +0000</lastBuildDate>
-    <atom:link href="https://bheisler.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://bheisler.github.io/categories/code/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Parsing NES ROM Headers with nom</title>
@@ -179,23 +178,6 @@ parser for the same data.&lt;/p&gt;
 &lt;p&gt;If you&amp;rsquo;d like to check out the code or play around with some perfectly legal,
 homebrew NES software, you can find it on
 &lt;a href=&#34;https://github.com/bheisler/Corrosion&#34;&gt;Github&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>About Me</title>
-      <link>https://bheisler.github.io/about/about/</link>
-      <pubDate>Tue, 25 Apr 2017 14:29:02 -0600</pubDate>
-      
-      <guid>https://bheisler.github.io/about/about/</guid>
-      <description>&lt;p&gt;Hello! I&amp;rsquo;m Brook Heisler. I&amp;rsquo;m a software developer from Saskatoon. When I&amp;rsquo;m not
-busy programming, I spend my time propmaking instead. This is reflected in the
-dual nature of this blog, which is mostly about my hobby projects. Here, you&amp;rsquo;ll
-find detailed build logs about my prop projects and even-more-detailed
-information on my code projects, as well as whatever else I feel like writing
-about. If you&amp;rsquo;re only interested in one of those two things, that&amp;rsquo;s cool - use
-the category links above to focus on only code or only props. There are even
-separate RSS feeds. Cheers!&lt;/p&gt;
 </description>
     </item>
     

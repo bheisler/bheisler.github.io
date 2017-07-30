@@ -16,7 +16,7 @@
 
 
     <meta property="og:title" content="Writing a Raytracer in Rust - Part 3 - Reflection and Refraction" />
-<meta property="og:description" content="Introduction Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
+<meta property="og:description" content="Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
 First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/" />
@@ -36,13 +36,11 @@ First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separ
 
 
     
-
-
-
-
     
     
     <link rel="canonical" href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/">
+    
+      <link rel="prev" href="/post/writing-raytracer-in-rust-part-2/">
     
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
@@ -266,6 +264,14 @@ ga('send', 'pageview');
   <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
     
     
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
   </nav>
 
 
@@ -274,18 +280,18 @@ ga('send', 'pageview');
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
 <meta itemprop="name" content="Writing a Raytracer in Rust - Part 3 - Reflection and Refraction">
-<meta itemprop="description" content="Introduction Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
+<meta itemprop="description" content="Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
 First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.">
 
 
 <meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00" />
-<meta itemprop="wordCount" content="2450">
+<meta itemprop="wordCount" content="2449">
 
   <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
 
 
 
-<meta itemprop="keywords" content="" />
+<meta itemprop="keywords" content="code,c,emulator,ffi,nes,nom,python,raytracer,rust," />
 
     <header>
       <h1 itemprop="headline">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</h1>
@@ -308,8 +314,6 @@ First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separ
     
     <div itemprop="articleBody">
       
-
-<h2 id="introduction">Introduction</h2>
 
 <p>Hello again, and welcome to the final part of my series on writing a raytracer
 in Rust (<a href="/post/writing-raytracer-in-rust-part-1/">Part 1</a>,
@@ -708,12 +712,34 @@ check out the <a href="https://github.com/bheisler/raytracer">GitHub Repository<
     
   
   
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
   
-  using <span itemprop="wordCount">2450</span> words.
+  
+    and tagged <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">2449</span> words.
 </p>
 
       
+  
 
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+      
+        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a> &ndash; 8 minutes
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a> &ndash; 9 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a> &ndash; 7 minutes
+      
+    </ul>
+  </aside>
 
 
     </footer>

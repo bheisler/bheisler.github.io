@@ -16,7 +16,7 @@
 
 
     <meta property="og:title" content="Writing a Raytracer in Rust - Part 2 - Light and Shadow" />
-<meta property="og:description" content="Introduction Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
+<meta property="og:description" content="Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
 Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/" />
@@ -36,14 +36,14 @@ Multiple Objects It&rsquo;s pretty easy to change our scene definition to contai
 
 
     
-
-
-
-
     
     
     <link rel="canonical" href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/">
     
+      <link rel="prev" href="/post/writing-raytracer-in-rust-part-1/">
+    
+    
+      <link rel="next" href="/post/writing-raytracer-in-rust-part-3/">
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
 eAHNmudzHEd6xt/NETkSBEEwiJk8SlS05DtXqc6fr8r2J/+V9jfflSWfpTtlSmISSDGByFhgF5vz
@@ -266,6 +266,14 @@ ga('send', 'pageview');
   <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
     
     
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
   </nav>
 
 
@@ -274,18 +282,18 @@ ga('send', 'pageview');
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
 <meta itemprop="name" content="Writing a Raytracer in Rust - Part 2 - Light and Shadow">
-<meta itemprop="description" content="Introduction Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
+<meta itemprop="description" content="Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
 Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.">
 
 
 <meta itemprop="dateModified" content="2017-03-20T00:00:00-06:00" />
-<meta itemprop="wordCount" content="1710">
+<meta itemprop="wordCount" content="1709">
 
   <meta itemprop="image" content="https://bheisler.github.io/static/spherical-lights.png">
 
 
 
-<meta itemprop="keywords" content="" />
+<meta itemprop="keywords" content="code,c,emulator,ffi,nes,nom,python,raytracer,rust," />
 
     <header>
       <h1 itemprop="headline">Writing a Raytracer in Rust - Part 2 - Light and Shadow</h1>
@@ -308,8 +316,6 @@ Multiple Objects It&rsquo;s pretty easy to change our scene definition to contai
     
     <div itemprop="articleBody">
       
-
-<h2 id="introduction">Introduction</h2>
 
 <p>Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t
 already, you may wish to read <a href="/post/writing-raytracer-in-rust-part-1/">Part 1</a>.
@@ -588,12 +594,34 @@ code yourself, you can check out the
     
   
   
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
   
-  using <span itemprop="wordCount">1710</span> words.
+  
+    and tagged <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">1709</span> words.
 </p>
 
       
+  
 
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+      
+        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a> &ndash; 8 minutes
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a> &ndash; 12 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a> &ndash; 7 minutes
+      
+    </ul>
+  </aside>
 
 
     </footer>

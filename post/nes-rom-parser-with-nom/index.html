@@ -4,7 +4,7 @@
     <meta name="generator" content="Hugo 0.18.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calling Rust From Python | bheisler.github.io</title>
+    <title>Parsing NES ROM Headers with nom | bheisler.github.io</title>
     
     
     
@@ -15,15 +15,14 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Calling Rust From Python" />
-<meta property="og:description" content="Hello! This is a detailed example of exposing Rust code to other languages (in this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really trivial example functions, skipping over a lot of the complexity. Even the better ones out there typically don&rsquo;t have a pre-existing, reasonably complex program to work with. I&rsquo;m going to start with trivial functions and build my way up to being able to define a scene for my raytracer in Python using a series of calls to Rust, then render it and return the resulting image data back to Python." />
+    <meta property="og:title" content="Parsing NES ROM Headers with nom" />
+<meta property="og:description" content="Long, long ago (December 2015) I wanted to learn how emulators worked, so I decided to write an NES emulator. Not only that, but I opted to write it in Rust, a language which I had never used before. A crazy idea, to be certain, but once I was done I had indeed learned a great deal about emulators, the NES, and Rust.
+Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work and upgrades." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bheisler.github.io/post/calling-rust-in-python/" />
-
-  <meta property="og:image" content="https://bheisler.github.io/static/rendered-by-python.png" />
+<meta property="og:url" content="https://bheisler.github.io/post/nes-rom-parser-with-nom/" />
 
 
-<meta property="og:updated_time" content="2017-04-02T00:00:00-06:00"/>
+<meta property="og:updated_time" content="2017-07-30T02:11:19&#43;00:00"/>
 
 
 
@@ -37,7 +36,7 @@
     
     
     
-    <link rel="canonical" href="https://bheisler.github.io/post/calling-rust-in-python/">
+    <link rel="canonical" href="https://bheisler.github.io/post/nes-rom-parser-with-nom/">
     
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
@@ -276,32 +275,31 @@ ga('send', 'pageview');
     <main>
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
-<meta itemprop="name" content="Calling Rust From Python">
-<meta itemprop="description" content="Hello! This is a detailed example of exposing Rust code to other languages (in this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really trivial example functions, skipping over a lot of the complexity. Even the better ones out there typically don&rsquo;t have a pre-existing, reasonably complex program to work with. I&rsquo;m going to start with trivial functions and build my way up to being able to define a scene for my raytracer in Python using a series of calls to Rust, then render it and return the resulting image data back to Python.">
+<meta itemprop="name" content="Parsing NES ROM Headers with nom">
+<meta itemprop="description" content="Long, long ago (December 2015) I wanted to learn how emulators worked, so I decided to write an NES emulator. Not only that, but I opted to write it in Rust, a language which I had never used before. A crazy idea, to be certain, but once I was done I had indeed learned a great deal about emulators, the NES, and Rust.
+Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work and upgrades.">
 
 
-<meta itemprop="dateModified" content="2017-04-02T00:00:00-06:00" />
-<meta itemprop="wordCount" content="2183">
-
-  <meta itemprop="image" content="https://bheisler.github.io/static/rendered-by-python.png">
+<meta itemprop="dateModified" content="2017-07-30T02:11:19&#43;00:00" />
+<meta itemprop="wordCount" content="1532">
 
 
 
 <meta itemprop="keywords" content="code,c,emulator,ffi,nes,nom,python,raytracer,rust," />
 
     <header>
-      <h1 itemprop="headline">Calling Rust From Python</h1>
+      <h1 itemprop="headline">Parsing NES ROM Headers with nom</h1>
       <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>11 minute read</span>
+<span>8 minute read</span>
 
   <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
     <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
   </svg>
   
-    <span>Published: <time datetime="2017-04-02T00:00:00-06:00">2 Apr, 2017</time></span>
+    <span>Published: <time datetime="2017-07-30T02:11:19&#43;00:00">30 Jul, 2017</time></span>
   
 
 </p>
@@ -311,312 +309,168 @@ ga('send', 'pageview');
     <div itemprop="articleBody">
       
 
-<p>Hello! This is a detailed example of exposing Rust code to other languages (in
-this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really
-trivial example functions, skipping over a lot of the complexity. Even the better
-ones out there typically don&rsquo;t have a pre-existing, reasonably complex program
-to work with. I&rsquo;m going to start with trivial functions and build my way up to
-being able to define a scene for my <a href="https://github.com/bheisler/raytracer">raytracer</a>
-in Python using a series of calls to Rust, then render it and return the
-resulting image data back to Python. If you want to know more about the raytracer,
-I wrote a series of posts on it <a href="/post/writing-raytracer-in-rust-part-1/">here</a>,
-but it won&rsquo;t be necessary; I&rsquo;ll explain parts of the raytracer here as we need
-them. Hopefully this will give a more complete picture of how to incorporate
-complex Rust code into Python.</p>
-
-<p>I&rsquo;ve never written any sort of Python/C interop before, so this should be another
-learning experience all around. I&rsquo;m going to arbitrarily choose
-<a href="https://cffi.readthedocs.io/en/latest/">CFFI</a> as the Python interop library.
-It&rsquo;s portable across interpreters and seems nicer to use than <a href="https://docs.python.org/2/library/ctypes.html">ctypes</a>.
-I expect the main concepts will be broadly applicable to other libraries (and
-other languages such as Ruby). Let get started!</p>
-
-<h2 id="calling-functions">Calling Functions</h2>
-
-<p>The first thing to do is to define a Rust function we want to call from Python.</p>
-
-<script src="//gist.github.com/bheisler/effc8c457c9d85d1e318be52e1b8c98d.js"></script>
-
-<p>We&rsquo;re actually defining a function for Rust&rsquo;s C foreign-function interface. The
-basic idea here is that we write a wrapper in Python that knows how to call
-C functions, and a wrapper in Rust that exposes C functions and translates them
-to regular function calls in Rust. It&rsquo;s sort of like we&rsquo;re calling from Python
-into C into Rust. The <code>no_mangle</code> attribute and <code>extern &quot;C&quot;</code> above instruct rustc
-not to change the name of the function (otherwise CFFI wouldn&rsquo;t be able to
-find it later) and to emit a function that can be called as if it were written
-in C. We&rsquo;ll need both for all functions that we want to expose to C.</p>
-
-<p>Now we need to instruct Cargo to build this library as a dynamic library
-(&ldquo;dylib&rdquo; in Cargo terms). I&rsquo;m writing this on a Windows PC, so Cargo
-produces a <code>raytracer_ffi.dll</code> file. I tested it on Linux as well and it created
-<code>libraytracer_ffi.so</code>.</p>
-
-<script src="//gist.github.com/bheisler/06c25b67a35bfd8f5b38781256558230.js"></script>
-
-<p>Then we need some Python code to load and call this shared library:</p>
-
-<script src="//gist.github.com/bheisler/ec798db12cd69153a6330e67eb6d3dac.js"></script>
-
-<p>Let&rsquo;s break this down a bit. First we import the <code>cffi</code> module and create an
-FFI object. Then we call <code>cdef</code> and pass it some text - this text is a C function
-signature matching the <code>double</code> function in Rust. CFFI parses this function
-signature in order to determine how to call the function. We&rsquo;ll need to do this
-for all of the functions and structs we want to expose to Python. Then we open
-the DLL file with <code>dlopen</code>. Finally, we call the <code>double</code> function as if it were
-a regular Python function and print the result.</p>
-
-<p>And now we should be able to call <code>double</code> from Python:</p>
-
-<pre><code>$ python.exe test.py
-18
-</code></pre>
-
-<p>Side note: I wasn&rsquo;t able to get this working with PyPy on 64-bit Windows. I
-didn&rsquo;t find out why, but I assume it has something to do with how PyPy only
-provides 32-bit binaries. PyPy worked fine for me on Linux, but I had to use
-64-bit CPython on Windows.</p>
-
-<h2 id="passing-structures">Passing Structures</h2>
-
-<p>Now, if I&rsquo;m going to be able to define a scene in Python, I&rsquo;ll need to be able
-to call functions and pass in structs as arguments. I&rsquo;ll keep working with this
-toy program a bit longer, but instead of simply doubling an integer, let&rsquo;s try
-and get it to calculate the length of a vector using <code>vector::Vector3::length</code>.</p>
-
-<p>First, I&rsquo;ll need to tell rustc that Vector3 should be laid out like a C struct.</p>
-
-<script src="//gist.github.com/bheisler/23de3e8f86143ceea2240b2a283b8f91.js"></script>
-
-<p>It appears that CFFI doesn&rsquo;t have any way to call functions with stack-allocated
-structures. Using the stack for small, copyable structures like Vector3 is
-pretty common in Rust, but I guess it isn&rsquo;t in C? So instead, our Rust function
-will have to accept a pointer to a Vector3.</p>
-
-<script src="//gist.github.com/bheisler/f02545b55a01f5602f9aa8802c970847.js"></script>
-
-<p>Here we define an extern function which accepts a raw pointer to a Vector3.
-Dereferencing raw pointers is unsafe, so we use an unsafe block to convert the
-raw pointer to a Rust reference. Finally, we call <code>length()</code> and return the value.</p>
-
-<script src="//gist.github.com/bheisler/d7c3c411f6826303a8a09868821b6829.js"></script>
-
-<p>Back in Python-land, we define a structure type matching Vector3 and the
-signature of the length function. Now we need to allocate a new vector_t object,
-which is done with the <code>ffi.new()</code> function. We need to pay attention to
-ownership here - the memory for the vector_t is allocated by Python and it will
-have to be freed by Python. In this case, it will be freed when the vector object
-gets garbage collected so we don&rsquo;t need to worry about it, but we&rsquo;ll need to
-be more careful about ownership later.</p>
-
-<pre><code>$ python.exe test.py
-1.73205080757
-</code></pre>
-
-<h2 id="returning-references-back-to-python">Returning References Back To Python</h2>
-
-<p>Now we&rsquo;ll start the process of building our actual FFI code. We&rsquo;ll start with the
-Scene structure. I don&rsquo;t especially want to expose all the complexity of the
-Scene structure to Python, so instead we&rsquo;ll use another C idiom and return an
-opaque pointer.</p>
-
-<script src="//gist.github.com/bheisler/9a552f490d320410b28ab5e6c065ee9f.js"></script>
-
-<p>Notice that we use <code>Box::new</code> to heap-allocate the structure, and <code>Box::into_raw</code>
-to convert it into a raw pointer to return. The corresponding Python code is:</p>
-
-<script src="//gist.github.com/bheisler/fcdb3bc11c85147172e1a6ec42f224d0.js"></script>
-
-<p>I&rsquo;m not actually sure <code>void*</code> is the right way to go here, but I don&rsquo;t know any
-other way to do opaque pointers in this situation. If you know more about this,
-let me know. CFFI seems to understand <code>uint32_t</code> all on its own, and presumably
-will call the Rust function with the appropriate integer width.</p>
-
-<pre><code>$ python.exe raytracer.py
-From Rust: Scene { width: 800, height: 600, fov: 45, elements: [],
-    lights: [], shadow_bias: 0.0000000000001, max_recursion_depth: 10 }
-From Python: &lt;cdata 'void*' 0x000000000155B260&gt;
-</code></pre>
-
-<p>Sharp readers might have noticed that we&rsquo;re leaking Scene objects - we&rsquo;re
-allocating some memory on the heap for the boxed Scene and never freeing it.
-For this trivial example, it doesn&rsquo;t matter much because it will be cleaned
-up when the process terminates, but it is rather inelegant, so let&rsquo;s fix that.</p>
-
-<h2 id="disposing-of-allocated-objects">Disposing Of Allocated Objects</h2>
-
-<p>This goes back to the brief discussion of ownership earlier. Previously,
-Python owned the allocated Vector3 object, so we could trust that it would be
-safely freed when it was garbage-collected. Now, we have an object allocated by
-Rust, but owned by a pointer in Python. Python doesn&rsquo;t know how to deallocate
-an object owned by Rust, so we&rsquo;ll have to return ownership of the pointer to
-Rust and allow Rust to free the memory.</p>
-
-<script src="//gist.github.com/bheisler/2f98fb5590e4dcd895773b1dd39a100d.js"></script>
-
-<p>Freeing the memory is actually quite simple - we use <code>Box::from_raw</code> to convert
-the raw pointer back into a box, and then just let it fall out of scope. Rust
-will automatically clean everything up for us.</p>
-
-<script src="//gist.github.com/bheisler/51656ea2be9b8d0c2e7ba2c6ba77bfe4.js"></script>
-
-<p>Right now, there&rsquo;s nothing to stop us from freeing the scene more than once,
-or continuing to use that pointer after the scene has been freed. There&rsquo;s nothing
-we can do about that from the Rust side, but in Python we can at least build a
-safe wrapper to work with.</p>
-
-<script src="//gist.github.com/bheisler/ba18f7b5c73c66ad9d1924e80881fc9e.js"></script>
-
-<p>Here, we define a Python class to represent our Scene. It defines the <code>__enter__</code>
-and <code>__exit__</code> methods necessary to act as a <a href="https://www.python.org/dev/peps/pep-0343/">Context Manager</a>,
-which allows us to use it with the <code>with</code> statement at the end. Running this
-file confirms that the scene object is being freed:</p>
-
-<pre><code>$ python.exe raytracer.py
-Freeing the scene
-</code></pre>
-
-<h2 id="enums">Enums</h2>
-
-<p>Before we begin constructing our scene in Python, however, there&rsquo;s one more bit
-of complexity to tackle first. Every object in this raytracer contains a Material
-structure to define what color the surface is, whether it&rsquo;s reflective or
-transparent, etc. This is defined in Rust using some enums and a struct:</p>
-
-<script src="//gist.github.com/bheisler/5af67a2bc9fb63ad1c77e087d5857c91.js"></script>
-
-<p>Rust&rsquo;s enums have no equivalent in C, and even if they did that DynamicImage
-type certainly doesn&rsquo;t. We&rsquo;ll have to create C-compatible wrappers for these
-types that we can expose to Python. I&rsquo;ll focus on the Coloration enum for now,
-the SurfaceType enum will work the same way.</p>
-
-<p>We&rsquo;ll start by defining another enum:</p>
-
-<script src="//gist.github.com/bheisler/153001fea515624f8eaaf807640c79bb.js"></script>
-
-<p>I know, I just said we can&rsquo;t do enums in C. Instead, we&rsquo;ll define a couple of
-functions to create CColoration values on the heap and return opaque pointers
-to them like we did with the Scene.</p>
-
-<p>First, the simple case of a solid color:</p>
-
-<script src="//gist.github.com/bheisler/37004afc200aa009204031f1443a2ad9.js"></script>
-
-<p>Then, the more complex case of a path to a texture file.</p>
-
-<script src="//gist.github.com/bheisler/8fc77676d46de395b661c89bb0f5384d.js"></script>
-
-<p>Here we take a pointer to a null-terminated character array (a C-style string)
-and convert it to a Rust string, which has a length and is encoded in UTF-8.
-This conversion could fail, if the C string isn&rsquo;t valid UTF-8. Notice that we
-need to be very careful not to panic. We can&rsquo;t just unwrap the result of
-converting the CStr to a regular string, because panicking across FFI boundaries
-is undefined behavior. Instead, we return a null pointer on all error
-conditions. A more serious project would probably want to have more robust error
-handling, but this is sufficient for now.</p>
-
-<p>The corresponding Python should be relatively familiar by now:</p>
-
-<script src="//gist.github.com/bheisler/02f53a18cc343e57b3a6e9b0c31678a4.js"></script>
-
-<p>The SurfaceType enum works basically the same way as above, so I&rsquo;ll spare you
-the details.</p>
-
-<script src="//gist.github.com/bheisler/fbfb35e8b010c89e7b40cc5b93b65a2c.js"></script>
-
-<p>All those with&rsquo;s are kind of ugly, but that&rsquo;s the price we pay for safety.
-We can verify that everything is being freed as expected:</p>
-
-<pre><code>$ python.exe raytracer.py
-Freeing surface type
-Freeing surface type
-Freeing surface type
-Freeing coloration
-Freeing coloration
-Freeing coloration
-Freeing coloration
-Freeing coloration
-</code></pre>
-
-<h2 id="constructing-the-scene">Constructing the Scene</h2>
-
-<p>Finally, we&rsquo;re ready to start constructing the scene. I&rsquo;ll focus on the case of
-adding a Sphere to the scene. The code to define other objects is pretty much
-the same.</p>
-
-<p>First, we need a new struct to represent Material:</p>
-
-<script src="//gist.github.com/bheisler/b90e0a5de2bdbc16d0120142bf6b94ba.js"></script>
-
-<p>And a function to add a sphere to a scene:</p>
-
-<script src="//gist.github.com/bheisler/bede2aa436be20ede3c7c876f2f28488.js"></script>
-
-<p>Most of this is the now-familiar C foreign-function boilerplate. The
-<code>material.to_rust()</code> method works pretty much as you&rsquo;d expect - it
-constructs a Material value from a CMaterial value, potentially loading the
-texture contained in the <code>CColoration</code>. More noteworthy is the way we convert
-the scene Box back into a raw pointer at the end of the method. This prevents
-Rust from deallocating our scene.</p>
-
-<p>You might reasonably ask why I chose to have one function that creates and adds
-the sphere directly to the scene. This does, after all, make it impossible for
-me to return a Sphere to Python. The answer is that since I don&rsquo;t really want to
-manipulate Spheres in Python, there&rsquo;s not much point in going to all that extra
-effort. You can go ahead and do that if you like.</p>
-
-<p>Now that we have all of that, we can call it from Python as before:</p>
-
-<script src="//gist.github.com/bheisler/690a6cc77c1e3ba295f5ce45798b6f26.js"></script>
-
-<pre><code>$ python.exe raytracer.py
-Sphere { center: Point { x: 0, y: 0, z: -5 }, radius: 1, material:
-  Material { coloration: Texture, albedo: 0.18, surface:
-  Reflective { reflectivity: 0.7 } } }
-</code></pre>
-
-<h2 id="rendering-and-returning-the-image-to-python">Rendering and Returning the Image To Python</h2>
-
-<p>Now that we can define a scene in Python, we need a way to render it and return
-the resulting image. We can&rsquo;t just return a byte array, because Python can&rsquo;t
-handle stack-allocated objects, and anyway it would overflow the stack. We could
-return a pointer/length pair, but then we have to pass it back to Rust to free
-it. Instead, we&rsquo;ll follow the C convention and have the caller provide a buffer
-to render the image into.</p>
-
-<script src="//gist.github.com/bheisler/5c3983559358ef40d4de64d83a44cf61.js"></script>
-
-<p>After the usual boilerplate, we convert the C-style byte array into a mutable
-slice with the <code>slice::from_raw_parts_mut</code> function, then wrap that into an
-ImageBuffer and pass it to the raytracer for rendering. Slices in Rust don&rsquo;t
-own their contents, so we don&rsquo;t need to do anything special to prevent Rust from
-trying to free the buffer.</p>
-
-<script src="//gist.github.com/bheisler/51eb8b1f5ad6067942d8a1a969842185.js"></script>
-
-<p>In Python, we need to save the dimensions of the image so that we can allocate
-an appropriate buffer. The raytracer uses 4-byte RGBA pixels, so we calculate
-the buffer size as 4 * width * height, allocate an appropriate buffer, and
-render the image into it. Then we call <code>ffi.buffer</code> to wrap it into a convenient
-Python object. Finally, we pass that to the Pillow library to be wrapped into
-an Image object that we can save out to disk or do further processing on.</p>
-
-<p><a href="http://imgur.com/a/knyif"><img src="/static/rendered-by-python.png" alt="Rendered By Python" /></a>
-Click to see high-resolution image</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>Overall, this turned out to be easier than I&rsquo;d expected. CFFI&rsquo;s user-friendly
-interface helped a lot, I think, though the Rust side has a lot of boilerplate.
-I expect some macros or something could help with that. I&rsquo;d like to thank Jake
-Goulding and co. for the <a href="http://jakegoulding.com/rust-ffi-omnibus/slice_arguments/">Rust FFI Omnibus</a>,
-which covers all of the basic techniques listed above (and provides examples
-for a number of other languages, if you&rsquo;d like to compare).</p>
-
-<p>As usual, if you want to try playing around with the code yourself, you can
-check out the <a href="https://github.com/bheisler/raytracer">GitHub Repository</a>. If you
-do, though, be careful with the complexity of the scene you try to render. It&rsquo;s
-very easy to reach multi-hour rendering times when you&rsquo;re defining scenes
-programmatically. Otherwise, enjoy!</p>
+<p>Long, long ago (December 2015) I wanted to learn how emulators worked, so I
+decided to write an <a href="https://github.com/bheisler/Corrosion">NES emulator</a>.
+Not only that, but I opted to write it in Rust, a language which I had never
+used before. A crazy idea, to be certain, but once I was done I had indeed
+learned a great deal about emulators, the NES, and Rust.</p>
+
+<p>Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work
+and upgrades. One of the things I did was rewrite the ROM parser using
+<a href="https://github.com/Geal/nom">nom</a>. The ROM parser was the first bit of Rust code
+I&rsquo;ve ever written, and it was not great, so I thought it was finally time to clean
+it up a bit. This post is a short description of that process and my thoughts on
+nom as a newcomer to this library. First, a detour to discuss the NES ROM format
+- if you&rsquo;re not interested in the fine details, you can skip ahead to the next
+section.</p>
+
+<h2 id="the-ines-header">The iNES Header</h2>
+
+<p>Nearly all NES ROM files are in one of two formats. There&rsquo;s the
+<a href="https://wiki.nesdev.com/w/index.php/INES">iNES</a> format, or a later extension
+called <a href="https://wiki.nesdev.com/w/index.php/NES_2.0">NES 2.0</a>. My existing parser
+only supports iNES, and that&rsquo;s all the new parser will support as well. I haven&rsquo;t
+come across many ROM&rsquo;s in NES 2.0 format yet, so I haven&rsquo;t needed to add support
+for it.</p>
+
+<p>Let&rsquo;s start digging into the iNES header and I&rsquo;ll explain what everything is as
+we go. First, we have a four-byte magic number - the ASCII letters &lsquo;NES&rsquo; followed
+by 0x1A - the DOS end-of-file character. After that is one byte holding the length
+of the PRG ROM data in 16kB blocks and one byte for the length of CHR ROM in 8kB blocks.
+NES cartridges contain PRG ROM and CHR ROM. PRG (program) ROM holds the
+assembled program code and associated data for the game. It&rsquo;s available in the
+main CPU memory map by reading 0x4020 to 0xFFFF, though many cartridges only
+support reading PRG ROM at addresses above 0x8000. CHR (character) ROM holds the
+graphical data for the game and is only indirectly accessible to the CPU.
+CHR ROM is used instead by the PPU (Picture Processing Unit). Some cartridges
+have no CHR ROM and instead use CHR RAM, transferring the graphical data
+to the CHR RAM at runtime.</p>
+
+<p>After those two bytes are two more bytes of flags. These include various bits
+of information about the hardware of the cartridge (eg. whether or not the
+cartridge has battery-backed RAM for saving your game). These flag bytes also
+contain the mapper ID for the game. Mappers are one of the more&hellip; interesting&hellip;
+aspects of NES emulation. As I mentioned before, the PRG ROM is typically
+accessible from 0x8000 to 0xFFFF - a window of 32kB. 32kB is not nearly large
+enough for most NES games (some of which have as much as 1MB of PRG ROM alone). To
+deal with this, cartridges contain circuit boards called mappers which map
+pages of the ROM in and out of the address space. Different games, and especially
+games by different manufacturers, often have wildly different mappers. The
+emulator must emulate the mapper as well, so the header contains one byte
+(split into two 4-bit pieces for historical reasons) containing the mapper ID.</p>
+
+<p>After the first two flag bytes is another page-count byte, this time for PRG
+RAM (the battery-backed save RAM in games like Legend of Zelda) and another
+flags byte. Finally, we have six reserved bytes, which are not used by iNES but
+are used by NES 2.0.</p>
+
+<p>To recap:</p>
+
+<ul>
+<li>4-byte magic number</li>
+<li>PRG ROM page count</li>
+<li>CHR ROM page count</li>
+<li>Lower half of mapper number &amp; flags</li>
+<li>Upper half of mapper number &amp; flags</li>
+<li>More flags</li>
+<li>Six bytes of zeroes</li>
+</ul>
+
+<p>Following this header is an optional 512-byte trainer (extra program code added
+by some ROM-ripping devices), and the actual PRG and CHR ROM data. Now that we know
+what we&rsquo;re parsing, let&rsquo;s take a look at nom.</p>
+
+<h2 id="nom">nom</h2>
+
+<p>The way parsing works in nom is you use the do_parse! macro to define your
+parser, and a number of other functions and macros to define the structure of
+your data. These macros and functions collectively generate some Rust code which
+parses that data and returns one of three possible results - Done (containing any
+remaining, unparsed data and the resulting value), Incomplete (meaning more
+data is needed) or Error (meaning the data is invalid or otherwise couldn&rsquo;t
+be parsed). The use of macros for this is a rather clever idea, though not
+without downsides.</p>
+
+<p>One of those downsides is that the compiler can&rsquo;t really help you when you
+make a mistake. For instance, it took me longer than I&rsquo;d like to admit to get
+the following code to compile before I realized that I had forgotten to pass
+the input to the do_parse macro.</p>
+
+<script src="//gist.github.com/bheisler/2fae3b00eedcb80a1a109e622a55f74f.js"></script>
+
+<p>Once I got going though, it was pretty smooth sailing and extremely fast to
+parse out the rest of the header and construct my Rom structure. The tag!
+macro takes a given sequence of bytes and reads that sequence from the input.
+be_u8 (the &lsquo;be&rsquo; means big-endian) is a one-byte unsigned integer. Then we have
+the cond! macro, which applies a given parser if some condition is true, and
+finally the take! macro, which consumes a given number of bytes and returns
+them as a slice.</p>
+
+<script src="//gist.github.com/bheisler/a39a0fdd5b1741ce7982849febe914c8.js"></script>
+
+<p>Since my code doesn&rsquo;t support the NES 2.0 extension, I wanted to detect if a ROM
+was using that format and return an error. This is where I started to run into
+trouble; I couldn&rsquo;t find an obvious way to conditionally return an error.
+I ended up working around it by using the call! macro to call a function I wrote
+which would return an error if the ROM was in NES 2.0 format. This was somewhat
+surprising to me; this seems like it would be a common problem.</p>
+
+<script src="//gist.github.com/bheisler/68c917c9f44934dd848b0efa61e7dbdd.js"></script>
+
+<p>At this point, I had a working parser, but I decided to take the opportunity to
+rework my code a bit as well. Previously, I simply stored the flag bytes in the
+Rom structure and left it to other code to mask out the individual flags, as well
+as the two 4-bit pieces of the mapper ID. nom can parse individual bits out of
+the input as well, so I started with separating out the mapper ID from the rest
+of the flag bytes.</p>
+
+<p>nom overall could use some work on its documentation, but using the bit-indexing
+is particularly opaque. I had to look up a cached version of an old blog post
+(<a href="https://webcache.googleusercontent.com/search?q=cache:4CNayFlPRicJ:siciarz.net/24-days-rust-nom-part-2/+&amp;cd=1&amp;hl=en&amp;ct=clnk&amp;gl=ca">link</a>)
+to find out how to do it. To spare you the same trouble, here&rsquo;s a quick overview.</p>
+
+<p>The bits! macro takes a bit-stream parser (eg. take_bits!) or a type-agnostic
+parser (eg. tuple!) and generates the code to apply that parser to a byte-slice
+input. There is also a bytes! macro to go the other way, applying a byte-slice
+parser to a bit-stream input. Inside the bits! macro, you can use parsers that
+consume individual bits. When switching from bit-stream to byte-slice parsing
+(that is, at the end of the bits! macro or the beginning of a bytes! macro), if
+there&rsquo;s a partial byte remaining in the input it will be ignored and the
+subsequent byte-slice parser will start parsing at the next whole byte. The only
+two built-in bit-stream parsers are take_bits! (which consumes a given number
+of bits from the input, and assembles them into the given integer type) and
+tag_bits! which is like tag! but for bits.</p>
+
+<p>Unfortunately, at this point it isn&rsquo;t possible to give names to each value in
+a bits! macro like it is in do_parse!, so I had to make do with collecting the
+mapper ID bits and the flag bits into a tuple instead.</p>
+
+<script src="//gist.github.com/bheisler/30d84186661c04a6d383278a18199e34.js"></script>
+
+<p>I went on to make some further changes, but they&rsquo;re not related to nom so I&rsquo;ll
+skip the details. You can take a look at the <a href="https://github.com/bheisler/Corrosion/blob/fdc4fa0334aabaa76518479dd0ad3e62e4e5ebb1/src/cart/ines.rs">code</a>
+if you&rsquo;re interested.</p>
+
+<h2 id="impressions-of-nom">Impressions of nom</h2>
+
+<p>I kind of like nom. There&rsquo;s a rocky learning curve, and the documentation needs
+some work. I&rsquo;m also a bit wary of such heavy use of macros. Parsing is (often)
+not performance-critical, so I&rsquo;d be willing to sacrifice some runtime efficiency
+to get some more help from the compiler when I make mistakes. On the other hand,
+once you do get the hang of it, it&rsquo;s quick and easy to define parsers for quite
+complex data structures and the code reads a lot like a description of the format
+to be parsed, which is always nice. nom has some beautifully clear example parsers
+to look at (take <a href="https://github.com/Geal/gif.rs/blob/master/">this GIF parser</a>,
+for example). It works on both binary and text data as well, which is a plus.</p>
+
+<p>Overall, I would consider nom for future projects that involve parsing data. The
+lack of documentation could cause some headaches, but it&rsquo;s much easier and safer
+to use a battle-tested library like nom than it is to write your own hand-written
+parser for the same data.</p>
+
+<p>If you&rsquo;d like to check out the code or play around with some perfectly legal,
+homebrew NES software, you can find it on
+<a href="https://github.com/bheisler/Corrosion">Github</a>.</p>
 
     </div>
     <article>
@@ -631,16 +485,16 @@ programmatically. Otherwise, enjoy!</p>
   
   
     
-      on <time datetime="2017-04-02T00:00:00-06:00">2 Apr, 2017</time>
+      on <time datetime="2017-07-30T02:11:19&#43;00:00">30 Jul, 2017</time>
     
   
   
     in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
   
   
-    and tagged <a href="/tags/c/">C</a>, <a href="/tags/ffi/">FFI</a>, <a href="/tags/python/">Python</a>, <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+    and tagged <a href="/tags/emulator/">Emulator</a>, <a href="/tags/nes/">NES</a>, <a href="/tags/rust/">Rust</a> and <a href="/tags/nom/">nom</a>
   
-  using <span itemprop="wordCount">2183</span> words.
+  using <span itemprop="wordCount">1532</span> words.
 </p>
 
       
@@ -653,7 +507,7 @@ programmatically. Otherwise, enjoy!</p>
     <ul>
       
       
-        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a> &ndash; 8 minutes
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
       
         <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a> &ndash; 12 minutes
       
