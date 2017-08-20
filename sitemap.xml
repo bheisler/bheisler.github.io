@@ -38,6 +38,11 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/tags/assembly/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/tags/c/</loc>
     <lastmod>2017-04-02T00:00:00-06:00</lastmod>
     <priority>0</priority>
@@ -61,8 +66,17 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/post/experiments-in-nes-jit-compilation/</loc>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/tags/ffi/</loc>
     <lastmod>2017-04-02T00:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bheisler.github.io/tags/jit/</loc>
     <priority>0</priority>
   </url>
   

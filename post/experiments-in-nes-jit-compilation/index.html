@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.18.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiments In NES JIT Compilation | bheisler.github.io</title>
+    
+    
+    
+    
+    
+    
+
+  <meta name="author" content="Brook Heisler">
+
+
+    <meta property="og:title" content="Experiments In NES JIT Compilation" />
+<meta property="og:description" content="Inspired by the always-incredible work on Dolphin, I decided to write myself an NES emulator called Corrosion a couple years ago. I managed to get it working well enough to play basic games, and then put the project aside. This post is not about the emulator itself, but rather the JIT compiler I added to it last year and the upgrades to said JIT compiler I&rsquo;ve made over the past few weeks." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/experiments-in-nes-jit-compilation/" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/experiments-in-nes-jit-compilation/">
+    
+    
+    <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
+eAHNmudzHEd6xt/NETkSBEEwiJk8SlS05DtXqc6fr8r2J/+V9jfflSWfpTtlSmISSDGByFhgF5vz
+rn9PD5pckiDvyqTObnIwMz0z3f2m5w29ITPrc/wiLRQKWTgcfm7sfr9vOtT0zuB7vV7PdPjnz338
+mjuir3m8p4YbJE7Xap54Eembng0SPPiuf+eXOr82BvhFH7TQQWL1XMSqz3+j+0FN8Uw6aKzX3Sex
+vDYTEEH+8GrsifQLH5S07xt850XP9c4vwZjXpgGeGH+Wxgdm3h+Q9BObd0TD+h4v9ftPzMF/r7Nn
+jCfc3w++86rXr5UBgwvVtZjgDzFDfWoBIWHOHP3OgSook/AEe23y378q0YPfv1YG+IEfL1QGBge6
+3aetTAQ55xBC+naw9AMGBmovRuhQ3+Ox/WSveH6tGODWEg5ZJp2y7NCQjY2NQmjEisWiFfdK1mg0
+HhPR63rCn2jFoMQH6fLa4DVh8NmrXr+UAZ7zmuQgzvs+vReLxSybzdrM7LSdv3Dezp47Y8eOHbdI
+JGJraxt266clW1pasu3NbcvnC1arlPEE3cfrj0SibgyN2e12OTCNfZN5/NIvcPEXTWBwEf7aS8qv
+Jx6P28LRBbt06ZK9884Vu3jpos0vHLHx8QlHVK3WsNXVFfvu26v2h9//wb6/etWq5bL/3J2lKWYR
+VB2NkGk8bTVPvfvsjV+PX9+zz1927xjgBxh8UX2+XxLx1/4dTSbVTKfTdvbsWfvoo4/sww8/sDNc
+j42PWRSmyMOWILTH9xMTE3buzGnLbW9ZuVyySqXKuWxh5pGWhDCddqcJ4T4KDDggxvCK0wo/98vO
+g+vWey9iiu93DPA3g8HIIMHeBv3Eel+HJH/+/Hn73e9+Z2+99aYtLi5C6DjERJy9VyoVy+8VLBqN
+WDaTsSNoxXvvvmuNesM2N7esXq/th71mnVY7WCzEiilhmCItkN2LkS9qnmCtx6958Ppl3+m9p0xA
+Hb7p2jPETxKNRp0k2u22m2x6etree+89+/jjj21mZsaSySTExq3T6VgbgprNpoV74EMkZqlE0gHi
+EOA4BFakkgnuQ9ZpE/uHINLPrSWE/bIOIP4Z1PJr1hp17e/9WfR4xnjaBs9+Jtc3+JE6pPq+CeT8
+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">
+
+    <style media="screen">
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{height:20px;width:20px;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{display:inline-block;float:left;margin-right:.5rem;width:14px;height:14px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}
+  .dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+</style>
+
+    <style media="screen">
+  @keyframes intro {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  .muted {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  main, footer {
+    animation: intro 0.3s both;
+    animation-delay: 0.15s;
+  }
+   
+  .hack li ul {
+    margin: 0;
+  }
+  .main {
+    padding: 20px 10px;
+  }
+  nav a.active {
+    background-color: #ff2e88;
+    color: #fff;
+  }
+  html {
+    font-size: 13px;
+  }
+  article [itemprop="description"] {
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  @media screen and (min-width: 768px) {
+    html {
+      font-size: 1em;
+    }
+    .container {
+      max-width: 50rem;
+    }
+  }
+</style>
+
+    <style media="screen">
+  nav a.active {
+      background-color: orange;
+      color: black;
+  }
+  a {
+    color: orange;
+    border-bottom: 1px solid orange;
+  }
+  a:hover {
+    background-color: orange;
+    color: black;
+  }
+  .dark h1 a:hover,
+  .dark h2 a:hover,
+  .dark h3 a:hover,
+  .dark h4 a:hover,
+  .dark h5 a:hover {
+      color: black
+  }
+   
+  .gist table tbody td:first-child {
+  	  color: rgba(0,0,0,0.3) !important;
+  }
+  .gist table td, .dark table th {
+  	  border-color: #ccc !important;
+  }
+</style>
+
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+  </head>
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Experiments In NES JIT Compilation">
+<meta itemprop="description" content="Inspired by the always-incredible work on Dolphin, I decided to write myself an NES emulator called Corrosion a couple years ago. I managed to get it working well enough to play basic games, and then put the project aside. This post is not about the emulator itself, but rather the JIT compiler I added to it last year and the upgrades to said JIT compiler I&rsquo;ve made over the past few weeks.">
+
+
+
+<meta itemprop="wordCount" content="4502">
+
+
+
+<meta itemprop="keywords" content="code,assembly,c,emulator,ffi,jit,nes,nom,python,raytracer,rust," />
+
+    <header>
+      <h1 itemprop="headline">Experiments In NES JIT Compilation</h1>
+      <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>22 minute read</span>
+
+  <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+    <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+  </svg>
+  
+    <span>Published: <time datetime="0001-01-01T00:00:00&#43;00:00">1 Jan, 0001</time></span>
+  
+
+</p>
+    </header>
+    
+    
+    <div itemprop="articleBody">
+      
+
+<p>Inspired by the always-incredible work on <a href="https://dolphin-emu.org/">Dolphin</a>,
+I decided to write myself an <a href="https://github.com/bheisler/Corrosion">NES emulator</a>
+called Corrosion a couple years ago. I managed to get it working well enough to
+play basic games, and then put the project aside. This post is not about the
+emulator itself, but rather the JIT compiler I added to it last year and the
+upgrades to said JIT compiler I&rsquo;ve made over the past few weeks.</p>
+
+<p>Having read that, you might be wondering &ldquo;Why would anybody write a JIT compiler
+for the NES?&rdquo; Indeed, it&rsquo;s a reasonable question. Unlike newer consoles, it&rsquo;s
+quite feasible to emulate the NES&rsquo;s modified 6502 CPU at full speed with a
+simple interpreter. As with most of the projects I write about here, I wanted
+to know how they work, so I built one. Having done so, I can say that I would
+not recommend JIT compilation for production-quality NES emulators except in
+severely resource-constrained environments. However, I would strongly recommend
+this project for anyone who wants to learn more about JIT compilers, as it&rsquo;s
+complex enough to be challenging but simple enough to be manageable.</p>
+
+<p>This is more of a post-mortem article covering the design of my JIT compiler,
+the pitfalls I ran into and the mistakes I made in construction and what I&rsquo;ve
+learned from the process. It is not a tutorial on how to write your own JIT
+compiler, though there are some links that cover that in more detail at the end.
+The emulator is written in Rust, but you don&rsquo;t need to know Rust to follow along.
+Most of the concepts will map to other low-level languages like C or C++. An
+understanding of x64 assembly would be helpful, but again, not required - I
+didn&rsquo;t know much assembly starting this project, and even now my assembly is
+pretty weak.</p>
+
+<h2 id="basics-of-jit-compilation">Basics of JIT Compilation</h2>
+
+<p>Just to make sure everyone&rsquo;s on the same page, a quick interlude on how JIT
+compilers work at a high level. If you&rsquo;re familiar with this already, feel free
+to skip ahead.</p>
+
+<p>Broadly speaking, a JIT (or just-in-time) compiler is a piece of code that
+translates some kind of program code into machine instructions for the host CPU.
+The difference between a JIT compiler and a regular compiler is that a JIT
+compiler performs this translation at runtime (hence just-in-time) rather than
+compiling the code and saving a binary for later execution.
+For emulation, the original program code is typically the binary machine code
+that was intended for the emulated CPU (in this case the NES&rsquo; 6502 CPU). However,
+JIT compilers are used for many other kinds of programs. Examples include the
+JIT compilers used by modern browsers to run Javascript, the Hotspot compiler
+in the JVM and dynamic language runtimes like PyPy and LuaJIT.</p>
+
+<p>JIT compilers are used primarily to speed up execution. A standard interpreter
+must fetch, decode and execute instructions one at a time. Even in a relatively
+fast language like Rust or C, this incurs some overhead. A JIT compiler, on the
+other hand, can be run once and emit a blob of machine code which executes an
+entire emulated function (or more) in one sequence of instructions. Eliminating
+that overhead often greatly improves execution speed. However, since the
+compilation is done at runtime, care must be taken that the JIT compiler itself
+doesn&rsquo;t run slowly enough to cause performance problems, where an ahead-of-time
+(AOT) compiler can spend much more time optimizing the code it generates.</p>
+
+<p>A JIT compiler typically parses some chunk of code, performs any analysis
+it needs to, and then generates binary machine code for the host CPU into a
+code buffer. Modern OS&rsquo;s require these code buffers to be marked as read-only
+and executable before they can be executed, but once this is done the generated
+code can be executed by jumping the host processor to the beginning of the buffer
+just like any normal function. Some more sophisticated JIT compilers will
+translate the source language into some intermediate in-memory representation
+for further processing before emitting the final machine code.</p>
+
+<p>As a simple example, consider the following 6502 code:</p>
+
+<pre><code>LDA $1A  // Load byte from RAM at 0x001A into A register
+ADC #$20 // Add 0x20 to the A register
+STA $1A  // Store A register into RAM at 0x001A
+</code></pre>
+
+<p>This might be translated into the following (simplified) x64 code:</p>
+
+<pre><code>MOV r9b, [rdx + 1Ah] // Load byte from RAM array pointed to by rdx into r9b
+ADC r9b, 20h         // Add 0x20 to r9b, which represents the A register
+MOV [rdx + 1Ah], r9b // Store the result back into the RAM array at 0x001A
+</code></pre>
+
+<p>Note that I&rsquo;ve omitted things like processor flags and interrupts from this
+example.</p>
+
+<h2 id="design-of-corrosion-s-jit">Design of Corrosion&rsquo;s JIT</h2>
+
+<p>Corrosion has a relatively simplistic JIT compiler. It has no intermediate
+representation or register allocator, which might be found in more sophisticated
+JIT compilers - Dolphin&rsquo;s PPC JIT has a register allocator, while David Sharp&rsquo;s
+Tarmac ARM emulator features an IR called Armlets (see links at the end).
+Since machine code is typically a binary format too complex for humans to write
+directly, most JIT compilers also devote much code to translating some
+assembly-like syntax or DSL used by the developers into the bytes that are given
+to the host CPU. Fortunately for me, there is an extremely useful compiler plugin
+by CensoredUsername called <a href="https://github.com/CensoredUsername/dynasm-rs">dynasm-rs</a>
+which can parse an Intel-assembly-like syntax and perform most of the assembly
+at compile time. I would recommend any Rust-based JIT compiler author should
+check out this plugin; I&rsquo;ve found it to work well, with no bugs to speak of and
+CensoredUsername was very helpful about answering my silly questions when I asked.
+The only limitation is that it currently only supports the x64 instruction set,
+though x86 support is planned. For those who prefer C/C++, there is a similar
+tool called <a href="https://luajit.org/dynasm_features.html">DynASM</a>, though I can&rsquo;t
+comment on that as I&rsquo;ve never used it myself.</p>
+
+<script src="//gist.github.com/bheisler/a949bf7d08573e4529b4a9e2fd10f5e6.js"></script>
+
+<p>The entry point to the JIT compiler in Corrosion is the
+<a href="https://github.com/bheisler/Corrosion/blob/develop/src/cpu/dispatcher.rs">dispatcher module</a>.
+When the CPU interpreter detects that it&rsquo;s executing an address from the ROM,
+it makes a call to the dispatcher to compile (if necessary) and execute the
+relevant block of code. The dispatcher is responsible for managing the cache
+of generated code blocks and calling to the JIT compiler to generate more code
+when necessary.</p>
+
+<p>If the dispatcher doesn&rsquo;t have an existing generated code block for a particular
+location in ROM, the <a href="https://github.com/bheisler/Corrosion/blob/develop/src/cpu/nes_analyst.rs">nes_analyst module</a>
+is used to collect information about the code to be compiled. The primary
+responsibility of nes_analyst is to determine where the end of the current
+function is and collect information about the instructions it contains.
+This is done using a very simplistic algorithm that I copied from Dolphin. It
+decodes instructions until it finds the first unconditional exit point (eg.
+returns, jumps or calls to other functions). To ignore the conditional exit
+points, it tracks the target address of the farthest forward-facing branch it&rsquo;s
+seen; any exit point before that is conditional. This approach does occasionally
+overestimate the length of the actual function, but it&rsquo;s simple and fast.
+The nes_analyst module is also responsible for identifying which instructions
+are the targets of branches and which instructions change or use which processor
+flags, which is used later in the compilation process. Decoding opcodes is done
+using the <code>decode_opcode!</code> macro which expands to a giant match structure that
+calls the appropriate functions. <code>decode_opcode!</code> has handling for the various
+addressing modes which we don&rsquo;t really need here, so there is some clutter,
+but it works well enough.</p>
+
+<p>As mentioned earlier, Corrosion doesn&rsquo;t have a register allocator. It&rsquo;s quite
+common for emulated CPU&rsquo;s to have more registers than the host CPU, especially
+since many JIT compilers run on the relatively register-light x86
+and x64 instruction sets. As a result, they need to do the extra step of
+determining which emulated registers should be represented by host registers
+and which should be stored in memory at any given point in the code. Conveniently,
+the NES&rsquo;s 6502 CPU has even fewer registers than x64 does, which means we can
+statically assign one x64 register to represent each 6502 register and have a
+few left over to store things like the pointers to the Rust CPU structure and
+the array which stores the emulated RAM, as well as a few more for general-purpose
+scratch memory.</p>
+
+<p>Most 6502 instructions come in various different flavors called addressing modes,
+which control where they take some of their data from. Take the CPX (ComPare X)
+instruction as an example. This instruction compares the value in the X register
+to a one-byte operand, setting the N (sign), Z (zero), and C (carry) flags.
+If the opcode is 0xE0, the operand is a one-byte immediate value stored
+right after the opcode. If the opcode is 0xE4, the next byte is instead
+zero-extended to 16 bits and used as an address into RAM. This mode is called
+the zero-page mode, and it can only access the first 255 bytes of RAM, which are
+called the Zero Page. The byte at the selected location is used for the
+comparison. Finally, if the opcode is 0xEC, the next two bytes (little-endian)
+are used as an absolute address into memory and whichever byte they select is used.
+If you&rsquo;re wondering, zero page instructions are one byte smaller and slightly
+faster than absolute instructions, which matters when you have a 64k address
+space and 1.34MHz CPU.</p>
+
+<p>There are a number of other addressing modes, but this should suffice to explain
+the concept. I could have written hand-tuned machine code for all 255 possible
+opcodes, but I&rsquo;m a lazy programmer, so instead I wrote a collection of routines
+that generate code to move the appropriate byte into one of my scratch registers
+(r8). That way, I can call the routine appropriate for the addressing mode to load
+the operand into r8, then define the instruction code to take it from there.
+Likewise, when writing to memory, I can move the value to be written into r8
+and call a routine to generate the instructions to transfer that value into the
+appropriate location in memory. It&rsquo;s slightly less efficient at runtime because
+I have to move data through an intermediate register instead of using it
+directly, but it saved a lot of my time.</p>
+
+<p>Slight aside - I was a bit surprised by how small the difference is between
+writing code to implement something and writing code that generates a program
+to implement something. I&rsquo;ll use CPX as an example again - this is some code
+from an earlier version of the JIT:</p>
+
+<script src="//gist.github.com/bheisler/eebebbacefda3c626f597a6c865805dd.js"></script>
+
+<p>If I were actually writing this in assembly, this reads like pretty much how
+I&rsquo;d do it - call the function for the appropriate addressing mode to load the
+operand, do some branching to set or clear the carry flag, compare the operand
+against the X register and call some functions to update the sign and zero
+flags. In fact, that&rsquo;s exactly how the interpreter handles this instruction.
+Instead, I&rsquo;m calling a function to generate the code to load the operand,
+generating code to do the comparison and update the flags, etc. Despite that
+extra layer of indirection, though, it reads pretty much the same. Because
+of this, implementing all of the instructions was as straightforward as
+translating my Rust code into assembly. I&rsquo;m not actually that good with
+assembly, so my code will probably make experienced assembly programmers cry.
+Still, it does the job. With that said, I would be interested in ideas for
+making it better if anyone would care to share links or suggestions.</p>
+
+<h2 id="enhancements">Enhancements</h2>
+
+<p>That brings me up to the present, more or less. Over the past few weeks I&rsquo;ve
+been working on some &lsquo;optimizations&rsquo; to the JIT compiler. I write that in quotes
+because for the most part I can&rsquo;t actually detect any measurable change in
+execution speed for these, but they were somewhat interesting to implement.</p>
+
+<p>The first such enhancement that I added was redundant flag elimination. This was
+actually really easy and I probably should have done it from the start. The idea
+here is that a good chunk of the code emitted by a JIT compiler (at least for
+emulators) does nothing but implement the various flag behaviors of the emulated
+CPU (eg. setting the overflow flag when an addition overflows). To some extent,
+a clever JIT compiler author can exploit similar flags in the host CPU to
+accomplish this with fewer instructions, but it&rsquo;s still there. If you look at
+<a href="http://www.oxyron.de/html/opcodes02.html">documents detailing the 6502&rsquo;s instruction set</a>,
+you&rsquo;ll quickly see that many instructions change the flags in some way,
+but very few instructions use them. What this means is that a typical program
+will overwrite processor flags far more often than they&rsquo;re actually used.
+Interpreters sometimes take advantage of this by not storing the flags at all,
+and instead storing enough data to calculate the flags and then evaluating them
+lazily when needed. A JIT compiler, however, can go one step further and analyze
+every instruction to see if that flag value will be used before it&rsquo;s overwritten
+by another instruction. If not, it doesn&rsquo;t emit the machine code to update the
+flag.</p>
+
+<p>The way I implemented this is to have nes_analyst keep track of the last
+instruction to change each flag while it&rsquo;s stepping through a function. Then
+when it hits an instruction that uses a flag, it looks up the InstructionAnalysis
+structure for the last instruction to set the flag, which contains a set of
+booleans indicating whether each flag will be used. Since we now know that that
+instruction&rsquo;s flag will be used and not overwritten, we set the appropriate
+boolean to true, signaling the JIT compiler to emit code to update that flag
+later on.</p>
+
+<p>There are a few pitfalls with this approach. For instance, if a branch is taken
+or if execution hits a jump instruction, we can&rsquo;t know if the code it jumps to
+will rely on this flag. If so, this optimization could break. A more
+sophisticated analysis could probably detect that, for at least some cases.
+This one-pass algorithm can&rsquo;t, so to be on the safe side it assumes that jump
+and branch instructions use all of the flags. Likewise, when an interrupt
+occurs, the NES pushes the flags and the return address on the stack. Since an
+interrupt can occur at any time, there&rsquo;s no way to be sure that the flags byte
+it pushes on the stack will be correct. I don&rsquo;t have a solution to this except
+to assume that no game will break because of the exact value of the flags byte
+on the stack. This seems like a safe assumption. Since interrupts can happen at
+any time, it would be difficult to know what the flags should have looked like
+when the interrupt happened. Something to be aware of, though.</p>
+
+<p>The initial version of my JIT compiler emitted a fixed series of instructions
+(a function prologue) at the beginning of every compiled block which rearranged
+the arguments from the win64 calling convention and loaded all of the NES
+register values out of memory into the designated x64 registers. Then, at every
+possible exit point from the block, it would emit some code (the epilogue) to
+do the reverse; store the register values back in memory and return control
+back to the interpreter. This means we can&rsquo;t just jump to the middle of a
+compiled function - we&rsquo;ll skip over the prologue and crash. Therefore, if some
+other code tries to jump into the middle of a function, we need to compile that
+function suffix as a complete function of its own, with its own prologue and
+epologues. Also, these duplicate prologues and epilogues take up space in the
+instruction cache, which could reduce performance.</p>
+
+<p>Instead, I&rsquo;ve changed it to use a trampoline; this is an ordinary Rust function
+taking the pointer to the compiled code to jump to as well as the pointers to
+the CPU structure and the RAM array. It contains an <code>asm!</code> macro which defines
+the assembly instructions to load the registers from memory, call the compiled
+block and then store the updated registers back into memory. Since we now only
+have one global &lsquo;prologue/epilogue&rsquo; shared between all compiled code blocks, we
+can then call directly into the middle of an existing block with no trouble.</p>
+
+<p>Another problem with the prologue/epilogue design was that compiled blocks
+couldn&rsquo;t easily call each other; the JIT would have to store everything back in
+memory to prepare for the prologue to be run again, or know how to jump past
+the prologue or something else complicated. With a trampoline-based design,
+it&rsquo;s easy to jump to another block - everything&rsquo;s already loaded into the
+appropriate registers, so you can just jump the host processor to the beginning
+of the target block. One wrinkle is that you need to be careful not to link
+together blocks from different banks of ROM, since one bank could be switched
+out and now your code is jumping to the wrong place.</p>
+
+<h2 id="challenges">Challenges</h2>
+
+<p>Speaking of that trampoline function, I did run into some difficulty implementing
+it. The trampoline function needs to transfer values from a struct in memory
+to and from registers. It takes a pointer to a CPU struct as an argument, but
+that alone isn&rsquo;t enough; Rust can rearrange and pad the fields however it likes,
+so I needed a way to get the offset of each field from the pointer to the CPU.
+C/C++ programmers can use the offsetof macro, but Rust has no official way to
+calculate the offset of a field within a structure. The layout of Rust structures
+isn&rsquo;t even guaranteed to be the same from release to release - in fact, it <a href="http://camlorn.net/posts/April%202017/rust-struct-field-reordering.html">was
+changed</a>
+just a few months ago in version 1.18.  I could have marked the CPU struct with
+<code>repr(C)</code> to force it to use the C layout and used hard-coded offsets, but that
+felt inelegant. I would have needed to update the offsets every time I modified
+the CPU struct, for one thing. Instead, I found a macro online that can calculate
+the offset of any field in a structure.</p>
+
+<script src="//gist.github.com/bheisler/b21c9bfc07ee4c1afac2e96ef55dfffd.js"></script>
+
+<p>This works by casting 0 (NULL) to a raw pointer to a <code>$ty</code> structure,
+dereferencing it, taking a reference to the field and casting that pointer back
+to a usize. As far as I can tell, this is actually safe and should be entirely
+evaluated at compile time, but it still needs to be wrapped in an unsafe block
+anyway. Use at your own risk, etc. etc. It&rsquo;s pretty easy to add more macros to
+calculate offsets with multiple levels of nesting - see <code>offset_of_2</code> in
+<code>x86_64_compiler/mod.rs</code> for an example. One drawback of this is that it can&rsquo;t
+be used for static values - it&rsquo;s forbidden to dereference null pointers when
+initializing static values, even with unsafe. Because of that, I didn&rsquo;t think
+it would work with the <code>asm!</code> macro&rsquo;s <code>n</code> value constraint (meaning constant
+integer) but it totally does. Still, it&rsquo;d be really nice if this was something
+Rust supported out of the box.</p>
+
+<p>Another challenge I ran into while implementing this is dealing with some
+quirks of the win64 calling convention. Rust, you see, does not have a defined
+calling convention, so there&rsquo;s no reliable way to call directly into Rust code
+from assembly. Instead, you expose a function marked <code>extern &quot;win64&quot;</code> or
+similar which then calls the function you actually want. This way, you set up
+your code to be compatible with the chosen calling convention - pushing
+caller-saved registers on the stack, placing arguments in the right registers -
+and leave Rust to handle the translation to its own internal calling
+convention. The win64 convention is one of two 64-bit calling conventions
+supported - the other one, sysv64, is still experimental and requires a special
+feature flag even on nightly. The JIT compiler needs to call back into Rust
+code to handle things like reading and writing memory-mapped devices like the
+PPU or the controllers. Unfortunately, win64 is slightly difficult to work
+with. It requires that the stack pointer be 16-byte aligned at the entry to
+every function, and that the caller provide a 32-byte empty space on the stack
+before the return address for the callee to use as scratch space. Failure to do
+this correctly causes hard-to-debug segfaults. In my code, I don&rsquo;t have many
+places where I call back to Rust code, and the generated code doesn&rsquo;t use the
+stack very much, so I deal with this by just hard-coding the number of bytes of
+space to leave on the stack. It&rsquo;s not ideal (if I had more complex requirements
+I might add a trampoline_to_win64 function to match trampoline_to_nes), but
+other JIT compiler authors should be aware of it.</p>
+
+<p>Next up, debugging. Debugging a JIT compiler sucks even more than debugging an
+interpreter. Debugging tools largely just don&rsquo;t handle runtime-generated
+machine code. Visual Studio, despite having a quite competent disassembly view,
+just will not step into a generated code block. GDB&rsquo;s disassembly view will at
+least display the generated code and let you scroll downwards through it, but
+not back upwards (I guess because it doesn&rsquo;t know which byte to start
+disasembling from, but it could at least allow you to scroll back up to the
+program counter). GDB also fails to insert breakpoints into generated code
+blocks even when you give it the address of the instruction to break at. GDB
+has some sort of interface for exposing debugging info for JIT-compiled code,
+but I wasn&rsquo;t able to make much sense of it. Apparently it relies on the JIT
+compiler generating and emitting a complete ELF table in memory for the
+generated code, which sounds like a lot of hassle. Anyway, in the absence of a
+debugger, good old println-debugging is your best friend. This is complicated
+by the fact that you have to insert your debug output into the generated code
+at runtime, but I&rsquo;d strongly suggest you find a way. I wish I had done this
+earlier, it would have saved me a ton of debugging time.</p>
+
+<p>Handling interrupts also proved to be something of a challenge. The NES has
+very tight synchronization between the CPU and the other hardware, which
+includes interrupts. I had hoped there would be some clever way to implement
+interrupts without just checking if there had been an interrupt before every
+emulated instruction, but I couldn&rsquo;t find one. This is part of why the
+duplicate epilogues were a problem, in fact; every emulated instruction was
+preceded by an implicit exit point, so there were a lot of redundant epilogues.
+The best I could come up with was to store a cycle count representing when the
+next interrupt would occur and then compare that against the actual cycle count
+before every instruction. This sort of works, because the hardware interrupts
+of the NES are entirely predictable, but it probably wouldn&rsquo;t work for other
+systems. On the other hand, other systems probably don&rsquo;t require such tight
+timing for the interrupts, so if you&rsquo;re writing a JIT you might be able to get
+away with only checking for interrupts once every 10 emulated instructions or
+something.</p>
+
+<p>As I mentioned in my post on <a href="/post/nes-rom-parser-with-nom/">parsing iNES ROM headers</a>,
+the NES only has 32k of address space mapped to the ROM. Some games take up
+more than a megabyte of ROM space, so NES cartridges incorporate circuitry so
+that the game can map banks of the ROM in and out of the address space.
+Implementing the bankswitching logic is one thing, but this allows for the
+possibility of self-modifying code even if you only use the JIT compiler when
+executing from ROM. There are all sorts of wacky corner cases this enables -
+what if the bank you&rsquo;re executing is switched out between instructions? What if
+half of a block is on one bank and the other is on the next bank, then the
+second half gets switched out? If you then execute a generated code block that
+compiled in the instructions from the original bank, the game will probably
+break. You could even have a multi-byte instruction on a bank boundary, such
+that the last byte of the instruction depends on which bank is mapped in. I&rsquo;ll
+be honest, I didn&rsquo;t solve this problem. Corrosion just assumes that no game
+will do strange stuff like this. Initially, I took a much more conservative
+approach and deleted all of the compiled code for a bank whenever it was
+switched out. This was a mistake; games like Legend of Zelda bankswitch
+frequently enough that the emulator was constantly recompiling sections of code
+that it had already compiled before. Major respect for the developers of other
+JIT-based emulators - dealing with arbitrary self-modifying code, especially in
+situations where you have an instruction cache and/or pipelining, must be a
+nightmare.</p>
+
+<h2 id="other-resources-conclusion">Other resources &amp; conclusion</h2>
+
+<p>Well, that&rsquo;s about it from me. This was a bit more stream-of-consciousness than
+my posts usually are, since I was writing about something I made a while ago.
+I normally write my posts concurrent with working on the projects they cover.
+I hope you found it interesting and/or educational. I&rsquo;ll leave you with some
+links to other resources that I used or wish that I&rsquo;d known about when I was
+building this thing.</p>
+
+<p>First off, Eli Bendersky&rsquo;s Adventures In JIT Compilation series
+(<a href="http://eli.thegreenplace.net/2017/adventures-in-jit-compilation-part-1-an-interpreter/">Part 1</a>,
+<a href="http://eli.thegreenplace.net/2017/adventures-in-jit-compilation-part-2-an-x64-jit/">Part 2</a>,
+<a href="http://eli.thegreenplace.net/2017/adventures-in-jit-compilation-part-3-llvm/">Part 3</a>,
+<a href="http://eli.thegreenplace.net/2017/adventures-in-jit-compilation-part-4-in-python/">Part 4</a>)
+is an excellent introduction to the low-level details of implementing an
+interpreter and a series of JITs for Brainfuck, including different ways of
+generating machine code, intermediate representations and so on.</p>
+
+<p>Second, David Sharp&rsquo;s <a href="http://www.davidsharp.com/tarmac/tarmacreport.pdf">report on Tarmac</a>,
+an optimizing JIT compiler for ARM emulation. It&rsquo;s over a hundred pages long,
+but this is an excellent overview of JIT compilation techniques as well as a
+detailed explanation of how Tarmac works. Sharp gives a good explanation (often
+including diagrams and/or examples) of common approaches to various problems in
+emulation, even if Tarmac itself doesn&rsquo;t use them. If nothing else, read it to
+learn about terminology you can plug into a search engine to find out more.</p>
+
+<p>If you&rsquo;re interested in NES emulation in particular, <a href="http://wiki.nesdev.com/w/index.php/Nesdev_Wiki">the NESdev wiki</a> is the premiere source of information for aspiring emulator developers and
+homebrew ROM authors. This wiki and the resources it links to (including
+<a href="http://forums.nesdev.com/">the forums</a>,
+<a href="https://wiki.nesdev.com/w/index.php/Emulator_tests">test ROMs</a>, and lots
+of documentation about the CPU/PPU/APU) provided all of the documentation I used
+to build this emulator in the first place.</p>
+
+<p>Finally, Dolphin&rsquo;s JIT doesn&rsquo;t seem to have much documentation, so if you want
+to find out more about it there are only two sources that I&rsquo;ve found useful.
+The <a href="https://github.com/dolphin-emu/dolphin/tree/master/Source/Core/Core/PowerPC">source code</a>,
+and <a href="https://www.reddit.com/r/emulation/comments/2xq5ar/how_close_is_dolphin_to_being_cycle_accurate/cp318ka/">this Reddit comment</a>
+by one of the developers giving a relatively high-level overview of how it all
+works.</p>
+
+<p>This has been a fun project. I have some other stuff in the pipeline at the
+moment, but I&rsquo;d like to come back to this emulator at some point. Until next
+time&hellip;</p>
+
+    </div>
+    <article>
+      
+    </article>
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    by <span itemprop="author">Brook Heisler</span>
+  
+  
+    
+      on <time datetime="0001-01-01T00:00:00&#43;00:00">1 Jan, 0001</time>
+    
+  
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/assembly/">Assembly</a>, <a href="/tags/emulator/">Emulator</a>, <a href="/tags/jit/">JIT</a>, <a href="/tags/nes/">NES</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">4502</span> words.
+</p>
+
+      
+  
+
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+      
+        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a> &ndash; 8 minutes
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a> &ndash; 12 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a> &ndash; 9 minutes
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a> &ndash; 7 minutes
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated by
+    <a href="https://gohugo.io/">Hugo</a>
+    using the
+    <a href="https://comfusion.github.io/after-dark/">After Dark</a>
+    theme by
+    <a href="http://comfusionllc.com">Comfusion LLC</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>
