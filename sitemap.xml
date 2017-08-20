@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bheisler.github.io/post/experiments-in-nes-jit-compilation/</loc>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/nes-rom-parser-with-nom/</loc>
     <lastmod>2017-07-30T02:11:19+00:00</lastmod>
   </url>
@@ -39,6 +44,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/assembly/</loc>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -55,18 +61,14 @@
   
   <url>
     <loc>https://bheisler.github.io/categories/code/</loc>
-    <lastmod>2017-07-30T02:11:19+00:00</lastmod>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/tags/emulator/</loc>
-    <lastmod>2017-07-30T02:11:19+00:00</lastmod>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://bheisler.github.io/post/experiments-in-nes-jit-compilation/</loc>
   </url>
   
   <url>
@@ -77,12 +79,13 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/jit/</loc>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/tags/nes/</loc>
-    <lastmod>2017-07-30T02:11:19+00:00</lastmod>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -94,7 +97,7 @@
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2017-07-30T02:11:19+00:00</lastmod>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -112,7 +115,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/rust/</loc>
-    <lastmod>2017-07-30T02:11:19+00:00</lastmod>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -123,7 +126,7 @@
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2017-07-30T02:11:19+00:00</lastmod>
+    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
   </url>
   
