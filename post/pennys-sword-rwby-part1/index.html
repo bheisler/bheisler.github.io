@@ -4,7 +4,7 @@
     <meta name="generator" content="Hugo 0.18.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parsing NES ROM Headers with nom | bheisler.github.io</title>
+    <title>Penny&#39;s Sword - RWBY - Part 1 | bheisler.github.io</title>
     
     
     
@@ -15,14 +15,16 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Parsing NES ROM Headers with nom" />
-<meta property="og:description" content="Long, long ago (December 2015) I wanted to learn how emulators worked, so I decided to write an NES emulator. Not only that, but I opted to write it in Rust, a language which I had never used before. A crazy idea, to be certain, but once I was done I had indeed learned a great deal about emulators, the NES, and Rust.
-Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work and upgrades." />
+    <meta property="og:title" content="Penny&#39;s Sword - RWBY - Part 1" />
+<meta property="og:description" content="In this post, I&rsquo;ll show you how I built a light-up replica of Penny Pollendina&rsquo;s unnamed swords from Rooster Teeth&rsquo;s excellent animated web show RWBY. RWBY is what originally got me into propmaking - I&rsquo;ve already made Yang&rsquo;s Ember Celica shotgauntlets and Adam&rsquo;s Wilt &amp; Blush Sword/Shotgun Combo. This is the first time I&rsquo;ve documented my process, so hopefully you find it useful.
+Blueprints &amp; Design First, a quick overview of how I intended to do this build." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bheisler.github.io/post/nes-rom-parser-with-nom/" />
+<meta property="og:url" content="https://bheisler.github.io/post/pennys-sword-rwby-part1/" />
+
+  <meta property="og:image" content="https://bheisler.github.io/static/pennys-sword-parts.jpg" />
 
 
-<meta property="og:updated_time" content="2017-07-30T02:11:19&#43;00:00"/>
+<meta property="og:updated_time" content="2017-10-14T12:00:00-06:00"/>
 
 
 
@@ -36,7 +38,7 @@ Anyway, I&rsquo;ve been working on that project again lately, doing some mainten
     
     
     
-    <link rel="canonical" href="https://bheisler.github.io/post/nes-rom-parser-with-nom/">
+    <link rel="canonical" href="https://bheisler.github.io/post/pennys-sword-rwby-part1/">
     
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
@@ -275,31 +277,33 @@ ga('send', 'pageview');
     <main>
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
-<meta itemprop="name" content="Parsing NES ROM Headers with nom">
-<meta itemprop="description" content="Long, long ago (December 2015) I wanted to learn how emulators worked, so I decided to write an NES emulator. Not only that, but I opted to write it in Rust, a language which I had never used before. A crazy idea, to be certain, but once I was done I had indeed learned a great deal about emulators, the NES, and Rust.
-Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work and upgrades.">
+<meta itemprop="name" content="Penny&#39;s Sword - RWBY - Part 1">
+<meta itemprop="description" content="In this post, I&rsquo;ll show you how I built a light-up replica of Penny Pollendina&rsquo;s unnamed swords from Rooster Teeth&rsquo;s excellent animated web show RWBY. RWBY is what originally got me into propmaking - I&rsquo;ve already made Yang&rsquo;s Ember Celica shotgauntlets and Adam&rsquo;s Wilt &amp; Blush Sword/Shotgun Combo. This is the first time I&rsquo;ve documented my process, so hopefully you find it useful.
+Blueprints &amp; Design First, a quick overview of how I intended to do this build.">
 
 
-<meta itemprop="dateModified" content="2017-07-30T02:11:19&#43;00:00" />
-<meta itemprop="wordCount" content="1532">
+<meta itemprop="dateModified" content="2017-10-14T12:00:00-06:00" />
+<meta itemprop="wordCount" content="2420">
+
+  <meta itemprop="image" content="https://bheisler.github.io/static/pennys-sword-parts.jpg">
 
 
 
 <meta itemprop="keywords" content="code,props,assembly,c,emulator,ffi,jit,nes,nom,pennys-sword,python,raytracer,rust,rwby," />
 
     <header>
-      <h1 itemprop="headline">Parsing NES ROM Headers with nom</h1>
+      <h1 itemprop="headline">Penny&#39;s Sword - RWBY - Part 1</h1>
       <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>8 minute read</span>
+<span>12 minute read</span>
 
   <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
     <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
   </svg>
   
-    <span>Published: <time datetime="2017-07-30T02:11:19&#43;00:00">30 Jul, 2017</time></span>
+    <span>Published: <time datetime="2017-10-14T12:00:00-06:00">14 Oct, 2017</time></span>
   
 
 </p>
@@ -309,168 +313,290 @@ Anyway, I&rsquo;ve been working on that project again lately, doing some mainten
     <div itemprop="articleBody">
       
 
-<p>Long, long ago (December 2015) I wanted to learn how emulators worked, so I
-decided to write an <a href="https://github.com/bheisler/Corrosion">NES emulator</a>.
-Not only that, but I opted to write it in Rust, a language which I had never
-used before. A crazy idea, to be certain, but once I was done I had indeed
-learned a great deal about emulators, the NES, and Rust.</p>
+<p>In this post, I&rsquo;ll show you how I built a light-up replica of Penny
+Pollendina&rsquo;s unnamed swords from Rooster Teeth&rsquo;s excellent animated web show
+<a href="http://www.roosterteeth.com/show/rwby">RWBY</a>. RWBY is what originally got me
+into propmaking - I&rsquo;ve already made Yang&rsquo;s Ember Celica shotgauntlets and
+Adam&rsquo;s Wilt &amp; Blush Sword/Shotgun Combo. This is the first time I&rsquo;ve documented
+my process, so hopefully you find it useful.</p>
 
-<p>Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work
-and upgrades. One of the things I did was rewrite the ROM parser using
-<a href="https://github.com/Geal/nom">nom</a>. The ROM parser was the first bit of Rust code
-I&rsquo;ve ever written, and it was not great, so I thought it was finally time to clean
-it up a bit. This post is a short description of that process and my thoughts on
-nom as a newcomer to this library. First, a detour to discuss the NES ROM format
-- if you&rsquo;re not interested in the fine details, you can skip ahead to the next
-section.</p>
+<h2 id="blueprints-design">Blueprints &amp; Design</h2>
 
-<h2 id="the-ines-header">The iNES Header</h2>
+<p>First, a quick overview of how I intended to do this build. A lot of this plan
+didn&rsquo;t survive contact with reality, but I think it&rsquo;s helpful to show where
+things went off the rails. The plan was to make the blade out of two pieces of
+<sup>1</sup>&frasl;<sub>2</sub>&rdquo; MDF laminated together around a steel rod, to have a secure place to
+attach the hilt and guard. The light-up detail along the blade would be done
+with EL wire or LEDs covered by a thin layer of scratched-up acrylic glass to
+diffuse the light. The other details on the blade would mostly be made of wood,
+MDF and styrene. I wasn&rsquo;t sure how to cut or sand the bevel for the edge of the
+blade, planning to figure that out when I got there. The guard was difficult -
+it&rsquo;s a more complex shape than it appears. It isn&rsquo;t just a disk - the center is
+dished in a bit. I also needed it to be hollow, since that&rsquo;s where I&rsquo;d put the
+batteries and electronics to make it light up. The right way to do it is with a
+lathe, but I don&rsquo;t have a lathe or any idea how to use one. The hilt would also
+be a challenge - it&rsquo;s oval shaped, not round. I planned to cut it out of a
+wooden dowel with a spokeshave and make the extra details out of styrene,
+planning to fall back to 3D printing if that didn&rsquo;t work.</p>
 
-<p>Nearly all NES ROM files are in one of two formats. There&rsquo;s the
-<a href="https://wiki.nesdev.com/w/index.php/INES">iNES</a> format, or a later extension
-called <a href="https://wiki.nesdev.com/w/index.php/NES_2.0">NES 2.0</a>. My existing parser
-only supports iNES, and that&rsquo;s all the new parser will support as well. I haven&rsquo;t
-come across many ROM&rsquo;s in NES 2.0 format yet, so I haven&rsquo;t needed to add support
-for it.</p>
+<p>As usual, I started by finding reference material and tracing out some
+blueprints in Inkscape. Reference material for RWBY is usually pretty easy to
+find, since Rooster Teeth often releases detailed turnaround shots of the
+characters and their gear for exactly this purpose. The RWBY wiki features <a href="http://rwby.wikia.com/wiki/Penny%27s_Swords/Image_Gallery">a
+number of images</a> of
+Penny&rsquo;s swords, incuding detailed concept art and a &lsquo;turnaround&rsquo; which shows
+the animation of the swords transforming.</p>
 
-<p>Let&rsquo;s start digging into the iNES header and I&rsquo;ll explain what everything is as
-we go. First, we have a four-byte magic number - the ASCII letters &lsquo;NES&rsquo; followed
-by 0x1A - the DOS end-of-file character. After that is one byte holding the length
-of the PRG ROM data in 16kB blocks and one byte for the length of CHR ROM in 8kB blocks.
-NES cartridges contain PRG ROM and CHR ROM. PRG (program) ROM holds the
-assembled program code and associated data for the game. It&rsquo;s available in the
-main CPU memory map by reading 0x4020 to 0xFFFF, though many cartridges only
-support reading PRG ROM at addresses above 0x8000. CHR (character) ROM holds the
-graphical data for the game and is only indirectly accessible to the CPU.
-CHR ROM is used instead by the PPU (Picture Processing Unit). Some cartridges
-have no CHR ROM and instead use CHR RAM, transferring the graphical data
-to the CHR RAM at runtime.</p>
+<h2 id="blade">Blade</h2>
 
-<p>After those two bytes are two more bytes of flags. These include various bits
-of information about the hardware of the cartridge (eg. whether or not the
-cartridge has battery-backed RAM for saving your game). These flag bytes also
-contain the mapper ID for the game. Mappers are one of the more&hellip; interesting&hellip;
-aspects of NES emulation. As I mentioned before, the PRG ROM is typically
-accessible from 0x8000 to 0xFFFF - a window of 32kB. 32kB is not nearly large
-enough for most NES games (some of which have as much as 1MB of PRG ROM alone). To
-deal with this, cartridges contain circuit boards called mappers which map
-pages of the ROM in and out of the address space. Different games, and especially
-games by different manufacturers, often have wildly different mappers. The
-emulator must emulate the mapper as well, so the header contains one byte
-(split into two 4-bit pieces for historical reasons) containing the mapper ID.</p>
+<p>This is the part I did last fall. I took a big block of <sup>1</sup>&frasl;<sub>2</sub>&rdquo; MDF to my <a href="http://sktechworks.ca/">local
+makerspace</a> and put it on the CNC mill. I came up with
+some plan to use the manual control mode of the mill to cut the block into two
+halves of the blade, which I would then glue together. I milled a <sup>1</sup>&frasl;<sub>4</sub>&rdquo; round
+groove down the center of the inside of the blade to hold a steel rod for
+reinforcement. Then I flipped each piece over and milled a second groove on the
+outside of the blade for the light-up section. Unfortunately, I&rsquo;ve completely
+forgotten the exact process I used to do this so I can&rsquo;t give more details.
+I&rsquo;ll take better notes next time.</p>
 
-<p>After the first two flag bytes is another page-count byte, this time for PRG
-RAM (the battery-backed save RAM in games like Legend of Zelda) and another
-flags byte. Finally, we have six reserved bytes, which are not used by iNES but
-are used by NES 2.0.</p>
+<p>Fast forward six months or so and it&rsquo;s time to glue this thing together. I
+scuffed up the in-sides of the MDF and the steel rod with sandpaper so the glue
+would hold better and then covered it in wood glue and epoxy and clamped the
+pieces together. This turned out to be a mistake. In my haste to get everything
+together before the epoxy started to set, I didn&rsquo;t line up the two parts
+properly. They&rsquo;re not even close. This isn&rsquo;t the first time I&rsquo;d make a costly
+mistake with glues, either.</p>
 
-<p>To recap:</p>
+
+<figure >
+    
+        <img src="/static/pennys-sword-shame.jpg" alt="Those lines should line up." />
+    
+    
+    <figcaption>
+        <p>
+        Those lines should line up.
+        
+            
+        
+        </p> 
+    </figcaption>
+    
+</figure>
+
+
+<p>D&rsquo;oh. I also realized that the grooves I&rsquo;d cut to hold the acrylic light
+diffuser and EL wire are only 2-3mm deep - much too shallow to contain both the
+2mm acrylic sheet and the 2.6mm EL wire. Double D&rsquo;oh. I decided to attempt to
+repair the damage rather than just starting over.</p>
+
+<p>I placed a wide chisel along the sides of the groove and tapped it lightly to
+cut the fibers and prevent tearout while I cut the groove deeper. I then used a
+quarter-inch chisel along the bottom of the groove to deepen it. Finally, I ran
+a ball-end bit along the bottom using my rotary tool for the EL wire. That
+worked&hellip; less well, since it&rsquo;s nigh-impossible to cut a straight line when the
+tool itself is pulling to one side erratically. Fortunately, that part
+shouldn&rsquo;t be easily visible so it&rsquo;s OK. Finally, I marked a line around both
+sides of the blade to show where the grooves shuld end and filled in the gaps
+with Bondo.</p>
+
+<p>The edge bevel on Penny&rsquo;s Sword is quite complex, and doesn&rsquo;t have the same
+angle along the length of the sword. I cut as much on my scrollsaw as I could.
+Unfortunately, the sword is too long to fit entirely on the saw. In the end, I
+hat to cut most of the edge bevel with a couple of hand files and a rasp. That
+actually worked quite well. It took hours and a lot of elbow grease, but
+there&rsquo;s something satisfying about patiently working with hand tools until the
+part is Just Right. If you plan to do this at home, be sure you know how about
+Draw Filing. If you don&rsquo;t, the idea is that you hold one end of the file in
+each hand, press the center against the work and push it forward and draw it
+back. I&rsquo;ve found this technique to be much faster and more controllable than
+filing along the length of the file using a sawing motion.</p>
+
+
+<figure >
+    
+        <img src="/static/pennys-sword-half-blade.jpg" />
+    
+    
+</figure>
+
+
+<p>Once that was done, I spread some Bondo on some of the areas where I&rsquo;d filed
+too far and sealed the MDF with cyanoacrylate. Thin CA is best for this, as it
+soaks deeper into the MDF, but my bottle of thin CA was so old that it turned
+into thick CA all on its own. Regardless of the viscosity though, when the CA
+hardens you&rsquo;re left with a rough but hard and nicely sandable surface which
+won&rsquo;t soak up paint the way unsealed MDF does. It&rsquo;s even wet-sandable, if done
+carefully.</p>
+
+<p>With that, plus some more sanding and spot-putty work, the blade was ready for
+primer.</p>
+
+<h2 id="blade-details">Blade Details</h2>
+
+<p>To make the half-round rail along the spine of the blade, I cut a piece of <sup>1</sup>&frasl;<sub>2</sub>&rdquo;
+dowel down the middle very carefully on my scroll saw, then cleaned it up by
+rubbing the flat side of the now-half-round-ish dowel along a file. I glued
+that down as straight as I could manage and cleaned up the seam with filler
+primer, files and sanding twigs. For the larger half-cylindro-spherical (yeah,
+I had to look that up) bit at the end, I cut a piece of <sup>3</sup>&frasl;<sub>4</sub>&rdquo; dowel in half and
+cleaned it up as before, then used a sanding drum on my rotary tool to sculpt
+the half-sphere part. This actually worked remarkably well. I couldn&rsquo;t get it
+to be quite round enough with just the rotary tool, but some work with a
+sanding sponge and filler primer got it close enough. The inner corners between
+the two parts and the spine of the blade are hard to reach so they&rsquo;re not as
+clean as I&rsquo;d like, but they&rsquo;re probably good enough.</p>
+
+
+<figure >
+    
+        <img src="/static/pennys-sword-spine.jpg" />
+    
+    
+</figure>
+
+
+<p>There are some additional details on either side of the blade, but those had to
+wait. Those details are on top of the diffuser for the glowy sections on the
+sides, which created an order-of-operations problem. I had to install the EL
+wire and the diffuser before I could add those details, and then I had to paint
+those detail bits and the rest of the blade after the diffuser was installed.
+So I had to mask out the lens and try not to get any paint on it.</p>
+
+<p>There is also an oblong piece on either side of the blade where it meets the
+guard. I intially tried cutting these out on my scroll saw and sanding them to
+the right shape, but I couldn&rsquo;t quite get it right so I ended up just
+laser-cutting them at the makerspace instead.</p>
+
+<h2 id="guard">Guard</h2>
+
+<p>Oh boy. This thing gave me so much trouble. As I mentioned above, I don&rsquo;t have
+a lathe and wouldn&rsquo;t know how to use one if I did. That means I really have two
+options for making this piece. I could cut it on the CNC mill, or I could 3D
+print it. I don&rsquo;t really like either one (CNC milling is a hassle and 3D
+printing is boring) but needs must. I haven&rsquo;t had much experience on the CNC
+mill at my local makerspace, and I&rsquo;m proud to say that I&rsquo;ve added a number of
+shining new mistakes to that experience which I hope to not repeat.</p>
+
+<p>Because this part had to be cut on both sides, I needed to be able to flip over
+the work piece without actually moving it relative to the bed of the CNC
+machine. In this case, this meant drilling a couple of holes through the
+material into the sacrificial board on the bed of the machine, into which I
+could place pieces of dowel. In theory, I could then flip the material over,
+make sure the dowels are seated in their holes in the sacrificial board, and
+carry on cutting on the other side. In practice, standard drill bits combined
+with the much higher RPMs of the mill caused nasty tearout. Another piece of
+sacrificial material on top of the workpiece would probably have helped.</p>
+
+<p>This CNC machine doesn&rsquo;t have a tool-changer, so I had to manually replace the
+tool multiple times during the cut. To do that, you need to adjust the origin
+for the height axis to reflect that the new tool is longer or shorter than the
+old one. If you reset the other axes, though, it&rsquo;s impossible to finish the
+cut, and that&rsquo;s exactly what I did the first time. The second time, my work
+piece came loose and I was informed that I had the movement speed of the CNC
+router set far too high. Since this CNC machine is someone&rsquo;s home-brew DIY
+project, it&rsquo;s somewhat lacking in documentation. Fortunately nothing was
+damaged except my MDF.</p>
+
+<p>Having wasted several hours, damaged a couple cutting tools and destroyed two
+blocks of MDF, I decided to just print it instead. This actually worked, which
+is nice. It took a lot of sanding, puttying, priming and repeating before it
+looked smooth enough, but I did get there in the end. I even printed in the
+<sup>1</sup>&frasl;<sub>4</sub>&rdquo; holes on either end to attach it to the rod inside the blade, though I had
+to use a <sup>1</sup>&frasl;<sub>4</sub>&rdquo; rat tail file to open them up a bit.</p>
+
+
+<figure >
+    
+        <img src="/static/pennys-sword-guard.jpg" />
+    
+    
+</figure>
+
+
+<p>The guard also has some other parts. First, some flat segments to turn the ring
+into a complete guard, which I laser-cut from acrylic and then finessed a bit
+with my files until they fit into the ring. Second, there are some sections
+that are raised above the center of the guard and have a power-symbol design
+that lights up. Those were also laser-cut from MDF and acrylic. All of these
+small MDF pieces were filleted with a sanding sponge, sealed with CA and
+primed.</p>
+
+<h2 id="hilt">Hilt</h2>
+
+<p>Compared to all of that, the hilt was actually quite easy. I cut a couple of
+sections of dowel to about twice the necessary length and took them to the
+makerspace. After some failed experiments with the drill press, I asked a
+couple of the guys there to help me with using the lathe to drill along the
+center of the dowel. I&rsquo;ll be honest - they did the work for me (thanks Al and
+Scott!). Then I just cut the oversized dowel in half and had two hilt-sized
+bits of wood which fit nicely on the <sup>1</sup>&frasl;<sub>4</sub>&rdquo; rod extending from the blade. One
+real one and a backup in case I messed up the first one. Helpful tip - always
+make spares.</p>
+
+<p>I had planned to try to use a spokeshave to cut the round dowel, but the
+spokeshave was too dull to cut with when it arrived. I really ought to learn
+how to sharpen blades. For now, though, I just clamped the dowel down in my
+vice and went at it with my files and a sanding sponge. I&rsquo;ve yet to find a more
+versatile tool than my cheap set of hand files from Home Depot.</p>
+
+<p>The hilt has a raised section on either end. Initially, I thought I&rsquo;d heat up
+some 1mm styrene, wrap it around and glue it in place. This didn&rsquo;t work
+(probably because I was trying to use a hair dryer and hot water. Maybe a heat
+gun would have worked). After puzzling about it for a while, I came up with a
+better idea. I cut a strip of thinner styrene which was flexible on its own.
+Then I wrapped that around the hilt multiple times, using styrene cement to
+glue each layer to the one beneath it like a roll of tape. This left an edge
+where the styrene strip ended, but some filing and sanding blended that in
+nicely. The styrene cement bonded the styrene to itself but not to the wood, so
+I mixed a bit of epoxy and glued the two styrene end-caps to the dowel.</p>
+
+<p>This all worked pretty well, but the two end-caps weren&rsquo;t quite flush with the
+sides of the hilt. I fixed that by scooping some baking soda into the gaps,
+tapping it a bit to get it inside, and then scraping away the excess. With the
+baking soda filling the gap, I dripped some thin CA (by this point I&rsquo;d bought
+a new bottle) inside. Baking soda causes CA to harden instantly and take up
+more space than CA normally does, so this filled in the gaps nicely. A bit more
+work with some needle files and sanding twigs to clean it up and it was ready to
+go.</p>
+
+
+<figure >
+    
+        <img src="/static/pennys-sword-hilt.jpg" />
+    
+    
+</figure>
+
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>This is getting quite long, so I&rsquo;m going to wrap up here. Almost all of the
+parts are shaped, refined and primed. In part 2, I&rsquo;ll explain how I painted,
+wired and finished the sword.</p>
+
+<p>Here&rsquo;s what all of the pieces look like so far:</p>
+
+
+<figure >
+    
+        <img src="/static/pennys-sword-parts.jpg" />
+    
+    
+</figure>
+
+
+<h2 id="tools-and-materials">Tools and Materials</h2>
+
+<p>Here&rsquo;s a short list of some of the tools and materials I used in this post:</p>
 
 <ul>
-<li>4-byte magic number</li>
-<li>PRG ROM page count</li>
-<li>CHR ROM page count</li>
-<li>Lower half of mapper number &amp; flags</li>
-<li>Upper half of mapper number &amp; flags</li>
-<li>More flags</li>
-<li>Six bytes of zeroes</li>
+<li><a href="http://amzn.to/2ylNm5c">Rustoleum Filler Primer</a></li>
+<li><a href="http://amzn.to/2xFPByh">Plastruct Bondene</a></li>
+<li>Bondo <a href="http://amzn.to/2znGzrT">Spot Putty</a> and <a href="http://amzn.to/2znHgRS">Body Filler</a></li>
+<li><a href="http://amzn.to/2yokPO2">Needle Files</a></li>
+<li><a href="http://amzn.to/2ymxzmS">Epoxy</a></li>
 </ul>
-
-<p>Following this header is an optional 512-byte trainer (extra program code added
-by some ROM-ripping devices), and the actual PRG and CHR ROM data. Now that we know
-what we&rsquo;re parsing, let&rsquo;s take a look at nom.</p>
-
-<h2 id="nom">nom</h2>
-
-<p>The way parsing works in nom is you use the do_parse! macro to define your
-parser, and a number of other functions and macros to define the structure of
-your data. These macros and functions collectively generate some Rust code which
-parses that data and returns one of three possible results - Done (containing any
-remaining, unparsed data and the resulting value), Incomplete (meaning more
-data is needed) or Error (meaning the data is invalid or otherwise couldn&rsquo;t
-be parsed). The use of macros for this is a rather clever idea, though not
-without downsides.</p>
-
-<p>One of those downsides is that the compiler can&rsquo;t really help you when you
-make a mistake. For instance, it took me longer than I&rsquo;d like to admit to get
-the following code to compile before I realized that I had forgotten to pass
-the input to the do_parse macro.</p>
-
-<script src="//gist.github.com/bheisler/2fae3b00eedcb80a1a109e622a55f74f.js"></script>
-
-<p>Once I got going though, it was pretty smooth sailing and extremely fast to
-parse out the rest of the header and construct my Rom structure. The tag!
-macro takes a given sequence of bytes and reads that sequence from the input.
-be_u8 (the &lsquo;be&rsquo; means big-endian) is a one-byte unsigned integer. Then we have
-the cond! macro, which applies a given parser if some condition is true, and
-finally the take! macro, which consumes a given number of bytes and returns
-them as a slice.</p>
-
-<script src="//gist.github.com/bheisler/a39a0fdd5b1741ce7982849febe914c8.js"></script>
-
-<p>Since my code doesn&rsquo;t support the NES 2.0 extension, I wanted to detect if a ROM
-was using that format and return an error. This is where I started to run into
-trouble; I couldn&rsquo;t find an obvious way to conditionally return an error.
-I ended up working around it by using the call! macro to call a function I wrote
-which would return an error if the ROM was in NES 2.0 format. This was somewhat
-surprising to me; this seems like it would be a common problem.</p>
-
-<script src="//gist.github.com/bheisler/68c917c9f44934dd848b0efa61e7dbdd.js"></script>
-
-<p>At this point, I had a working parser, but I decided to take the opportunity to
-rework my code a bit as well. Previously, I simply stored the flag bytes in the
-Rom structure and left it to other code to mask out the individual flags, as well
-as the two 4-bit pieces of the mapper ID. nom can parse individual bits out of
-the input as well, so I started with separating out the mapper ID from the rest
-of the flag bytes.</p>
-
-<p>nom overall could use some work on its documentation, but using the bit-indexing
-is particularly opaque. I had to look up a cached version of an old blog post
-(<a href="https://webcache.googleusercontent.com/search?q=cache:4CNayFlPRicJ:siciarz.net/24-days-rust-nom-part-2/+&amp;cd=1&amp;hl=en&amp;ct=clnk&amp;gl=ca">link</a>)
-to find out how to do it. To spare you the same trouble, here&rsquo;s a quick overview.</p>
-
-<p>The bits! macro takes a bit-stream parser (eg. take_bits!) or a type-agnostic
-parser (eg. tuple!) and generates the code to apply that parser to a byte-slice
-input. There is also a bytes! macro to go the other way, applying a byte-slice
-parser to a bit-stream input. Inside the bits! macro, you can use parsers that
-consume individual bits. When switching from bit-stream to byte-slice parsing
-(that is, at the end of the bits! macro or the beginning of a bytes! macro), if
-there&rsquo;s a partial byte remaining in the input it will be ignored and the
-subsequent byte-slice parser will start parsing at the next whole byte. The only
-two built-in bit-stream parsers are take_bits! (which consumes a given number
-of bits from the input, and assembles them into the given integer type) and
-tag_bits! which is like tag! but for bits.</p>
-
-<p>Unfortunately, at this point it isn&rsquo;t possible to give names to each value in
-a bits! macro like it is in do_parse!, so I had to make do with collecting the
-mapper ID bits and the flag bits into a tuple instead.</p>
-
-<script src="//gist.github.com/bheisler/30d84186661c04a6d383278a18199e34.js"></script>
-
-<p>I went on to make some further changes, but they&rsquo;re not related to nom so I&rsquo;ll
-skip the details. You can take a look at the <a href="https://github.com/bheisler/Corrosion/blob/fdc4fa0334aabaa76518479dd0ad3e62e4e5ebb1/src/cart/ines.rs">code</a>
-if you&rsquo;re interested.</p>
-
-<h2 id="impressions-of-nom">Impressions of nom</h2>
-
-<p>I kind of like nom. There&rsquo;s a rocky learning curve, and the documentation needs
-some work. I&rsquo;m also a bit wary of such heavy use of macros. Parsing is (often)
-not performance-critical, so I&rsquo;d be willing to sacrifice some runtime efficiency
-to get some more help from the compiler when I make mistakes. On the other hand,
-once you do get the hang of it, it&rsquo;s quick and easy to define parsers for quite
-complex data structures and the code reads a lot like a description of the format
-to be parsed, which is always nice. nom has some beautifully clear example parsers
-to look at (take <a href="https://github.com/Geal/gif.rs">this GIF parser</a>,
-for example). It works on both binary and text data as well, which is a plus.</p>
-
-<p>Overall, I would consider nom for future projects that involve parsing data. The
-lack of documentation could cause some headaches, but it&rsquo;s much easier and safer
-to use a battle-tested library like nom than it is to write your own hand-written
-parser for the same data.</p>
-
-<p>If you&rsquo;d like to check out the code or play around with some perfectly legal,
-homebrew NES software, you can find it on
-<a href="https://github.com/bheisler/Corrosion">Github</a>.</p>
 
     </div>
     <article>
@@ -485,40 +611,20 @@ homebrew NES software, you can find it on
   
   
     
-      on <time datetime="2017-07-30T02:11:19&#43;00:00">30 Jul, 2017</time>
+      on <time datetime="2017-10-14T12:00:00-06:00">14 Oct, 2017</time>
     
   
   
-    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+    in <span itemprop="articleSection"><a href="/categories/props/">props</a></span>
   
   
-    and tagged <a href="/tags/emulator/">Emulator</a>, <a href="/tags/nes/">NES</a>, <a href="/tags/rust/">Rust</a> and <a href="/tags/nom/">nom</a>
+    and tagged <a href="/tags/pennys-sword/">Penny&#39;s Sword</a> and <a href="/tags/rwby/">RWBY</a>
   
-  using <span itemprop="wordCount">1532</span> words.
+  using <span itemprop="wordCount">2420</span> words.
 </p>
 
       
-  
 
-
-
-  <aside>
-    <header>Related Content</header>
-    <ul>
-      
-      
-        <li><a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a> &ndash; 22 minutes
-      
-        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
-      
-        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a> &ndash; 12 minutes
-      
-        <li><a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a> &ndash; 9 minutes
-      
-        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a> &ndash; 7 minutes
-      
-    </ul>
-  </aside>
 
 
     </footer>

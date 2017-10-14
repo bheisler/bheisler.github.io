@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bheisler.github.io/post/pennys-sword-rwby-part1/</loc>
+    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/experiments-in-nes-jit-compilation/</loc>
     <lastmod>2017-08-20T11:35:37-06:00</lastmod>
   </url>
@@ -9,11 +14,6 @@
   <url>
     <loc>https://bheisler.github.io/post/nes-rom-parser-with-nom/</loc>
     <lastmod>2017-07-30T02:11:19+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://bheisler.github.io/about/about/</loc>
-    <lastmod>2017-04-25T14:29:02-06:00</lastmod>
   </url>
   
   <url>
@@ -37,8 +37,11 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/about/about/</loc>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/about/</loc>
-    <lastmod>2017-04-25T14:29:02-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -96,8 +99,20 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/tags/pennys-sword/</loc>
+    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
+    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bheisler.github.io/categories/props/</loc>
+    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -120,13 +135,19 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/tags/rwby/</loc>
+    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/tags/</loc>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
+    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
