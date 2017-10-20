@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://bheisler.github.io/post/pennys-sword-rwby-part2/</loc>
+    <lastmod>2017-10-19T19:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/pennys-sword-rwby-part1/</loc>
     <lastmod>2017-10-14T12:00:00-06:00</lastmod>
   </url>
@@ -100,19 +105,19 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/pennys-sword/</loc>
-    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <lastmod>2017-10-19T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <lastmod>2017-10-19T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/categories/props/</loc>
-    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <lastmod>2017-10-19T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -136,7 +141,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/rwby/</loc>
-    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <lastmod>2017-10-19T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -147,7 +152,7 @@
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2017-10-14T12:00:00-06:00</lastmod>
+    <lastmod>2017-10-19T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
