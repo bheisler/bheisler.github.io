@@ -154,6 +154,10 @@ benchmarking environments, though I haven&amp;rsquo;t measured that.&lt;/p&gt;
 
 &lt;p&gt;All of the data and analysis scripts can be found &lt;a href=&#34;https://github.com/bheisler/travis-benchmark-data&#34;&gt;on GitHub&lt;/a&gt;&lt;/p&gt;
 
+&lt;p&gt;Thank you to Daniel Hogan, for reading over this post and giving me a great deal
+of useful feedback. I&amp;rsquo;d also like to thank Andrew Gallant (@burntsushi) and co.
+for creating both the regex crate and cargo-benchcmp.&lt;/p&gt;
+
 &lt;h2 id=&#34;addendum-why-libtest-and-not-criterion-rs&#34;&gt;Addendum: Why libtest and not Criterion.rs&lt;/h2&gt;
 
 &lt;p&gt;I opted to use Rust&amp;rsquo;s standard benchmarking tool rather than Criterion.rs because
