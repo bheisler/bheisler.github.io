@@ -4,7 +4,7 @@
     <meta name="generator" content="Hugo 0.18.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Is Benchmarking on Travis-CI Reliable? | bheisler.github.io</title>
+    <title>Are Benchmarks From Cloud CI Services Reliable? | bheisler.github.io</title>
     
     
     
@@ -15,14 +15,14 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Is Benchmarking on Travis-CI Reliable?" />
-<meta property="og:description" content="Intro: After I released the first version of Criterion.rs, (a statistics-driven benchmarking tool for Rust) I was asked about using it to detect performance regressions as part of a cloud-based continuous integration (CI) pipeline such as Travis-CI or Appveyor. That got me wondering - does it even make sense to do that?
+    <meta property="og:title" content="Are Benchmarks From Cloud CI Services Reliable?" />
+<meta property="og:description" content="After I released the first version of Criterion.rs, (a statistics-driven benchmarking tool for Rust) I was asked about using it to detect performance regressions as part of a cloud-based continuous integration (CI) pipeline such as Travis-CI or Appveyor. That got me wondering - does it even make sense to do that?
 Cloud-CI pipelines have a lot of potential to introduce noise into the benchmarking process - unpredictable load on the physical hosts of the build VM&rsquo;s, or even unpredictable migrations of VMs between physical hosts." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bheisler.github.io/post/benchmarking-in-the-cloud/" />
 
 
-<meta property="og:updated_time" content="2018-01-02T00:00:00-06:00"/>
+<meta property="og:updated_time" content="2018-01-06T16:00:00-06:00"/>
 
 
 
@@ -275,31 +275,31 @@ ga('send', 'pageview');
     <main>
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
-<meta itemprop="name" content="Is Benchmarking on Travis-CI Reliable?">
-<meta itemprop="description" content="Intro: After I released the first version of Criterion.rs, (a statistics-driven benchmarking tool for Rust) I was asked about using it to detect performance regressions as part of a cloud-based continuous integration (CI) pipeline such as Travis-CI or Appveyor. That got me wondering - does it even make sense to do that?
+<meta itemprop="name" content="Are Benchmarks From Cloud CI Services Reliable?">
+<meta itemprop="description" content="After I released the first version of Criterion.rs, (a statistics-driven benchmarking tool for Rust) I was asked about using it to detect performance regressions as part of a cloud-based continuous integration (CI) pipeline such as Travis-CI or Appveyor. That got me wondering - does it even make sense to do that?
 Cloud-CI pipelines have a lot of potential to introduce noise into the benchmarking process - unpredictable load on the physical hosts of the build VM&rsquo;s, or even unpredictable migrations of VMs between physical hosts.">
 
 
-<meta itemprop="dateModified" content="2018-01-02T00:00:00-06:00" />
-<meta itemprop="wordCount" content="999">
+<meta itemprop="dateModified" content="2018-01-06T16:00:00-06:00" />
+<meta itemprop="wordCount" content="1124">
 
 
 
 <meta itemprop="keywords" content="code,props,assembly,benchmarking,c,emulator,ffi,jit,nes,nom,pennys-sword,python,raytracer,rust,rwby," />
 
     <header>
-      <h1 itemprop="headline">Is Benchmarking on Travis-CI Reliable?</h1>
+      <h1 itemprop="headline">Are Benchmarks From Cloud CI Services Reliable?</h1>
       <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>5 minute read</span>
+<span>6 minute read</span>
 
   <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
     <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
   </svg>
   
-    <span>Published: <time datetime="2018-01-02T00:00:00-06:00">2 Jan, 2018</time></span>
+    <span>Published: <time datetime="2018-01-06T16:00:00-06:00">6 Jan, 2018</time></span>
   
 
 </p>
@@ -308,8 +308,6 @@ Cloud-CI pipelines have a lot of potential to introduce noise into the benchmark
     
     <div itemprop="articleBody">
       
-
-<h2 id="intro">Intro:</h2>
 
 <p>After I released the first version of <a href="https://github.com/japaric/criterion.rs">Criterion.rs</a>,
 (a statistics-driven benchmarking tool for Rust) I was asked about using it to
@@ -326,6 +324,11 @@ to do it myself.</p>
 
 <p>tl;dr: Yes, there is enough noise to make benchmark results unreliable.
 Read on if you want to see the numbers.</p>
+
+<p>In this post, I benchmarked on Travis-CI, but I don&rsquo;t mean to single them out,
+they&rsquo;re just the cloud-CI provider that I&rsquo;m most familiar with.
+To the best of my knowledge, they don&rsquo;t claim that their service is suitable
+for benchmarking.</p>
 
 <h2 id="methodology">Methodology</h2>
 
@@ -375,16 +378,7 @@ than others.</p>
 </figure>
 
 
-
-<figure >
-    
-        <img src="/static/travis_benchmark_histogram_close.png" />
-    
-    
-</figure>
-
-
-<p>As you can see from the above plots, the cloud benchmarks do indeed show more
+<p>As you can see from the above chart, the cloud benchmarks do indeed show more
 noise than the local benchmarks.</p>
 
 <p>All numbers are in units of percentage points representing the percentage
@@ -399,6 +393,8 @@ Cloud:
 mean: 1.42961542492
 min: -99.99, max: 3177.03
 std. dev.: 72.1539676978
+
+Levene's Test p-value: 1.97E-49
 </code></pre>
 
 <p>Note that there were four benchmark results in the cloud set with percentage
@@ -422,6 +418,13 @@ long enough to affect multiple benchmark tests.</p>
 the reliability of benchmarks performed on cloud-CI pipelines. This confirms the
 intuitive expectation.</p>
 
+<p>To be clear; this doesn&rsquo;t mean every benchmark is wrong - many of the comparisons
+show shifts of +-2%, roughly similar to the noise observed in local benchmarks.
+However, differences of as much as 50% are fairly common with no change
+in the code at all, which makes it very difficult to know if a change
+in benchmarking results is due to a change in the true performance of the code
+being benchmarked, or if it is simply noise. Hence, unreliable.</p>
+
 <p>It would still be useful to have automated detection of performance regressions
 as part of a CI pipeline, however. Further work is needed to find ways to
 mitigate the effects of this noise.</p>
@@ -437,7 +440,7 @@ external influence affects a single test twice.</p>
 run the whole benchmarking process in multiple build jobs. In that case, before
 merging a pull request, a maintainer could manually examine the results. If a
 performance regression is detected by all of the build jobs, it&rsquo;s probably safe
-to treat is as real rather than noise.</p>
+to treat it as real rather than noise.</p>
 
 <p>It is also possible that different cloud-CI providers could make for less noisy
 benchmarking environments, though I haven&rsquo;t measured that.</p>
@@ -468,7 +471,7 @@ based on Criterion.rs.</p>
   
   
     
-      on <time datetime="2018-01-02T00:00:00-06:00">2 Jan, 2018</time>
+      on <time datetime="2018-01-06T16:00:00-06:00">6 Jan, 2018</time>
     
   
   
@@ -477,7 +480,7 @@ based on Criterion.rs.</p>
   
     and tagged <a href="/tags/benchmarking/">Benchmarking</a> and <a href="/tags/rust/">Rust</a>
   
-  using <span itemprop="wordCount">999</span> words.
+  using <span itemprop="wordCount">1124</span> words.
 </p>
 
       
