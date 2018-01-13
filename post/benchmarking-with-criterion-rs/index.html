@@ -4,7 +4,7 @@
     <meta name="generator" content="Hugo 0.18.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calling Rust From Python | bheisler.github.io</title>
+    <title>Benchmarking In Stable Rust With Criterion.rs | bheisler.github.io</title>
     
     
     
@@ -15,15 +15,14 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Calling Rust From Python" />
-<meta property="og:description" content="Hello! This is a detailed example of exposing Rust code to other languages (in this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really trivial example functions, skipping over a lot of the complexity. Even the better ones out there typically don&rsquo;t have a pre-existing, reasonably complex program to work with. I&rsquo;m going to start with trivial functions and build my way up to being able to define a scene for my raytracer in Python using a series of calls to Rust, then render it and return the resulting image data back to Python." />
+    <meta property="og:title" content="Benchmarking In Stable Rust With Criterion.rs" />
+<meta property="og:description" content="When I initially announced the release of Criterion.rs, I didn&rsquo;t expect that there would be so much demand for benchmarking on stable Rust. Now, I&rsquo;d like to announce the release of Criterion.rs 0.1.2, which supports the stable compiler. This post is an introduction to benchmarking with Criterion.rs and a discussion of reasons why you might or might not want to do so.
+What is Criterion.rs? Criterion.rs is a benchmarking library for Rust that aims to bring solid statistical confidence to benchmarking Rust code, while maintaining good ease-of-use, even for programmers without a background in statistics." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bheisler.github.io/post/calling-rust-in-python/" />
-
-  <meta property="og:image" content="https://bheisler.github.io/static/rendered-by-python.png" />
+<meta property="og:url" content="https://bheisler.github.io/post/benchmarking-with-criterion-rs/" />
 
 
-<meta property="og:updated_time" content="2017-04-02T00:00:00-06:00"/>
+<meta property="og:updated_time" content="2018-01-12T19:00:00-06:00"/>
 
 
 
@@ -37,7 +36,7 @@
     
     
     
-    <link rel="canonical" href="https://bheisler.github.io/post/calling-rust-in-python/">
+    <link rel="canonical" href="https://bheisler.github.io/post/benchmarking-with-criterion-rs/">
     
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
@@ -276,32 +275,31 @@ ga('send', 'pageview');
     <main>
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
-<meta itemprop="name" content="Calling Rust From Python">
-<meta itemprop="description" content="Hello! This is a detailed example of exposing Rust code to other languages (in this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really trivial example functions, skipping over a lot of the complexity. Even the better ones out there typically don&rsquo;t have a pre-existing, reasonably complex program to work with. I&rsquo;m going to start with trivial functions and build my way up to being able to define a scene for my raytracer in Python using a series of calls to Rust, then render it and return the resulting image data back to Python.">
+<meta itemprop="name" content="Benchmarking In Stable Rust With Criterion.rs">
+<meta itemprop="description" content="When I initially announced the release of Criterion.rs, I didn&rsquo;t expect that there would be so much demand for benchmarking on stable Rust. Now, I&rsquo;d like to announce the release of Criterion.rs 0.1.2, which supports the stable compiler. This post is an introduction to benchmarking with Criterion.rs and a discussion of reasons why you might or might not want to do so.
+What is Criterion.rs? Criterion.rs is a benchmarking library for Rust that aims to bring solid statistical confidence to benchmarking Rust code, while maintaining good ease-of-use, even for programmers without a background in statistics.">
 
 
-<meta itemprop="dateModified" content="2017-04-02T00:00:00-06:00" />
-<meta itemprop="wordCount" content="2183">
-
-  <meta itemprop="image" content="https://bheisler.github.io/static/rendered-by-python.png">
+<meta itemprop="dateModified" content="2018-01-12T19:00:00-06:00" />
+<meta itemprop="wordCount" content="948">
 
 
 
 <meta itemprop="keywords" content="code,props,assembly,benchmarking,c,criterion.rs,emulator,ffi,jit,nes,nom,pennys-sword,python,raytracer,rust,rwby," />
 
     <header>
-      <h1 itemprop="headline">Calling Rust From Python</h1>
+      <h1 itemprop="headline">Benchmarking In Stable Rust With Criterion.rs</h1>
       <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>11 minute read</span>
+<span>5 minute read</span>
 
   <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
     <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
   </svg>
   
-    <span>Published: <time datetime="2017-04-02T00:00:00-06:00">2 Apr, 2017</time></span>
+    <span>Published: <time datetime="2018-01-12T19:00:00-06:00">12 Jan, 2018</time></span>
   
 
 </p>
@@ -311,312 +309,163 @@ ga('send', 'pageview');
     <div itemprop="articleBody">
       
 
-<p>Hello! This is a detailed example of exposing Rust code to other languages (in
-this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really
-trivial example functions, skipping over a lot of the complexity. Even the better
-ones out there typically don&rsquo;t have a pre-existing, reasonably complex program
-to work with. I&rsquo;m going to start with trivial functions and build my way up to
-being able to define a scene for my <a href="https://github.com/bheisler/raytracer">raytracer</a>
-in Python using a series of calls to Rust, then render it and return the
-resulting image data back to Python. If you want to know more about the raytracer,
-I wrote a series of posts on it <a href="/post/writing-raytracer-in-rust-part-1/">here</a>,
-but it won&rsquo;t be necessary; I&rsquo;ll explain parts of the raytracer here as we need
-them. Hopefully this will give a more complete picture of how to incorporate
-complex Rust code into Python.</p>
+<p>When I initially announced the release of Criterion.rs, I didn&rsquo;t expect that
+there would be so much demand for benchmarking on stable Rust. Now, I&rsquo;d like to
+announce the release of Criterion.rs 0.1.2, which supports the stable compiler.
+This post is an introduction to benchmarking with Criterion.rs and a discussion
+of reasons why you might or might not want to do so.</p>
 
-<p>I&rsquo;ve never written any sort of Python/C interop before, so this should be another
-learning experience all around. I&rsquo;m going to arbitrarily choose
-<a href="https://cffi.readthedocs.io/en/latest/">CFFI</a> as the Python interop library.
-It&rsquo;s portable across interpreters and seems nicer to use than <a href="https://docs.python.org/2/library/ctypes.html">ctypes</a>.
-I expect the main concepts will be broadly applicable to other libraries (and
-other languages such as Ruby). Let get started!</p>
+<h2 id="what-is-criterion-rs">What is Criterion.rs?</h2>
 
-<h2 id="calling-functions">Calling Functions</h2>
+<p>Criterion.rs is a benchmarking library for Rust that aims to bring solid
+statistical confidence to benchmarking Rust code, while maintaining good
+ease-of-use, even for programmers without a background in statistics. It&rsquo;s
+already available on <a href="https://crates.io/crates/criterion">Crates.io</a> and on
+<a href="https://github.com/japaric/criterion.rs">GitHub</a>.</p>
 
-<p>The first thing to do is to define a Rust function we want to call from Python.</p>
+<p>It was originally written by <a href="https://github.com/japaric/">@japaric</a>, but was
+never released on Crates.io. I (<a href="https://github.com/bheisler">@bheisler</a>)
+volunteered to take over maintenance and development a few months ago, and I
+published the first version of Criterion.rs to Crates.io in December 2017.</p>
 
-<script src="//gist.github.com/bheisler/effc8c457c9d85d1e318be52e1b8c98d.js"></script>
+<h2 id="getting-started-with-criterion-rs">Getting Started with Criterion.rs</h2>
 
-<p>We&rsquo;re actually defining a function for Rust&rsquo;s C foreign-function interface. The
-basic idea here is that we write a wrapper in Python that knows how to call
-C functions, and a wrapper in Rust that exposes C functions and translates them
-to regular function calls in Rust. It&rsquo;s sort of like we&rsquo;re calling from Python
-into C into Rust. The <code>no_mangle</code> attribute and <code>extern &quot;C&quot;</code> above instruct rustc
-not to change the name of the function (otherwise CFFI wouldn&rsquo;t be able to
-find it later) and to emit a function that can be called as if it were written
-in C. We&rsquo;ll need both for all functions that we want to expose to C.</p>
+<p>To start with Criterion.rs, add the following to your <code>Cargo.toml</code> file:</p>
 
-<p>Now we need to instruct Cargo to build this library as a dynamic library
-(&ldquo;dylib&rdquo; in Cargo terms). I&rsquo;m writing this on a Windows PC, so Cargo
-produces a <code>raytracer_ffi.dll</code> file. I tested it on Linux as well and it created
-<code>libraytracer_ffi.so</code>.</p>
+<pre><code class="language-toml">[dev-dependencies]
+criterion = &quot;0.1.2&quot;
 
-<script src="//gist.github.com/bheisler/06c25b67a35bfd8f5b38781256558230.js"></script>
-
-<p>Then we need some Python code to load and call this shared library:</p>
-
-<script src="//gist.github.com/bheisler/ec798db12cd69153a6330e67eb6d3dac.js"></script>
-
-<p>Let&rsquo;s break this down a bit. First we import the <code>cffi</code> module and create an
-FFI object. Then we call <code>cdef</code> and pass it some text - this text is a C function
-signature matching the <code>double</code> function in Rust. CFFI parses this function
-signature in order to determine how to call the function. We&rsquo;ll need to do this
-for all of the functions and structs we want to expose to Python. Then we open
-the DLL file with <code>dlopen</code>. Finally, we call the <code>double</code> function as if it were
-a regular Python function and print the result.</p>
-
-<p>And now we should be able to call <code>double</code> from Python:</p>
-
-<pre><code>$ python.exe test.py
-18
+[[bench]]
+name = &quot;my_benchmark&quot;
+harness = false
 </code></pre>
 
-<p>Side note: I wasn&rsquo;t able to get this working with PyPy on 64-bit Windows. I
-didn&rsquo;t find out why, but I assume it has something to do with how PyPy only
-provides 32-bit binaries. PyPy worked fine for me on Linux, but I had to use
-64-bit CPython on Windows.</p>
+<p>Next, define a benchmark by creating a file at <code>$PROJECT/benches/my_benchmark.rs</code> with the following contents.</p>
 
-<h2 id="passing-structures">Passing Structures</h2>
+<script src="//gist.github.com/bheisler/2da10e7aaac3011ce1d6328e3a4ffdce.js"></script>
 
-<p>Now, if I&rsquo;m going to be able to define a scene in Python, I&rsquo;ll need to be able
-to call functions and pass in structs as arguments. I&rsquo;ll keep working with this
-toy program a bit longer, but instead of simply doubling an integer, let&rsquo;s try
-and get it to calculate the length of a vector using <code>vector::Vector3::length</code>.</p>
+<p>Finally, run this benchmark with <code>cargo bench</code>. You should see output similar to the following:</p>
 
-<p>First, I&rsquo;ll need to tell rustc that Vector3 should be laid out like a C struct.</p>
-
-<script src="//gist.github.com/bheisler/23de3e8f86143ceea2240b2a283b8f91.js"></script>
-
-<p>It appears that CFFI doesn&rsquo;t have any way to call functions with stack-allocated
-structures. Using the stack for small, copyable structures like Vector3 is
-pretty common in Rust, but I guess it isn&rsquo;t in C? So instead, our Rust function
-will have to accept a pointer to a Vector3.</p>
-
-<script src="//gist.github.com/bheisler/f02545b55a01f5602f9aa8802c970847.js"></script>
-
-<p>Here we define an extern function which accepts a raw pointer to a Vector3.
-Dereferencing raw pointers is unsafe, so we use an unsafe block to convert the
-raw pointer to a Rust reference. Finally, we call <code>length()</code> and return the value.</p>
-
-<script src="//gist.github.com/bheisler/d7c3c411f6826303a8a09868821b6829.js"></script>
-
-<p>Back in Python-land, we define a structure type matching Vector3 and the
-signature of the length function. Now we need to allocate a new vector_t object,
-which is done with the <code>ffi.new()</code> function. We need to pay attention to
-ownership here - the memory for the vector_t is allocated by Python and it will
-have to be freed by Python. In this case, it will be freed when the vector object
-gets garbage collected so we don&rsquo;t need to worry about it, but we&rsquo;ll need to
-be more careful about ownership later.</p>
-
-<pre><code>$ python.exe test.py
-1.73205080757
+<pre><code>     Running target/release/deps/example-423eedc43b2b3a93
+fib 20                  time:   [26.029 us 26.251 us 26.505 us]
+Found 11 outliers among 99 measurements (11.11%)
+  6 (6.06%) high mild
+  5 (5.05%) high severe
 </code></pre>
 
-<h2 id="returning-references-back-to-python">Returning References Back To Python</h2>
+<p>See the <a href="https://japaric.github.io/criterion.rs/book/getting_started.html">Getting Started</a> guide for more details.</p>
 
-<p>Now we&rsquo;ll start the process of building our actual FFI code. We&rsquo;ll start with the
-Scene structure. I don&rsquo;t especially want to expose all the complexity of the
-Scene structure to Python, so instead we&rsquo;ll use another C idiom and return an
-opaque pointer.</p>
+<h2 id="converting-libtest-benchmarks-to-criterion-rs">Converting libtest benchmarks to Criterion.rs</h2>
 
-<script src="//gist.github.com/bheisler/9a552f490d320410b28ab5e6c065ee9f.js"></script>
+<p>We&rsquo;ll start with this benchmark as an example:</p>
 
-<p>Notice that we use <code>Box::new</code> to heap-allocate the structure, and <code>Box::into_raw</code>
-to convert it into a raw pointer to return. The corresponding Python code is:</p>
+<script src="//gist.github.com/bheisler/61efe654cf235acab9966f8e3e55a5c3.js"></script>
 
-<script src="//gist.github.com/bheisler/fcdb3bc11c85147172e1a6ec42f224d0.js"></script>
+<p>The first thing to do is update the <code>Cargo.toml</code> to disable the libtest
+benchmark harness:</p>
 
-<p>I&rsquo;m not actually sure <code>void*</code> is the right way to go here, but I don&rsquo;t know any
-other way to do opaque pointers in this situation. If you know more about this,
-let me know. CFFI seems to understand <code>uint32_t</code> all on its own, and presumably
-will call the Rust function with the appropriate integer width.</p>
-
-<pre><code>$ python.exe raytracer.py
-From Rust: Scene { width: 800, height: 600, fov: 45, elements: [],
-    lights: [], shadow_bias: 0.0000000000001, max_recursion_depth: 10 }
-From Python: &lt;cdata 'void*' 0x000000000155B260&gt;
+<pre><code class="language-toml">[[bench]]
+name = &quot;example&quot;
+harness = false
 </code></pre>
 
-<p>Sharp readers might have noticed that we&rsquo;re leaking Scene objects - we&rsquo;re
-allocating some memory on the heap for the boxed Scene and never freeing it.
-For this trivial example, it doesn&rsquo;t matter much because it will be cleaned
-up when the process terminates, but it is rather inelegant, so let&rsquo;s fix that.</p>
+<p>The next step is to update the imports:</p>
 
-<h2 id="disposing-of-allocated-objects">Disposing Of Allocated Objects</h2>
-
-<p>This goes back to the brief discussion of ownership earlier. Previously,
-Python owned the allocated Vector3 object, so we could trust that it would be
-safely freed when it was garbage-collected. Now, we have an object allocated by
-Rust, but owned by a pointer in Python. Python doesn&rsquo;t know how to deallocate
-an object owned by Rust, so we&rsquo;ll have to return ownership of the pointer to
-Rust and allow Rust to free the memory.</p>
-
-<script src="//gist.github.com/bheisler/2f98fb5590e4dcd895773b1dd39a100d.js"></script>
-
-<p>Freeing the memory is actually quite simple - we use <code>Box::from_raw</code> to convert
-the raw pointer back into a box, and then just let it fall out of scope. Rust
-will automatically clean everything up for us.</p>
-
-<script src="//gist.github.com/bheisler/51656ea2be9b8d0c2e7ba2c6ba77bfe4.js"></script>
-
-<p>Right now, there&rsquo;s nothing to stop us from freeing the scene more than once,
-or continuing to use that pointer after the scene has been freed. There&rsquo;s nothing
-we can do about that from the Rust side, but in Python we can at least build a
-safe wrapper to work with.</p>
-
-<script src="//gist.github.com/bheisler/ba18f7b5c73c66ad9d1924e80881fc9e.js"></script>
-
-<p>Here, we define a Python class to represent our Scene. It defines the <code>__enter__</code>
-and <code>__exit__</code> methods necessary to act as a <a href="https://www.python.org/dev/peps/pep-0343/">Context Manager</a>,
-which allows us to use it with the <code>with</code> statement at the end. Running this
-file confirms that the scene object is being freed:</p>
-
-<pre><code>$ python.exe raytracer.py
-Freeing the scene
+<pre><code class="language-rust">#[macro_use]
+extern crate criterion;
+use criterion::Criterion;
 </code></pre>
 
-<h2 id="enums">Enums</h2>
+<p>Then, we can change the <code>bench_fib</code> function. Remove the <code>#[bench]</code> and change
+the argument to <code>&amp;mut Criterion</code> instead. The contents of this function need to
+change as well:</p>
 
-<p>Before we begin constructing our scene in Python, however, there&rsquo;s one more bit
-of complexity to tackle first. Every object in this raytracer contains a Material
-structure to define what color the surface is, whether it&rsquo;s reflective or
-transparent, etc. This is defined in Rust using some enums and a struct:</p>
-
-<script src="//gist.github.com/bheisler/5af67a2bc9fb63ad1c77e087d5857c91.js"></script>
-
-<p>Rust&rsquo;s enums have no equivalent in C, and even if they did that DynamicImage
-type certainly doesn&rsquo;t. We&rsquo;ll have to create C-compatible wrappers for these
-types that we can expose to Python. I&rsquo;ll focus on the Coloration enum for now,
-the SurfaceType enum will work the same way.</p>
-
-<p>We&rsquo;ll start by defining another enum:</p>
-
-<script src="//gist.github.com/bheisler/153001fea515624f8eaaf807640c79bb.js"></script>
-
-<p>I know, I just said we can&rsquo;t do enums in C. Instead, we&rsquo;ll define a couple of
-functions to create CColoration values on the heap and return opaque pointers
-to them like we did with the Scene.</p>
-
-<p>First, the simple case of a solid color:</p>
-
-<script src="//gist.github.com/bheisler/37004afc200aa009204031f1443a2ad9.js"></script>
-
-<p>Then, the more complex case of a path to a texture file.</p>
-
-<script src="//gist.github.com/bheisler/8fc77676d46de395b661c89bb0f5384d.js"></script>
-
-<p>Here we take a pointer to a null-terminated character array (a C-style string)
-and convert it to a Rust string, which has a length and is encoded in UTF-8.
-This conversion could fail, if the C string isn&rsquo;t valid UTF-8. Notice that we
-need to be very careful not to panic. We can&rsquo;t just unwrap the result of
-converting the CStr to a regular string, because panicking across FFI boundaries
-is undefined behavior. Instead, we return a null pointer on all error
-conditions. A more serious project would probably want to have more robust error
-handling, but this is sufficient for now.</p>
-
-<p>The corresponding Python should be relatively familiar by now:</p>
-
-<script src="//gist.github.com/bheisler/02f53a18cc343e57b3a6e9b0c31678a4.js"></script>
-
-<p>The SurfaceType enum works basically the same way as above, so I&rsquo;ll spare you
-the details.</p>
-
-<script src="//gist.github.com/bheisler/fbfb35e8b010c89e7b40cc5b93b65a2c.js"></script>
-
-<p>All those with&rsquo;s are kind of ugly, but that&rsquo;s the price we pay for safety.
-We can verify that everything is being freed as expected:</p>
-
-<pre><code>$ python.exe raytracer.py
-Freeing surface type
-Freeing surface type
-Freeing surface type
-Freeing coloration
-Freeing coloration
-Freeing coloration
-Freeing coloration
-Freeing coloration
+<pre><code class="language-rust">fn bench_fib(c: &amp;mut Criterion) {
+    c.bench_function(&quot;fib 20&quot;, |b| b.iter(|| fibonacci(20)));
+}
 </code></pre>
 
-<h2 id="constructing-the-scene">Constructing the Scene</h2>
+<p>Finally, we need to invoke some macros to generate a main function, since we
+no longer have libtest to provide one:</p>
 
-<p>Finally, we&rsquo;re ready to start constructing the scene. I&rsquo;ll focus on the case of
-adding a Sphere to the scene. The code to define other objects is pretty much
-the same.</p>
-
-<p>First, we need a new struct to represent Material:</p>
-
-<script src="//gist.github.com/bheisler/b90e0a5de2bdbc16d0120142bf6b94ba.js"></script>
-
-<p>And a function to add a sphere to a scene:</p>
-
-<script src="//gist.github.com/bheisler/bede2aa436be20ede3c7c876f2f28488.js"></script>
-
-<p>Most of this is the now-familiar C foreign-function boilerplate. The
-<code>material.to_rust()</code> method works pretty much as you&rsquo;d expect - it
-constructs a Material value from a CMaterial value, potentially loading the
-texture contained in the <code>CColoration</code>. More noteworthy is the way we convert
-the scene Box back into a raw pointer at the end of the method. This prevents
-Rust from deallocating our scene.</p>
-
-<p>You might reasonably ask why I chose to have one function that creates and adds
-the sphere directly to the scene. This does, after all, make it impossible for
-me to return a Sphere to Python. The answer is that since I don&rsquo;t really want to
-manipulate Spheres in Python, there&rsquo;s not much point in going to all that extra
-effort. You can go ahead and do that if you like.</p>
-
-<p>Now that we have all of that, we can call it from Python as before:</p>
-
-<script src="//gist.github.com/bheisler/690a6cc77c1e3ba295f5ce45798b6f26.js"></script>
-
-<pre><code>$ python.exe raytracer.py
-Sphere { center: Point { x: 0, y: 0, z: -5 }, radius: 1, material:
-  Material { coloration: Texture, albedo: 0.18, surface:
-  Reflective { reflectivity: 0.7 } } }
+<pre><code class="language-rust">criterion_group!(benches, bench_fib);
+criterion_main!(benches);
 </code></pre>
 
-<h2 id="rendering-and-returning-the-image-to-python">Rendering and Returning the Image To Python</h2>
+<p>And that&rsquo;s it! The complete migrated benchmark code is below:</p>
 
-<p>Now that we can define a scene in Python, we need a way to render it and return
-the resulting image. We can&rsquo;t just return a byte array, because Python can&rsquo;t
-handle stack-allocated objects, and anyway it would overflow the stack. We could
-return a pointer/length pair, but then we have to pass it back to Rust to free
-it. Instead, we&rsquo;ll follow the C convention and have the caller provide a buffer
-to render the image into.</p>
+<script src="//gist.github.com/bheisler/45675855d119ad6f03fa94a5247466fe.js"></script>
 
-<script src="//gist.github.com/bheisler/5c3983559358ef40d4de64d83a44cf61.js"></script>
+<h2 id="the-pitch-why-you-might-want-to-use-criterion-rs">The Pitch - Why You Might Want to Use Criterion.rs</h2>
 
-<p>After the usual boilerplate, we convert the C-style byte array into a mutable
-slice with the <code>slice::from_raw_parts_mut</code> function, then wrap that into an
-ImageBuffer and pass it to the raytracer for rendering. Slices in Rust don&rsquo;t
-own their contents, so we don&rsquo;t need to do anything special to prevent Rust from
-trying to free the buffer.</p>
+<p>There are a number of reasons to use Criterion.rs.</p>
 
-<script src="//gist.github.com/bheisler/51eb8b1f5ad6067942d8a1a969842185.js"></script>
+<p>The biggest one, the one that drew me to it in the first place, is the
+statistical confidence it provides. libtest gives a number and a confidence
+interval of some sort, but I cant&rsquo;t even tell if that number is higher or
+lower than it was the last time I ran the benchmarks. Even if it is, how could
+I tell if that change was due to random noise or a change in the performance of
+the code? I&rsquo;ve used Criterion.rs to benchmark and optimize my own projects and
+every time I&rsquo;ve seen it show a statistically-significant optimization or
+regression it&rsquo;s been real. It&rsquo;s almost fun, tweaking the code and running the
+benchmarks to see what happened. I&rsquo;ve never gotten into that sort of flow with
+libtest.</p>
 
-<p>In Python, we need to save the dimensions of the image so that we can allocate
-an appropriate buffer. The raytracer uses 4-byte RGBA pixels, so we calculate
-the buffer size as 4 * width * height, allocate an appropriate buffer, and
-render the image into it. Then we call <code>ffi.buffer</code> to wrap it into a convenient
-Python object. Finally, we pass that to the Pillow library to be wrapped into
-an Image object that we can save out to disk or do further processing on.</p>
+<p>Another big reason is that Criterion.rs is actively maintained and developed.
+libtest is not, and the description of the bencher crate on GitHub declares
+that new features will not be added. Indeed, it instructs the reader to &ldquo;Go
+build a better stable benchmarking library.&rdquo; I hope Criterion.rs is that
+library.</p>
 
-<p><a href="http://imgur.com/a/knyif"><img src="/static/rendered-by-python.png" alt="Rendered By Python" /></a>
-Click to see high-resolution image</p>
+<p>Criterion.rs produces more statistical information than libtest, and generates
+helpful charts and graphs to make it more easily understandable to the user.
+Additionally, it automatically compares the results of one run with the
+previous, without needing to install cargo-benchcmp or manually save benchmark
+results to files.</p>
 
-<h2 id="conclusion">Conclusion</h2>
+<p>Finally, Criterion.rs is compatible with stable builds of Rust, where libtest is
+not.</p>
 
-<p>Overall, this turned out to be easier than I&rsquo;d expected. CFFI&rsquo;s user-friendly
-interface helped a lot, I think, though the Rust side has a lot of boilerplate.
-I expect some macros or something could help with that. I&rsquo;d like to thank Jake
-Goulding and co. for the <a href="http://jakegoulding.com/rust-ffi-omnibus/slice_arguments/">Rust FFI Omnibus</a>,
-which covers all of the basic techniques listed above (and provides examples
-for a number of other languages, if you&rsquo;d like to compare).</p>
+<h2 id="the-anti-pitch-why-you-might-prefer-libtest">The Anti-Pitch - Why You Might Prefer libtest</h2>
 
-<p>As usual, if you want to try playing around with the code yourself, you can
-check out the <a href="https://github.com/bheisler/raytracer">GitHub Repository</a>. If you
-do, though, be careful with the complexity of the scene you try to render. It&rsquo;s
-very easy to reach multi-hour rendering times when you&rsquo;re defining scenes
-programmatically. Otherwise, enjoy!</p>
+<p>With all that said, I would also like to explain some reasons why Criterion.rs
+might not be right for everyone.</p>
+
+<p>For example, libtest benchmarks execute much more quickly than
+Criterion.rs benchmarks, especially the small and fast benchmarks. A small
+libtest benchmark function can run to completion in less than a second, where
+Criterion runs for (by default) at least 8 seconds plus analysis time. If your
+project lends itself to many small benchmarks, you&rsquo;d need to configure
+Criterion.rs to run shorter tests, where you wouldn&rsquo;t with libtest.</p>
+
+<p>The corollary to active development is that Criterion.rs&rsquo; API is not yet fully
+stablized, where libtest isn&rsquo;t likely to change.</p>
+
+<p>libtest is also more seamless to use than Criterion.rs. You don&rsquo;t need to mess
+around with your <code>Cargo.toml</code> file to use libtest benchmarks, they just work.
+Along the same lines, libtest has the <code>test::black_box</code> function to prevent
+unwanted constant folding, which Criterion.rs can only approximate for now.
+Finally, libtest is the only option for benchmarks within your main crate -
+both Criterion.rs and bencher can only be used in the <code>benches</code> folder at
+present.</p>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>I hope I&rsquo;ve convinced you to give Criterion.rs a look. I&rsquo;m excited for the
+future of this project and of Rust as a whole, and I hope you are too.</p>
+
+<p>Although Criterion.rs now supports stable Rust, that doesn&rsquo;t mean that it
+itself is stable, or even feature-complete. I certainly plan to continue
+polishing and expanding on what Criterion.rs already provides. If you&rsquo;d like to
+help with that effort, or if you&rsquo;d like to make suggestions, feature requests
+or bug reports, please check out <a href="https://github.com/japaric/criterion.rs">the repository on
+GitHub</a>.</p>
+
+<p>In addition, I hope to work with the Rust team to help define and implement the
+necessary changes to Cargo and rustc to use alternate test and benchmark
+frameworks. This would make it as seamless to use Criterion.rs as it already is
+to use libtest, and will hopefully allow the community to experiment with a
+variety of ways to support testing and benchmarking.</p>
 
     </div>
     <article>
@@ -631,16 +480,16 @@ programmatically. Otherwise, enjoy!</p>
   
   
     
-      on <time datetime="2017-04-02T00:00:00-06:00">2 Apr, 2017</time>
+      on <time datetime="2018-01-12T19:00:00-06:00">12 Jan, 2018</time>
     
   
   
     in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
   
   
-    and tagged <a href="/tags/c/">C</a>, <a href="/tags/ffi/">FFI</a>, <a href="/tags/python/">Python</a>, <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+    and tagged <a href="/tags/benchmarking/">Benchmarking</a>, <a href="/tags/criterion.rs/">Criterion.rs</a> and <a href="/tags/rust/">Rust</a>
   
-  using <span itemprop="wordCount">2183</span> words.
+  using <span itemprop="wordCount">948</span> words.
 </p>
 
       
@@ -653,13 +502,13 @@ programmatically. Otherwise, enjoy!</p>
     <ul>
       
       
-        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a> &ndash; 5 minutes
-      
         <li><a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a> &ndash; 6 minutes
       
         <li><a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a> &ndash; 22 minutes
       
         <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a> &ndash; 8 minutes
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
       
         <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a> &ndash; 12 minutes
       

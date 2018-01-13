@@ -6,8 +6,176 @@
     <description>Recent content in Posts on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 06 Jan 2018 16:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Fri, 12 Jan 2018 19:00:00 -0600</lastBuildDate>
     <atom:link href="https://bheisler.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Benchmarking In Stable Rust With Criterion.rs</title>
+      <link>https://bheisler.github.io/post/benchmarking-with-criterion-rs/</link>
+      <pubDate>Fri, 12 Jan 2018 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/benchmarking-with-criterion-rs/</guid>
+      <description>
+
+&lt;p&gt;When I initially announced the release of Criterion.rs, I didn&amp;rsquo;t expect that
+there would be so much demand for benchmarking on stable Rust. Now, I&amp;rsquo;d like to
+announce the release of Criterion.rs 0.1.2, which supports the stable compiler.
+This post is an introduction to benchmarking with Criterion.rs and a discussion
+of reasons why you might or might not want to do so.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-is-criterion-rs&#34;&gt;What is Criterion.rs?&lt;/h2&gt;
+
+&lt;p&gt;Criterion.rs is a benchmarking library for Rust that aims to bring solid
+statistical confidence to benchmarking Rust code, while maintaining good
+ease-of-use, even for programmers without a background in statistics. It&amp;rsquo;s
+already available on &lt;a href=&#34;https://crates.io/crates/criterion&#34;&gt;Crates.io&lt;/a&gt; and on
+&lt;a href=&#34;https://github.com/japaric/criterion.rs&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;It was originally written by &lt;a href=&#34;https://github.com/japaric/&#34;&gt;@japaric&lt;/a&gt;, but was
+never released on Crates.io. I (&lt;a href=&#34;https://github.com/bheisler&#34;&gt;@bheisler&lt;/a&gt;)
+volunteered to take over maintenance and development a few months ago, and I
+published the first version of Criterion.rs to Crates.io in December 2017.&lt;/p&gt;
+
+&lt;h2 id=&#34;getting-started-with-criterion-rs&#34;&gt;Getting Started with Criterion.rs&lt;/h2&gt;
+
+&lt;p&gt;To start with Criterion.rs, add the following to your &lt;code&gt;Cargo.toml&lt;/code&gt; file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[dev-dependencies]
+criterion = &amp;quot;0.1.2&amp;quot;
+
+[[bench]]
+name = &amp;quot;my_benchmark&amp;quot;
+harness = false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, define a benchmark by creating a file at &lt;code&gt;$PROJECT/benches/my_benchmark.rs&lt;/code&gt; with the following contents.&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/2da10e7aaac3011ce1d6328e3a4ffdce.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;Finally, run this benchmark with &lt;code&gt;cargo bench&lt;/code&gt;. You should see output similar to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;     Running target/release/deps/example-423eedc43b2b3a93
+fib 20                  time:   [26.029 us 26.251 us 26.505 us]
+Found 11 outliers among 99 measurements (11.11%)
+  6 (6.06%) high mild
+  5 (5.05%) high severe
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;See the &lt;a href=&#34;https://japaric.github.io/criterion.rs/book/getting_started.html&#34;&gt;Getting Started&lt;/a&gt; guide for more details.&lt;/p&gt;
+
+&lt;h2 id=&#34;converting-libtest-benchmarks-to-criterion-rs&#34;&gt;Converting libtest benchmarks to Criterion.rs&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ll start with this benchmark as an example:&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/61efe654cf235acab9966f8e3e55a5c3.js&#34;&gt;&lt;/script&gt;
+
+&lt;p&gt;The first thing to do is update the &lt;code&gt;Cargo.toml&lt;/code&gt; to disable the libtest
+benchmark harness:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[[bench]]
+name = &amp;quot;example&amp;quot;
+harness = false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The next step is to update the imports:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;#[macro_use]
+extern crate criterion;
+use criterion::Criterion;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then, we can change the &lt;code&gt;bench_fib&lt;/code&gt; function. Remove the &lt;code&gt;#[bench]&lt;/code&gt; and change
+the argument to &lt;code&gt;&amp;amp;mut Criterion&lt;/code&gt; instead. The contents of this function need to
+change as well:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;fn bench_fib(c: &amp;amp;mut Criterion) {
+    c.bench_function(&amp;quot;fib 20&amp;quot;, |b| b.iter(|| fibonacci(20)));
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally, we need to invoke some macros to generate a main function, since we
+no longer have libtest to provide one:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;criterion_group!(benches, bench_fib);
+criterion_main!(benches);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And that&amp;rsquo;s it! The complete migrated benchmark code is below:&lt;/p&gt;
+
+&lt;script src=&#34;//gist.github.com/bheisler/45675855d119ad6f03fa94a5247466fe.js&#34;&gt;&lt;/script&gt;
+
+&lt;h2 id=&#34;the-pitch-why-you-might-want-to-use-criterion-rs&#34;&gt;The Pitch - Why You Might Want to Use Criterion.rs&lt;/h2&gt;
+
+&lt;p&gt;There are a number of reasons to use Criterion.rs.&lt;/p&gt;
+
+&lt;p&gt;The biggest one, the one that drew me to it in the first place, is the
+statistical confidence it provides. libtest gives a number and a confidence
+interval of some sort, but I cant&amp;rsquo;t even tell if that number is higher or
+lower than it was the last time I ran the benchmarks. Even if it is, how could
+I tell if that change was due to random noise or a change in the performance of
+the code? I&amp;rsquo;ve used Criterion.rs to benchmark and optimize my own projects and
+every time I&amp;rsquo;ve seen it show a statistically-significant optimization or
+regression it&amp;rsquo;s been real. It&amp;rsquo;s almost fun, tweaking the code and running the
+benchmarks to see what happened. I&amp;rsquo;ve never gotten into that sort of flow with
+libtest.&lt;/p&gt;
+
+&lt;p&gt;Another big reason is that Criterion.rs is actively maintained and developed.
+libtest is not, and the description of the bencher crate on GitHub declares
+that new features will not be added. Indeed, it instructs the reader to &amp;ldquo;Go
+build a better stable benchmarking library.&amp;rdquo; I hope Criterion.rs is that
+library.&lt;/p&gt;
+
+&lt;p&gt;Criterion.rs produces more statistical information than libtest, and generates
+helpful charts and graphs to make it more easily understandable to the user.
+Additionally, it automatically compares the results of one run with the
+previous, without needing to install cargo-benchcmp or manually save benchmark
+results to files.&lt;/p&gt;
+
+&lt;p&gt;Finally, Criterion.rs is compatible with stable builds of Rust, where libtest is
+not.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-anti-pitch-why-you-might-prefer-libtest&#34;&gt;The Anti-Pitch - Why You Might Prefer libtest&lt;/h2&gt;
+
+&lt;p&gt;With all that said, I would also like to explain some reasons why Criterion.rs
+might not be right for everyone.&lt;/p&gt;
+
+&lt;p&gt;For example, libtest benchmarks execute much more quickly than
+Criterion.rs benchmarks, especially the small and fast benchmarks. A small
+libtest benchmark function can run to completion in less than a second, where
+Criterion runs for (by default) at least 8 seconds plus analysis time. If your
+project lends itself to many small benchmarks, you&amp;rsquo;d need to configure
+Criterion.rs to run shorter tests, where you wouldn&amp;rsquo;t with libtest.&lt;/p&gt;
+
+&lt;p&gt;The corollary to active development is that Criterion.rs&amp;rsquo; API is not yet fully
+stablized, where libtest isn&amp;rsquo;t likely to change.&lt;/p&gt;
+
+&lt;p&gt;libtest is also more seamless to use than Criterion.rs. You don&amp;rsquo;t need to mess
+around with your &lt;code&gt;Cargo.toml&lt;/code&gt; file to use libtest benchmarks, they just work.
+Along the same lines, libtest has the &lt;code&gt;test::black_box&lt;/code&gt; function to prevent
+unwanted constant folding, which Criterion.rs can only approximate for now.
+Finally, libtest is the only option for benchmarks within your main crate -
+both Criterion.rs and bencher can only be used in the &lt;code&gt;benches&lt;/code&gt; folder at
+present.&lt;/p&gt;
+
+&lt;h2 id=&#34;next-steps&#34;&gt;Next Steps&lt;/h2&gt;
+
+&lt;p&gt;I hope I&amp;rsquo;ve convinced you to give Criterion.rs a look. I&amp;rsquo;m excited for the
+future of this project and of Rust as a whole, and I hope you are too.&lt;/p&gt;
+
+&lt;p&gt;Although Criterion.rs now supports stable Rust, that doesn&amp;rsquo;t mean that it
+itself is stable, or even feature-complete. I certainly plan to continue
+polishing and expanding on what Criterion.rs already provides. If you&amp;rsquo;d like to
+help with that effort, or if you&amp;rsquo;d like to make suggestions, feature requests
+or bug reports, please check out &lt;a href=&#34;https://github.com/japaric/criterion.rs&#34;&gt;the repository on
+GitHub&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In addition, I hope to work with the Rust team to help define and implement the
+necessary changes to Cargo and rustc to use alternate test and benchmark
+frameworks. This would make it as seamless to use Criterion.rs as it already is
+to use libtest, and will hopefully allow the community to experiment with a
+variety of ways to support testing and benchmarking.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Are Benchmarks From Cloud CI Services Reliable?</title>
