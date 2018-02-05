@@ -4,28 +4,26 @@
     <meta name="generator" content="Hugo 0.18.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writing a Raytracer in Rust - Part 2 - Light and Shadow | bheisler.github.io</title>
+    <title>Posts | bheisler.github.io</title>
     
     
     
     
     
+      <meta name="robots" content="noindex">
+    
     
 
-  <meta name="author" content="Brook Heisler">
+  <meta name="author" content="">
 
 
-    <meta property="og:title" content="Writing a Raytracer in Rust - Part 2 - Light and Shadow" />
-<meta property="og:description" content="Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/" />
-
-  <meta property="og:image" content="https://bheisler.github.io/static/spherical-lights.png" />
+    <meta property="og:title" content="Posts" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://bheisler.github.io/post/" />
 
 
-<meta property="og:updated_time" content="2017-03-20T00:00:00-06:00"/>
-
+<meta property="og:updated_time" content="2017-02-20T11:00:00-06:00"/>
 
 
 
@@ -38,12 +36,10 @@ Multiple Objects It&rsquo;s pretty easy to change our scene definition to contai
     
     
     
-    <link rel="canonical" href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-2/">
+      <link href="https://bheisler.github.io/post/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
     
-      <link rel="prev" href="/post/writing-raytracer-in-rust-part-1/">
+    <link rel="canonical" href="https://bheisler.github.io/post/">
     
-    
-      <link rel="next" href="/post/writing-raytracer-in-rust-part-3/">
     
     <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAG+ZJREFU
 eAHNmudzHEd6xt/NETkSBEEwiJk8SlS05DtXqc6fr8r2J/+V9jfflSWfpTtlSmISSDGByFhgF5vz
@@ -279,361 +275,55 @@ ga('send', 'pageview');
 
 </header>
     <main>
-  <article itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    <h1>Posts</h1>
+  </header>
+  
+    <article itemscope itemtype="http://schema.org/CreativeWork">
+  <header>
+    <h2 itemprop="headline">
+      <a href="https://bheisler.github.io/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
+    </h2>
     
-<meta itemprop="name" content="Writing a Raytracer in Rust - Part 2 - Light and Shadow">
-<meta itemprop="description" content="Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.">
-
-
-<meta itemprop="dateModified" content="2017-03-20T00:00:00-06:00" />
-<meta itemprop="wordCount" content="1709">
-
-  <meta itemprop="image" content="https://bheisler.github.io/static/spherical-lights.png">
-
-
-
-<meta itemprop="keywords" content="code,props,assembly,benchmarking,c,criterion.rs,emulator,ffi,jit,nes,nom,pennys-sword,python,raytracer,rust,rwby," />
-
-    <header>
-      <h1 itemprop="headline">Writing a Raytracer in Rust - Part 2 - Light and Shadow</h1>
       <p class="muted"><svg style="margin-bottom:-3px" id="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>9 minute read</span>
+<span>7 minute read</span>
 
   <svg style="margin-bottom: -3px" id="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
     <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
   </svg>
   
-    <span>Published: <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time></span>
+    <span>Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time></span>
   
 
 </p>
-    </header>
     
-    
-    <div itemprop="articleBody">
-      
-
-<p>Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t
-already, you may wish to read <a href="/post/writing-raytracer-in-rust-part-1/">Part 1</a>.
-Previously, we implemented a basic raytracer which can render only a single
-sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and
-basic lighting.</p>
-
-<h2 id="multiple-objects">Multiple Objects</h2>
-
-<p>It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres
-instead of just a single one. Once we have multiple spheres, however, we need to
-know which one our ray hit. This is easy if they don&rsquo;t overlap on the screen.
-If they do, we can find the correct sphere by taking the nearest intersection
-to our camera. That means we need to know the distance to the intersection, not
-just whether there is an intersection or not.</p>
-
-<p>This requires a bit more geometry. Recall from last time that we detect an
-intersection by constructing a right triangle between the camera origin and the
-center of the sphere. We can calculate the distance between the center of the
-sphere and the camera, and the distance between the camera and the right angle
-of our triangle. From there, we can use Pythagoras&rsquo; Theorem to calculate the
-length of the opposite side of the triangle. If the length is greater than the
-radius of the sphere, there is no intersection.</p>
-
-<p>There are more right triangles formed by the ray than just this one, however.
-If we instead create a triangle between the point that the ray intersects the
-sphere and the center of the sphere, we can again use Pythagoras&rsquo; Theorem to
-calculate the distance from our right angle to the intersection point.
-Subtracting that from the distance from the camera to the right angle gives the
-distance to the intersection point.</p>
-
-<p><img src="/static/intersection-distance.png" alt="Intersection Distance" /></p>
-
-<p>To put that in code, here are the changes to our Sphere intersection method:</p>
-
-<script src="//gist.github.com/bheisler/27f0fc17de209662a04cd6393a8731c3.js"></script>
-
-<p>Now that we know the distance to the intersection, we need a method to perform
-the iteration and return the nearest intersection. It&rsquo;s also useful to return
-a reference to the object itself (for example, so we can use the right color).
-Notice that we have to use partial_cmp and unwrap to compare the distances. This
-is an instance where Rust&rsquo;s strict type safety sort of gets in the way - because
-some values (NaN, +-Infinity) can&rsquo;t be correctly compared, f64 doesn&rsquo;t implement
-the Cmp trait. In this case, no valid intersection can ever contain those values
-so we should be safe just using unwrap. It&rsquo;s a bit ugly, but
-it&rsquo;s probably better than tracking down strange bugs related to NaN-safety later.</p>
-
-<script src="//gist.github.com/bheisler/95ffb04905984a10fe00580851e19380.js"></script>
-
-<h2 id="planes">Planes</h2>
-
-<p>Next up we&rsquo;ll add Planes as an object to test our rays against. There are a few
-ways to represent planes in 3D space, but for our purposes the most convenient
-is to define a point on the plane, and the normal of the surface. Before we
-implement the intersection test though, we need to adapt our scene structure
-so it can contain an arbitrary number of spheres or planes.</p>
-
-<p>We could try adding another Vec of Plane structures, but that gets annoying
-quickly. We&rsquo;d have to duplicate some logic (eg. the trace method) to apply to
-both the spheres and the planes. Some sort of dynamic dispatch is appropriate
-here. Rust provides two ways to do this. We could either wrap each object in a
-variant of an Enum or we could use
-<a href="https://doc.rust-lang.org/book/trait-objects.html">Trait Objects</a>. I&rsquo;ve chosen
-to go with the former, but it&rsquo;s mostly a matter of personal preference.</p>
-
-<script src="//gist.github.com/bheisler/7c4f1d7580a79c636d8b1ddfaecd652f.js"></script>
-
-<p>Now that we have our Plane structure, how can we test for an intersection?
-One convenient property of planes is that they&rsquo;re infinitely large. If a plane
-isn&rsquo;t perfectly parallel to our ray, it will always intersect eventually.
-We can test this with the dot product - if the dot product between the ray and
-the normal of the plane is zero (give or take a bit to account for
-floating-point error) then it&rsquo;s parallel and thus there is no intersection.
-Otherwise, there is an intersection somewhere.</p>
-
-<p>However, we need to know where that intersection is. I&rsquo;m afraid that I haven&rsquo;t
-been able to find a good intuitive or geometric explanation of why this works,
-so I&rsquo;ll just have to direct you to
-<a href="https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection">Scratchapixel</a>,
-where they show the full derivation of the equation.</p>
-
-<script src="//gist.github.com/bheisler/388e88f4cb2ecb391c63aabd76859c5f.js"></script>
-
-<p>Now that all of that&rsquo;s done, let&rsquo;s take a moment to admire our handywork.</p>
-
-<p><img src="/static/spheres-and-planes.png" alt="Spheres and Planes" /></p>
-
-<p>Yeah, I know. Five minutes in MS Paint, amirite? It will look better once we
-start adding lighting effects.</p>
-
-<h2 id="directional-lights">Directional Lights</h2>
-
-<p>We&rsquo;ll start by adding a single directional light to our scene. Directional lights
-approximate light from the sun or stars - objects so far away that their light
-rays are effectively parallel to each other and at an approximately-constant
-intensity level. As a result, they&rsquo;re also simpler than closer point-source
-lights.</p>
-
-<script src="//gist.github.com/bheisler/5884657ad43bb968c8dbcedddfe72faf.js"></script>
-
-<p>Next we need to know the surface normal of the object at the point our ray
-intersected with it.</p>
-
-<p>Sphere:</p>
-
-<pre><code>fn surface_normal(&amp;self, hit_point: &amp;Point) -&gt; Vector3 {
-    (*hit_point - self.center).normalize()
-}
-</code></pre>
-
-<p>Plane:</p>
-
-<pre><code>fn surface_normal(&amp;self, _: &amp;Point) -&gt; Vector3 {
-    -self.normal
-}
-</code></pre>
-
-<p>Finally, we&rsquo;ll need to add an albedo to our Spheres and Planes. This is simply
-a parameter which specifies how much light energy is reflected by an object and
-how much is absorbed.</p>
-
-<p>Now to actually implement the shading. First some preparation.</p>
-
-<pre><code>let intersection = scene.trace(&amp;ray);
-let hit_point = ray.origin + (ray.direction * intersection.distance)
-let surface_normal = intersection.element.surface_normal(&amp;hit_point)
-let direction_to_light = -scene.light.direction
-</code></pre>
-
-<p>Now we calculate the amount of light that lands on this point. This is
-proportional to the cosine of the angle between the surface normal and the
-direction to the light (<a href="https://en.wikipedia.org/wiki/Lambert%27s_cosine_law">Lambert&rsquo;s Cosine Law</a>).
-The dot product is the length of one vector times the
-cosine of the angle between them, but because we use normalized vectors the
-length will be one. We also add a factor for the brightness of the light.</p>
-
-<pre><code>let light_power = (surface_normal.dot(&amp;direction_to_light) as f32) *
-    scene.light.intensity;
-</code></pre>
-
-<p>Then we calculate the proportion of the light which is reflected. This is equal
-to the albedo of the object divided by Pi. Once again I have to admit that I
-can&rsquo;t find a good explanation of this formula. If you&rsquo;re really interested, you
-can once again check out Scratchapixel&rsquo;s
-<a href="https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/diffuse-lambertian-shading">derivation</a>
-(be warned - this one contains integrals). The short version is that dividing by
-Pi ensures that the object doesn&rsquo;t reflect away more energy than it receives.</p>
-
-<pre><code>let light_reflected = intersection.element.albedo() / std::f32::consts::PI;
-</code></pre>
-
-<p>Finally we accumulate this together into the final color for the pixel.
-We represent colors as (R, G, B) triplets where each value is in the range
-0.0&hellip;1.0. We can multiply colors by multiplying each value - eg. if the red
-component of a light is 0.5 and the object reflects 0.5 of red light, the viewer
-will receive a red value of 0.25.</p>
-
-<pre><code>let color = intersection.element.color() * scene.light.color *
-            light_power * light_reflected;
-</code></pre>
-
-<p>Or, all together:</p>
-
-<script src="//gist.github.com/bheisler/7fe4960b607344aa57a06d4712685ab5.js"></script>
-
-<p><img src="/static/directional-lighting.png" alt="Directional Lighting" /></p>
-
-<p>It&rsquo;s still not quite right though - none of the spheres are casting shadows, on
-the lower plane or on each other.</p>
-
-<h2 id="shadows">Shadows</h2>
-
-<p>Calculating shadows in a raytracer is really easy. Simply trace another ray from
-the intersection of the prime ray and the object back to the light. If there is
-another object between the intersection and the light, the point is in shadow.</p>
-
-<script src="//gist.github.com/bheisler/14fae787f7092ad068a572d9b406d10f.js"></script>
-
-<p><img src="/static/shadow-acne.png" alt="Shadow Acne" /></p>
-
-<p>Well, that&rsquo;s not quite right. We have shadows on the lower plane and the green
-sphere, but also a lot of noise. The dark noise is called &lsquo;shadow acne&rsquo; and
-it occurs because our floating point values have limited precision. Sometimes,
-the hit point will be ever so slightly inside the intersected object and so the
-shadow ray will intersect with the same object the prime ray did. It might seem
-like we could simply ignore that object when tracing the shadow ray, and for
-this simple geometry we could. If we had more complex objects though (eg. a model of
-a tree) we would want an object to be able to cast shadows on itself, so that
-won&rsquo;t work. Instead, we simply add a tiny fudge factor and adjust the origin
-of the shadow ray a short distance along the surface normal so that we can be
-sure it&rsquo;s outside the object. It doesn&rsquo;t have to be much - I&rsquo;ve found that bias
-values as small as 1e-13 were enough to eliminate visible shadow acne.</p>
-
-<pre><code>let shadow_ray = Ray {
-    origin: hit_point + (surface_normal * scene.shadow_bias),
-    direction: direction_to_light,
-};
-</code></pre>
-
-<p><img src="/static/shadows.png" alt="Shadows" /></p>
-
-<h2 id="multiple-lights">Multiple Lights</h2>
-
-<p>It&rsquo;s pretty easy to implement multiple lights as well. The light the camera sees
-from any particular point is equal to the sum of the contributions from each
-individual light source. We can just iterate through the lights, accumulating
-together the color values from each.</p>
-
-<script src="//gist.github.com/bheisler/c6186ef183ed98fccd02c119c2cc01a4.js"></script>
-
-<p>This produces the following image - notice the two sets of shadows.</p>
-
-<p><img src="/static/multiple-lights.png" alt="Multiple Lights" /></p>
-
-<h2 id="spherical-lights">Spherical Lights</h2>
-
-<p>Finally, we&rsquo;ll add Spherical Lights (or point lights). First some definitions.
-Again, I&rsquo;m using an enum for dynamic dispatch.</p>
-
-<script src="//gist.github.com/bheisler/2aad485bfef7087438c493e3ca6a5bdc.js"></script>
-
-<p>Next up, we need to know the direction to the light. This is easily calculated:</p>
-
-<pre><code>(s.position - *hit_point).normalize()
-</code></pre>
-
-<p>The intensity of these lights obeys the
-<a href="https://en.wikipedia.org/wiki/Inverse-square_law">Inverse Square Law</a>, so we
-calculate the intensity by dividing the light&rsquo;s intensity value by 4*Pi*distance^2.
-Incidentally, this means that the intensity values of spherical lights in your
-scene definition must be much larger than for directional lights.</p>
-
-<pre><code>let r2 = (s.position - *hit_point).norm() as f32;
-s.intensity / (4.0 * ::std::f32::consts::PI * r2)
-</code></pre>
-
-<p>Additionally, our shadow test needs to be changed a bit. For directional lights,
-we only had to check if there was any intersection in the direction of the light.
-That won&rsquo;t work now - what if there&rsquo;s an object on the far side of the light?
-Instead we check if the nearest intersection is closer than the light itself is.</p>
-
-<pre><code>let shadow_intersection = scene.trace(&amp;shadow_ray);
-let in_light = shadow_intersection.is_none() ||
-    shadow_intersection.unwrap().distance &gt; light.distance(&amp;hit_point);
-</code></pre>
-
-<p>Putting that all together produces this:</p>
-
-<p><img src="/static/spherical-lights.png" alt="Spherical Lights" /></p>
-
-<p>Try doing that in five minutes in MS Paint!</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>We&rsquo;ve taken this toy raytracer from producing an image of a green circle to a
-nicely-lit scene containing multiple objects. The <a href="/post/writing-raytracer-in-rust-part-3/">last entry</a>
-in this series will go on to add texturing as well as simple reflection and
-refraction simulations. As before, if you want to try playing around with the
-code yourself, you can check out the
-<a href="https://github.com/bheisler/raytracer">GitHub Repository</a>.</p>
-
-    </div>
-    <article>
-      
-    </article>
-    <footer>
-      <hr>
-      <p>
-  Published
+  </header>
   
-    by <span itemprop="author">Brook Heisler</span>
+  <div itemprop="description">
+    Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
+So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
+  </div>
   
+    <p><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></p>
   
-    
-      on <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time>
-    
-  
-  
-    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
-  
-  
-    and tagged <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
-  
-  using <span itemprop="wordCount">1709</span> words.
-</p>
+</article>
 
-      
   
-
-
-
-  <aside>
-    <header>Related Content</header>
-    <ul>
-      
-      
-        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a> &ndash; 4 minutes
-      
-        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a> &ndash; 5 minutes
-      
-        <li><a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a> &ndash; 6 minutes
-      
-        <li><a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a> &ndash; 22 minutes
-      
-        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a> &ndash; 8 minutes
-      
-        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a> &ndash; 11 minutes
-      
-        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a> &ndash; 12 minutes
-      
-    </ul>
-  </aside>
-
-
-    </footer>
-  </article>
 </main>
     <footer>
+  <nav>
+  <p>
+    
+      <a href="/post/">&laquo; Previous</a> |
+    
+    <span>Page 2 of 2</span>
+    
+  </p>
+</nav>
+
   
   <p class="muted">
     This page was generated by
