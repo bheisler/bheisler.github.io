@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS - Notes on Rust Crates From Writing an RSS Reader | bheisler.github.io</title>
+    <meta name="description" content="Way back in the dim mists of history (back in university) I wrote myself a custom RSS reader in Java and called it JARVIS1. You see, I read a lot of webcomics. Like, a lot. Some webcomics provide RSS feeds, but some don&rsquo;t, and as my collection grew it started to become a hassle to use Firefox&rsquo;s live bookmarks to manage it all. Ultimately, I wrote up a quick Swing GUI to use as a single interface for keeping up with blogs and tracking which comics had published updates since the last time I&rsquo;d checked2.">
+    <meta name="keywords" content="Rust, JARVIS">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="Brook Heisler">
+
+
+    <meta property="og:title" content="JARVIS - Notes on Rust Crates From Writing an RSS Reader" />
+<meta property="og:description" content="Way back in the dim mists of history (back in university) I wrote myself a custom RSS reader in Java and called it JARVIS1. You see, I read a lot of webcomics. Like, a lot. Some webcomics provide RSS feeds, but some don&rsquo;t, and as my collection grew it started to become a hassle to use Firefox&rsquo;s live bookmarks to manage it all. Ultimately, I wrote up a quick Swing GUI to use as a single interface for keeping up with blogs and tracking which comics had published updates since the last time I&rsquo;d checked2." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/jarvis-impressions-of-rust-libraries/" />
+
+
+
+<meta property="article:published_time" content="2018-04-22T16:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-04-22T16:00:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/jarvis-impressions-of-rust-libraries/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="JARVIS - Notes on Rust Crates From Writing an RSS Reader">
+<meta itemprop="description" content="Way back in the dim mists of history (back in university) I wrote myself a custom RSS reader in Java and called it JARVIS1. You see, I read a lot of webcomics. Like, a lot. Some webcomics provide RSS feeds, but some don&rsquo;t, and as my collection grew it started to become a hassle to use Firefox&rsquo;s live bookmarks to manage it all. Ultimately, I wrote up a quick Swing GUI to use as a single interface for keeping up with blogs and tracking which comics had published updates since the last time I&rsquo;d checked2.">
+
+
+<meta itemprop="datePublished" content="2018-04-22T16:00:00-06:00" />
+<meta itemprop="dateModified" content="2018-04-22T16:00:00-06:00" />
+<meta itemprop="wordCount" content="3077">
+
+
+
+<meta itemprop="keywords" content="Rust,JARVIS," />
+
+    <header>
+      <h1 itemprop="headline">JARVIS - Notes on Rust Crates From Writing an RSS Reader</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>15 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-04-22T16:00:00-06:00">22 Apr, 2018</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>Way back in the dim mists of history (back in university) I wrote myself a
+custom RSS reader in Java and called it JARVIS<sup class="footnote-ref" id="fnref:jarvis"><a rel="footnote" href="#fn:jarvis">1</a></sup>. You see, I read a lot of
+webcomics. Like, a lot. Some webcomics provide RSS feeds, but some don&rsquo;t, and
+as my collection grew it started to become a hassle to use Firefox&rsquo;s live
+bookmarks to manage it all. Ultimately, I wrote up a quick Swing GUI to use as
+a single interface for keeping up with blogs and tracking which comics had
+published updates since the last time I&rsquo;d checked<sup class="footnote-ref" id="fnref:programming"><a rel="footnote" href="#fn:programming">2</a></sup>. Over the years, I
+periodically make upgrades to it - performing the HTTP requests in parallel,
+for example, or adding caching. I recently completed such a round of upgrades,
+rewriting large portions of the code from a mixture of Scala and Java into
+Rust. This brought me into contact with a number of Rust libraries that I&rsquo;ve
+never used before. I hope my impressions can be useful to the maintainers of
+those libraries and to other Rust programmers.</p>
+
+<h2 id="basic-design">Basic Design</h2>
+
+<p>At some point over the years I&rsquo;d rewritten the whole database access layer and
+HTTP-fetching code in Scala. Scala is a great language, but I haven&rsquo;t used it
+in years and so this code was starting to get very hard to maintain. The plan
+was to rewrite all of that into either Rust or Java. Of course, Rust doesn&rsquo;t yet
+run on the JVM, so I needed to decide how I was going to integrate the two.</p>
+
+<p>I could have gone with JNI or JNA or some other Java FFI system, but I figured
+that would be more complex than I wanted. Also, I eventually plan to convert
+this into an HTTP server so that I can access it from any device. Ultimately,
+I settled on launching a background process and communicating with it by
+serializing JSON messages over stdin/stdout. In retrospect, that was probably a
+mistake; if I were doing this again I think I should have just had the backend
+process start up a simple HTTP server on localhost and connected to that instead
+of messing around with stdin/stdout.</p>
+
+<p>The backend process has three main responsibilities. It stores data and makes
+it available for some limited querying by the GUI. It performs HTTP requests
+for RSS feeds; either simple fetches for regular news feeds or with some simple
+date/time logic attached to guess whether webcomics that don&rsquo;t have RSS feeds
+would have updated. Finally, I&rsquo;ve come up with the concept of an archive
+cursor, which takes a bit of explaining. Fellow webcomics fans will no doubt be
+familiar with the <a href="http://tvtropes.org/pmwiki/pmwiki.php/Main/ArchiveBinge">Archive
+Binge</a>, where someone
+starts at the beginning of the archives and goes on reading until caught up to
+the present. This can take hours or even days for very long comics, and I
+typically don&rsquo;t have that much unbroken time. As an alternative, I&rsquo;ve set up
+JARVIS to automatically find the next 3-5 pages per day so I can read them.
+This requires scraping the pages to automatically find the &ldquo;Next Page&rdquo; links.
+I&rsquo;ve found this to be a great way to get caught up on new webcomics or to
+re-read old favorites while only investing 10-15 minutes a day rather than
+seven-hour marathon sessions.</p>
+
+<h2 id="basic-json-api">Basic JSON API</h2>
+
+<p>I didn&rsquo;t originally expect this to be difficult. &ldquo;You just connect serde and
+GSON to stdin/out&rdquo; I thought &ldquo;That seems pretty simple&rdquo;. Famous last words.
+I ran into two major problems doing that. First, both <code>GSON</code> and <code>serde_json</code>
+expected that there would be no more data after the end of the first record,
+which wasn&rsquo;t true in this case. Second, I ran into deadlocks aplenty.</p>
+
+<p>The solution to the first problem wasn&rsquo;t actually so hard. After asking around
+I discovered that <code>serde_json</code> has a <a href="https://docs.serde.rs/serde_json/struct.StreamDeserializer.html"><code>StreamDeserializer</code></a> iterator which
+does precisely what I wanted (<code>GSON</code> calls it a <a href="https://google.github.io/gson/apidocs/com/google/gson/stream/JsonReader.html"><code>JSONReader</code></a>).</p>
+
+<p>The second problem wasn&rsquo;t easily solved by a library. It took me a little while
+to iron out all of the deadlocks. The problem is that each side of the
+communication will write a message and then wait for the response (or in the
+case of the backend, will wait for the next command). If both sides end up
+waiting at the same time, you get a deadlock.</p>
+
+<p>Most languages (including Rust) will buffer stdout to avoid the overhead of
+calling out to the OS for every character. Exactly when that buffer is flushed
+is usually not documented, though. It is typically flushed when the process
+writes a newline character, but not necessarily. Also, <code>serde_json</code> at least
+expects there to be some kind of separation between each message in a stream
+such as a newline. Ultimately, what I settled on is to write the message,
+write a newline character, and then explicitly flush the output stream.</p>
+
+<p>Once I got all of that working, the rest of the JSON interface was pretty
+straightforward, so I won&rsquo;t go into much detail on that.</p>
+
+<h2 id="error-handling">Error Handling</h2>
+
+<p>With all of this JSON parsing, database access and HTTP fetching going on,
+there&rsquo;s a lot of room for errors to occur. I opted to set up a decent
+error-handling system early on, with the new <code>failure</code> crate.</p>
+
+<p>My error-handling needs are pretty simple; I just need to bubble errors up to
+the JSON API layer where they can be reported back to the GUI process. <code>failure</code>
+provides a variety of different ways to handle errors to represent different
+performance and effort tradeoffs. I picked the <code>Error</code> type, which requires
+basically no effort at the cost of always allocating when an error is created.
+I simply return a <code>Result&lt;T, Error&gt;</code> from all of my functions that can fail,
+and print the error message at the top level. I was quite impressed by how
+easy it was. I&rsquo;m not concerned about the allocation here; for this code errors
+should be rare and performance is not a top concern anyway.</p>
+
+<h2 id="database">Database</h2>
+
+<p>For database access, I used the <code>diesel</code> crate with a Sqlite database file.
+Overall, it worked quite well - the resulting code is much clearer than the
+code it replaced. It does make me a bit nervous though. The major reason why I
+decided to replace the Scala code initially was because I was having a lot of
+trouble remembering how to work with the heavily DSL-based <code>Slick</code> library, and
+I&rsquo;m concerned that I might have a similar problem with <code>diesel</code> in the future.
+I think it will be less pronounced, but I still have to remember, for example,
+that I need to use <code>diesel::insert_into(feed)</code> for inserts but <code>feed.load</code> for
+queries. On the good side, even the DSL-based Diesel code is easily readable;
+I&rsquo;m just not sure I&rsquo;ll be able to remember how to write it without referencing
+the documentation.</p>
+
+<p>Speaking of the documentation, there are a few areas I found where it could be
+improved. In particular, the documentation on foreign-key relationships and
+JOINs is buried in the API docs where it&rsquo;s kind of hard to find. It would be
+nice if there was a guide to doing these things on the website with the other
+guides, or at least some links to the right place in the API docs to make it
+easier to find. Having said that, I like how Diesel makes foreign-key queries
+very explicit, rather than trying to fetch a whole object graph like some ORMs
+do.</p>
+
+<p>One comment is that (depending on how you design your database) the DSL imports
+can clash with likely variable names. For example, when inserting a new record
+into the <code>feed</code> table, it&rsquo;s pretty reasonable to do something like this:</p>
+
+<pre><code>use ::schema::feed::dsl::*;
+let feed = ...
+diesel::insert_into(feed).values(feed).execute(...);
+</code></pre>
+
+<p>Except that this causes a name collision between the <code>feed</code> table object and the
+<code>feed</code> structure being inserted, so you have to artificially rename the value.
+Over time I might gravitate towards using <code>schema::feed::table</code> or something
+similar to make it really clear what is being referenced.</p>
+
+<p>Finally, I had some trouble accessing the database in multiple parallel
+threads. I know sqlite doesn&rsquo;t support concurrent writes, but it does support
+parallel reads, so I thought I&rsquo;d set up a database thread pool of 2-3 threads
+and take advantage of whatever parallelism I could get. I thought sqlite would
+lock the database during writes and that the other threads would block until it
+was unlocked, then proceed. Instead, all other transactions simply failed while
+the database was locked. Of course, I could write my own retry logic, but it&rsquo;s
+surprising that I would have to. In the end, I settled for just using a
+single database thread; it&rsquo;s plenty fast enough for my needs.</p>
+
+<p>One last thing - I love that <code>diesel</code> directs the programmer to use database
+migrations right from the start. It can be done in Java with tools like Flyway,
+but the programmer needs to know to look for them. Explicit, repeatable
+migration scripts make databases much easier to work with over long periods of
+maintenance.</p>
+
+<h2 id="tokio-reqwest">Tokio &amp; Reqwest</h2>
+
+<p>JARVIS needs to make many HTTP requests to fetch RSS feeds and other resources.
+Since they&rsquo;re mostly independent, it&rsquo;s much faster to perform these requests in
+parallel. In Rust, that means using <code>tokio</code> and <code>futures</code>. <code>tokio</code> is pretty
+low-level, though, and I didn&rsquo;t want to have to add HTTPS support myself, so I
+went with <code>reqwest</code>&rsquo;s unstable async API instead, which is a higher-level layer
+built on top of <code>tokio</code>.</p>
+
+<p>The original Scala code I replaced was also heavily futures-based, so it was
+more or less a direct translation. Overall, I was really impressed by this
+whole section of the ecosystem. Despite officially being unstable,
+<code>reqwest</code>&rsquo;s<sup class="footnote-ref" id="fnref:reqwest"><a rel="footnote" href="#fn:reqwest">3</a></sup> async API was well designed, well documented and worked
+flawlessly. <code>futures</code> is great as well; it provides every combinator I wanted
+in a futures library and then some (the <code>loop_fn</code> function in particular
+cleaned up some ugly recursive code in the original Scala implementation). Note
+that I used version <code>0.1.17</code> of <code>futures</code>; the API has changed a bit in 0.2 and
+I understand it will change more in 0.3 which is expected to arrive soon.</p>
+
+<p>I&rsquo;ve read comments saying that the <code>futures</code> library is hard to learn and hard
+to use. Now that I&rsquo;ve used it, I don&rsquo;t think that is the case. Almost
+everything I know about futures from other languages transfers over quite
+cleanly. The only notable difference is that you have to do something with your
+future after you&rsquo;ve built it. In Java or Scala, you register your callbacks and
+then just let the Future object fall out of scope; the callbacks will still be
+triggered when the future is completed. Rust&rsquo;s futures need to be polled rather
+than notified, though, so you have to build up the future and then submit it to
+an event loop to be executed. Once you adjust for that though, the <code>futures</code>
+API looks pretty much like any other. Maybe it helps that I have extensive
+experience working with futures in other languages though. For those who don&rsquo;t,
+I believe that the async/await pattern is already available through macros;
+that may be more familiar.</p>
+
+<p>That said, it&rsquo;s not all roses. I&rsquo;m not sure I like how <code>reqwest</code> tries to build
+a strongly-typed API over HTTP headers. In particular, I have to work with
+etags and the last-modified header for caching RSS feeds. I&rsquo;ve always treated
+them as opaque string tokens, and it&rsquo;s a slight hassle to have to convert
+between the typed representation that <code>reqwest</code> uses and the string
+representation stored in the database. It&rsquo;s just a function call or two,
+though; more of a speed bump than an actual problem.</p>
+
+<h2 id="rss-atom-parsing">RSS/ATOM Parsing</h2>
+
+<p>Conveniently for me, Rust already has crates for parsing RSS and ATOM feeds -
+<code>rss</code> and <code>atom_syndication</code>. I don&rsquo;t have too much to say about those crates
+specifically; they each have a simple job and do it well enough. It might be
+nice to have a third crate that provides a basic abstraction over the two
+formats (something like the <code>Rome</code> library does in Java) but it&rsquo;s easy enough
+to just try to parse a response as RSS and then fall back to ATOM if that fails.
+Both of these crates are owned by the same GitHub organization, though it seems
+like maintenance on the RSS crate is more active.</p>
+
+<p>I would like to comment on one thing tangentially related to these crates
+though. They show a problem that I see in a lot of Rust crates, which is that
+the documentation is badly cluttered by functions that are not that
+interesting. In this case, the feed structures are builders with getters and
+setters for all of the various fields used by RSS and ATOM feeds. In other
+libraries, it&rsquo;s the <code>get_ref/get_mut_ref</code> functions and so on. It can be hard
+to visually skim through all of the noise of getters and setters to find the
+parsing and creation functions, which are meaningfully distinct. Perhaps RustDoc
+or the new doxidize tool could do something to improve the signal-to-noise here,
+like allowing the programmer to coalesce together related functions, or to
+separate functions into different sections to group the setters and getters
+together and the parsing functions in a different section.</p>
+
+<h2 id="chrono">Chrono</h2>
+
+<p>My need for date/time operations on this project was thankfully quite limited.
+Dealing with dates and times can be unbelievably complicated. In my case, I
+mostly just have to check if a day has passed since the last time the user
+read a webcomic, or to check if today is a certain day of the week.</p>
+
+<p>That said, I&rsquo;m not hugely impressed with the <code>chrono</code> crate. It did most of the
+things I needed it to do, but not quite everything. In particular, it doesn&rsquo;t
+appear to have any way to add or subtract large durations (months or years)
+from a datetime except to approximate it by using eg. 4 weeks instead of a
+month. I fully realize that doing that kind of math correctly is a huge
+headache, but <code>chrono</code> is the standard (only?) date/time crate in the Rust
+ecosystem. People are going to need to do things like this, and if the
+ecosystem doesn&rsquo;t provide a standard correct implementation they will invent
+their own incorrect versions instead.</p>
+
+<p>Likewise, it lacks a lot of helper functions that I&rsquo;m used to having from
+working with JodaTime, like having an obvious way to get &ldquo;midnight today&rdquo; as
+a <code>DateTime</code>. It&rsquo;s easy enough to piece together from what is there, I suppose,
+so I can&rsquo;t say this is a huge problem. The <code>NaiveDateTime</code> struct in general is
+missing a lot of the features of the <code>DateTime</code> struct; if this is intentional
+it might be helpful to give clearer guidance to the programmer that they should
+convert to a timezone-aware type before operating on it. It would be nice if
+Diesel could perform that conversion.</p>
+
+<p>On the plus side; I do like how <code>chrono</code> uses a single generic type to
+represent the difference between a DateTime in UTC, the local time zone and a
+fixed offset. Most other date/time libraries I&rsquo;ve worked with use entirely
+separate classes for that if they handle it at all.</p>
+
+<p><code>chrono</code> does not appear to have support for the standard <code>tzdb</code> database;
+there&rsquo;s a separate crate for that, but it doesn&rsquo;t seem to be very actively
+maintained and it works by generating fixed Rust code from the database. I
+haven&rsquo;t tried, but this would probably make it difficult to deal with changes
+to time zones and things like daylight-savings-time rules.</p>
+
+<h2 id="http-parsing-scraping">HTTP Parsing/Scraping</h2>
+
+<p>Initially, I wrote all of the scraping code with <code>select.rs</code>, then at the last
+minute scrapped it all and re-wrote it with <code>scraper</code> instead. Overall, I think
+both of these libraries are lacking (at least compared to <code>JSoup</code>), but they&rsquo;re
+lacking different things.</p>
+
+<p>I initially liked <code>select.rs</code>&rsquo; typed selector API, but it currently isn&rsquo;t as
+powerful as full CSS selectors simply because a lot of the standard CSS
+selectors are not yet implemented. I do like this design, though, because it
+makes it easy for the application programmer to extend the system to define
+additional selectors of arbitrary complexity. Unfortunately, I have a hard
+requirement to allow dynamic, runtime-defined selectors, and <code>select.rs</code> does
+not support that use case at all right now. Also, <code>select.rs</code> is largely
+undocumented. It&rsquo;s designed well enough that I was able to figure out how to
+use it from the API docs anyway, but it could definitely benefit from some more
+effort on documentation.</p>
+
+<p><code>scraper</code>, by contrast, only works with CSS selector strings. This makes it
+impossible to extend, but makes it possible for me to use selector strings
+provided at runtime. This is a requirement for me because webcomic HTML pages
+are super inconsistent from one site to another and hard-coded heuristics for
+finding the &lsquo;next-page&rsquo; links can only take one so far. This is why JARVIS
+allows the user to override the heuristics and provide a CSS selector string
+that matches the appropriate link. Unfortunately, <code>scraper</code> does not provide
+some of the useful extensions to CSS selectors that <code>JSoup</code> does - such as the
+<code>:has(selector)</code> construction which selects parent nodes that contain descendant
+nodes matching the nested selector. The programmer could provide it, but then
+we&rsquo;re back to either hard-coded selection behavior or implementing my own extra
+parsing.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The Rust ecosystem is pretty new and unrefined in a lot of places. In
+particular, I would like to see improvements made in the areas of date/time
+and HTTP parsing/scraping libraries. Meanwhile, <code>serde</code>, <code>tokio/reqwest</code> and
+<code>diesel</code> are all already excellent to varying degrees.</p>
+
+<p>As for JARVIS, I&rsquo;ve been using the combined Java/Rust version as my daily driver
+for about a week now, fixing bugs occasionally. The new version is already much
+easier to work on than the old Java/Scala one was. This is all just one more
+step in a long-term plan to convert this whole system into a web-app that I can
+access from any device without needing to install the software, but for now I&rsquo;m
+going to put this project down and use it for a while until I&rsquo;ve ironed out all
+of the new bugs. Thanks for reading! I hope this was helpful.</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:jarvis">Yes, like Tony Stark&rsquo;s house AI. I had much grander ambitions when I named this project.
+ <a class="footnote-return" href="#fnref:jarvis"><sup>[return]</sup></a></li>
+<li id="fn:programming">As a side note, how cool is it that we as programmers can just go do stuff like that? Somehow that never seems to get old for me.
+ <a class="footnote-return" href="#fnref:programming"><sup>[return]</sup></a></li>
+<li id="fn:reqwest">Wow, that is hard to type. Muscle-memory keeps trying to correct it to &lsquo;request&rsquo;.
+ <a class="footnote-return" href="#fnref:reqwest"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author">Brook Heisler</span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-04-22T16:00:00-06:00">
+    22 Apr, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/jarvis/">JARVIS</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">3077</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
+        <time datetime="5M">5 minutes</time>
+      
+        <li><a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a>
+        <time datetime="22M">22 minutes</time>
+      
+        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
+        <time datetime="11M">11 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
+        <time datetime="12M">12 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>

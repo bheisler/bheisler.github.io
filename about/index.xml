@@ -2,11 +2,13 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Abouts on bheisler.github.io</title>
-    <link>https://bheisler.github.io/about/index.xml</link>
+    <link>https://bheisler.github.io/about/</link>
     <description>Recent content in Abouts on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <atom:link href="https://bheisler.github.io/about/index.xml" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="https://bheisler.github.io/about/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>About Me</title>
@@ -14,18 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://bheisler.github.io/about/about/</guid>
-      <description>&lt;p&gt;Hello! I&amp;rsquo;m Brook Heisler. I&amp;rsquo;m a software developer from Saskatoon. When I&amp;rsquo;m not
-busy programming, I spend my time propmaking instead. This is reflected in the
-dual nature of this blog, which is mostly about my hobby projects. Here, you&amp;rsquo;ll
-find detailed build logs about my prop projects and even-more-detailed
-information on my code projects, as well as whatever else I feel like writing
-about. If you&amp;rsquo;re only interested in one of those two things, that&amp;rsquo;s cool - use
-the category links above to focus on only code or only props. There are even
-separate RSS feeds. Cheers!&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/bheisler&#34;&gt;Github Profile&lt;/a&gt;
-&lt;a href=&#34;https://www.linkedin.com/in/brook-heisler-805597124/&#34;&gt;LinkedIn Profile&lt;/a&gt;&lt;/p&gt;
-</description>
+      <description>Hello! I&amp;rsquo;m Brook Heisler. I&amp;rsquo;m a software developer from Saskatoon. When I&amp;rsquo;m not busy programming, I spend my time propmaking instead. This is reflected in the dual nature of this blog, which is mostly about my hobby projects. Here, you&amp;rsquo;ll find detailed build logs about my prop projects and even-more-detailed information on my code projects, as well as whatever else I feel like writing about. If you&amp;rsquo;re only interested in one of those two things, that&amp;rsquo;s cool - use the category links above to focus on only code or only props.</description>
     </item>
     
   </channel>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on bheisler.github.io</title>
+    <link>https://bheisler.github.io/tags/</link>
+    <description>Recent content in Tags on bheisler.github.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 20 Aug 2017 11:35:37 -0600</lastBuildDate>
+    
+	<atom:link href="https://bheisler.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Assembly</title>
+      <link>https://bheisler.github.io/tags/assembly/</link>
+      <pubDate>Sun, 20 Aug 2017 11:35:37 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/assembly/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Benchmarking</title>
+      <link>https://bheisler.github.io/tags/benchmarking/</link>
+      <pubDate>Mon, 05 Feb 2018 07:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/benchmarking/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>C</title>
+      <link>https://bheisler.github.io/tags/c/</link>
+      <pubDate>Sun, 02 Apr 2017 00:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/c/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Criterion.rs</title>
+      <link>https://bheisler.github.io/tags/criterion.rs/</link>
+      <pubDate>Mon, 05 Feb 2018 07:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/criterion.rs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Emulator</title>
+      <link>https://bheisler.github.io/tags/emulator/</link>
+      <pubDate>Sun, 20 Aug 2017 11:35:37 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/emulator/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ffi</title>
+      <link>https://bheisler.github.io/tags/ffi/</link>
+      <pubDate>Sun, 02 Apr 2017 00:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/ffi/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Jarvis</title>
+      <link>https://bheisler.github.io/tags/jarvis/</link>
+      <pubDate>Sun, 22 Apr 2018 16:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/jarvis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Jit</title>
+      <link>https://bheisler.github.io/tags/jit/</link>
+      <pubDate>Sun, 20 Aug 2017 11:35:37 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/jit/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Nes</title>
+      <link>https://bheisler.github.io/tags/nes/</link>
+      <pubDate>Sun, 20 Aug 2017 11:35:37 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/nes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Nom</title>
+      <link>https://bheisler.github.io/tags/nom/</link>
+      <pubDate>Sun, 30 Jul 2017 02:11:19 +0000</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/nom/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pennys Sword</title>
+      <link>https://bheisler.github.io/tags/pennys-sword/</link>
+      <pubDate>Thu, 19 Oct 2017 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/pennys-sword/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Python</title>
+      <link>https://bheisler.github.io/tags/python/</link>
+      <pubDate>Sun, 02 Apr 2017 00:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Raytracer</title>
+      <link>https://bheisler.github.io/tags/raytracer/</link>
+      <pubDate>Sun, 02 Apr 2017 00:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/raytracer/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rust</title>
+      <link>https://bheisler.github.io/tags/rust/</link>
+      <pubDate>Sun, 22 Apr 2018 16:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/rust/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Rwby</title>
+      <link>https://bheisler.github.io/tags/rwby/</link>
+      <pubDate>Thu, 19 Oct 2017 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/rwby/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
