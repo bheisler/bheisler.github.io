@@ -6,10 +6,19 @@
     <description>Recent content in Posts on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 22 Apr 2018 16:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Thu, 14 Jun 2018 19:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Running Rust on the GPU with Accel</title>
+      <link>https://bheisler.github.io/post/rust-on-the-gpu-with-accel/</link>
+      <pubDate>Thu, 14 Jun 2018 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/rust-on-the-gpu-with-accel/</guid>
+      <description>For the past month or so, I&amp;rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&amp;rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&amp;rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.</description>
+    </item>
     
     <item>
       <title>JARVIS - Notes on Rust Crates From Writing an RSS Reader</title>

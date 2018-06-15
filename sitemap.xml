@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://bheisler.github.io/post/rust-on-the-gpu-with-accel/</loc>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/jarvis-impressions-of-rust-libraries/</loc>
     <lastmod>2018-04-22T16:00:00-06:00</lastmod>
   </url>
@@ -72,6 +77,12 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/tags/accel/</loc>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/tags/assembly/</loc>
     <lastmod>2017-08-20T11:35:37-06:00</lastmod>
     <priority>0</priority>
@@ -96,7 +107,7 @@
   
   <url>
     <loc>https://bheisler.github.io/categories/code/</loc>
-    <lastmod>2018-04-22T16:00:00-06:00</lastmod>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -115,6 +126,12 @@
   <url>
     <loc>https://bheisler.github.io/tags/ffi/</loc>
     <lastmod>2017-04-02T00:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bheisler.github.io/tags/gpgpu/</loc>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -150,7 +167,7 @@
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2018-04-22T16:00:00-06:00</lastmod>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -174,7 +191,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/rust/</loc>
-    <lastmod>2018-04-22T16:00:00-06:00</lastmod>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -186,13 +203,13 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/</loc>
-    <lastmod>2017-08-20T11:35:37-06:00</lastmod>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2018-04-22T16:00:00-06:00</lastmod>
+    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   

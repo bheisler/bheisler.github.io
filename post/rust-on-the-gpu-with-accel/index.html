@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Rust on the GPU with Accel | bheisler.github.io</title>
+    <meta name="description" content="For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.">
+    <meta name="keywords" content="Rust, GPGPU, Accel">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="">
+
+
+    <meta property="og:title" content="Running Rust on the GPU with Accel" />
+<meta property="og:description" content="For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/rust-on-the-gpu-with-accel/" />
+
+
+
+<meta property="article:published_time" content="2018-06-14T19:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-06-14T19:00:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/rust-on-the-gpu-with-accel/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Running Rust on the GPU with Accel">
+<meta itemprop="description" content="For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.">
+
+
+<meta itemprop="datePublished" content="2018-06-14T19:00:00-06:00" />
+<meta itemprop="dateModified" content="2018-06-14T19:00:00-06:00" />
+<meta itemprop="wordCount" content="2570">
+
+
+
+<meta itemprop="keywords" content="Rust,GPGPU,Accel," />
+
+    <header>
+      <h1 itemprop="headline">Running Rust on the GPU with Accel</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>13 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-06-14T19:00:00-06:00">14 Jun, 2018</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>For the past month or so, I&rsquo;ve been working on a follow-up to my series on <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in
+Rust</a>. This time around, I&rsquo;ll be talking about writing a
+GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code.
+Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good
+to start with some documentation on that aspect of the problem before diving into path tracing.</p>
+
+<p>I&rsquo;ve used <a href="https://github.com/termoshtt/accel">Accel</a> for this project because it&rsquo;s probably the
+best option currently available. &ldquo;Best available&rdquo; sadly does not imply that it&rsquo;s production-ready
+at this point, but we&rsquo;ll make do where we have to. Accel&rsquo;s author, Toshiki Teramura, has already
+merged several of my pull requests making various improvements to the library. Unfortunately, some
+of the problem spots lie lower down, in rustc or even in LLVM&rsquo;s PTX backend.</p>
+
+<p>I will assume that you are at least somewhat familiar with CUDA programming. If you aren&rsquo;t, there&rsquo;s
+a very good Udacity course on the subject that was posted to Youtube <a href="https://www.youtube.com/playlist?list=PLGvfHSgImk4aweyWlhBXNF6XISY3um82_">here</a>.</p>
+
+<h2 id="installing-prerequisites">Installing Prerequisites</h2>
+
+<p>Accel requires a number of things pre-installed on the system before it can compile and execute GPU
+code, so let&rsquo;s start there. First, you&rsquo;ll need to download and install the <a href="https://developer.nvidia.com/cuda-downloads">CUDA
+toolkit</a> for your system. This is pretty
+straightforward (at least on Windows) so I&rsquo;ll just move on.</p>
+
+<p>Second, you&rsquo;ll need to install Xargo for cross-compilation. I understand the Rust team is planning
+on integrating Xargo&rsquo;s functionality into Cargo, but at time of writing that hasn&rsquo;t landed yet. In
+the meantime, this is as simple as <code>cargo install xargo</code>. You&rsquo;ll also need a Nightly version of Rust,
+so grab that with <code>rustup install nightly</code>.</p>
+
+<p>Third, you&rsquo;ll need some of LLVM&rsquo;s tools - specifically, <code>ar</code>, <code>llvm-link</code> and <code>llc</code>. On Linux (I
+did this on Arch, your distro may vary) this was pretty easy - I just installed the <code>llvm</code> package
+and all of these tools were included. However, LLVM&rsquo;s Windows installer does not include them, so
+we have to build them from source. This is&hellip; an involved process. The process is detailed
+<a href="https://llvm.org/docs/GettingStartedVS.html">here</a>, but I&rsquo;ll try to summarize as best I can. This
+is what worked for me, but your milage may vary, caveat emptor, the usual. I&rsquo;m not an LLVM guru so
+I probably won&rsquo;t be able to help much if things go wrong.</p>
+
+<p>To build LLVM, you&rsquo;ll need to download and install <a href="https://www.visualstudio.com/downloads/">Visual
+Studio</a> (2015 or later, I used 2017) and
+<a href="https://cmake.org/download/">CMake</a>. Visual Studio does seem to be required - LLVM apparently
+cannot be built by LLVM on Windows. Open Visual Studio and create a C++ project, which should cause
+it to automatically download and install the C++ tools (you can delete the project afterwards).
+Then download and unpack the LLVM source from <a href="https://releases.llvm.org/download.html">the download page</a>.</p>
+
+<p>Open the CMake GUI and set the path to the source directory. Also, set up the build directory -
+note that this is NOT where the final binaries will be placed - I think it&rsquo;s a temporary directory
+used during the configuration and compilation process, and this is where the Visual Studio project
+files will be generated. It doesn&rsquo;t really matter what you set the build directory to, so make it
+easy to find later. Click Configure. In the window that appears, set the toolset to <code>host=x64</code>
+(assuming that you&rsquo;re on a 64-bit CPU, which you probably are. If not, I think you should leave
+this blank, but I&rsquo;m not sure.) Click Finish and wait for a while. At this stage, you may want to
+find <code>CMAKE_INSTALL_PREFIX</code> in the list of options and set it to point to somewhere else - this is
+where the final binaries will be found. Finally, click Generate, and CMake will generate a Visual
+Studio Solution file (&ldquo;LLVM.soln&rdquo;) in your build directory.</p>
+
+<p>Open that in Visual Studio and press F7 (or click Build-&gt;Build in the menu) to begin the
+compilation process. This process took over an hour on my machine and rendered it largely unusable
+in the meantime due to high memory usage, so you&rsquo;ll want to be aware of that (close memory-hungry
+applications like web browsers). Once that is finished, you&rsquo;ll have the necessary executables in
+<code>$CMAKE_INSTALL_PREFIX/bin</code>. You can now go ahead and clean up the CMake build directory (it takes
+up a lot of disk space) and even uninstall CMake at this point; we won&rsquo;t be needing it anymore.
+Likewise, if you like, you no longer need to have the LLVM source code either.</p>
+
+<p>OK! Now we have everything installed and we&rsquo;re almost ready to run some code on the GPU. Make sure
+that you&rsquo;ve added your new LLVM tools to your <code>$PATH</code>. Also, set the environment variable
+<code>CUDA_LIBRARY_PATH</code> to tell Accel where to find the CUDA libraries (in my case, I set it to
+<code>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\lib\x64</code>).</p>
+
+<p>You will probably want to clone the Accel repository as well; some of the latest fixes haven&rsquo;t been
+released yet and I found I needed to make some custom modifications to it to get it to compile.</p>
+
+<pre><code>git clone https://github.com/termoshtt/accel.git
+</code></pre>
+
+<p>Specifically, I needed to modify <code>nvptx/src/compile.rs</code> to remove the <code>+nightly</code> argument to Xargo.
+I haven&rsquo;t submitted a pull request for this because I&rsquo;m unsure if that change would work for others
+or if it&rsquo;s just an oddity of my own environment.</p>
+
+<p>Finally, we can start writing some Rust!</p>
+
+<pre><code>cargo init cuda-test
+cd cuda-test
+rustup override set nightly
+</code></pre>
+
+<h2 id="basic-example">Basic Example</h2>
+
+<p>Paste the example code from the Accel repository README into the <code>src/main.rs</code> file, and add the
+following to the <code>Cargo.toml</code> (assuming you cloned Accel as I suggested):</p>
+
+<pre><code>[dependencies]
+accel = { version = &quot;0.1.0&quot;, path = &quot;../accel&quot;}
+accel-derive = { version = &quot;0.1.0&quot;, path = &quot;../accel/accel-derive&quot;}
+</code></pre>
+
+<p>You&rsquo;ll want to edit the <code>#[build_path]</code> attribute on the <code>add</code> function though. The way Accel works
+is it uses a procedural macro to copy your kernel code into a second crate and compiles that crate
+to produce a PTX file which it can then load and provide to CUDA. By default, the example places the
+crate in a hidden folder under your home directory, which is just messy.</p>
+
+<p>At this point, you should be able to <code>cargo run</code> and see the following output:</p>
+
+<pre><code>a = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0]
+b = [0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0, 26.0, 28.0, 30.0, 32.0, 34.0, 36.0, 38.0, 40.0, 42.0, 44.0, 46.0, 48.0, 50.0, 52.0, 54.0, 56.0, 58.0, 60.0, 62.0]
+c = [0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0, 33.0, 36.0, 39.0, 42.0, 45.0, 48.0, 51.0, 54.0, 57.0, 60.0, 63.0, 66.0, 69.0, 72.0, 75.0, 78.0, 81.0, 84.0, 87.0, 90.0, 93.0]
+</code></pre>
+
+<p>You have now run Rust code on your GPU! Now, I&rsquo;ll walk through what this code is doing.</p>
+
+<pre><code>#[kernel]
+#[crate(&quot;accel-core&quot; = &quot;0.2.0-alpha&quot;)]
+#[build_path(&quot;.rust2ptx&quot;)]
+pub unsafe fn add(a: *const f64, b: *const f64, c: *mut f64, n: usize) {
+    let i = accel_core::index();
+    if (i as usize) &lt; n {
+        *c.offset(i) = *a.offset(i) + *b.offset(i);
+    }
+}
+</code></pre>
+
+<p>This declares our kernel - the entry-point function that will be launched on the GPU, distinguished
+by the <code>#[kernel]</code> attribute. This code will be copied to the <code>lib.rs</code> file of a separate crate (in
+this case, located at the path <code>.rust2ptx</code>), compiled to LLVM bitcode, linked together with the
+bitcode of all dependencies and finally compiled again to produce a PTX file that CUDA can accept.
+You can add dependencies to this subcrate using the following attributes:</p>
+
+<pre><code>#[crate(&quot;accel-core&quot; = &quot;0.2.0-alpha&quot;)]
+#[crate_path(&quot;common&quot; = &quot;../common&quot;)]
+</code></pre>
+
+<p>The <code>#[crate]</code> attribute is for regular Crates.io crates, while the <code>#[crate_path]</code> attribute
+refers to a crate by directory path. Note that this path is relative to the temporary kernel
+directory (<code>.rust2ptx</code>), hence the leading <code>..</code> (in this case, that means <code>.rust2ptx/../common</code>, or
+just <code>common</code>). There is no way to add <code>use</code> statements to the generated <code>lib.rs</code> file, so you&rsquo;ll
+need to refer to parameters with their fully-qualified type, though you can add <code>use</code> statements
+inside the kernel function if you wish.</p>
+
+<p>This simple example uses the <code>accel_core::index()</code> function to get the thread index, which works
+for simple kernels but for anything more complicated you&rsquo;ll probably want to use the
+<code>thread_idx/block_dim/block_idx/grid_dim</code> functions which return a structure containing the
+relevant values for all three dimensions (or just call the compiler built-ins directly - see the
+<a href="https://docs.rs/accel-core/0.2.0-alpha/accel_core/"><code>accel_core</code> rustdoc</a> for more details).</p>
+
+<pre><code>fn main() {
+    let n = 32;
+    let mut a = UVec::new(n).unwrap();
+    let mut b = UVec::new(n).unwrap();
+    let mut c = UVec::new(n).unwrap();
+
+    for i in 0..n {
+        a[i] = i as f64;
+        b[i] = 2.0 * i as f64;
+    }
+    println!(&quot;a = {:?}&quot;, a.as_slice());
+    println!(&quot;b = {:?}&quot;, b.as_slice());
+</code></pre>
+
+<p>Here, we allocate and fill three <code>UVec</code>s. These are fixed-size arrays in a <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#um-unified-memory-programming-hd">Unified Memory</a>
+space shared between the CPU and GPU. In Accel, this is how you bulk-transfer data to and from the
+GPU&rsquo;s memory and allocate working memory space for the kernel.</p>
+
+<pre><code>    let grid = Grid::x(1);
+    let block = Block::x(n as u32);
+    add(grid, block, a.as_ptr(), b.as_ptr(), c.as_mut_ptr(), n);
+
+    device::sync().unwrap();
+    println!(&quot;c = {:?}&quot;, c.as_slice());
+</code></pre>
+
+<p>Here, we create Grid and Block structures to define the size (Block) and number (Grid) of our
+thread blocks in one, two, or three dimensions. This is analogous to the parameters in the <code>&lt;&lt;&lt;&gt;&gt;&gt;</code>
+syntax in CUDA C. We launch the <code>add</code> kernel on the device by calling the <code>add</code> function, passing
+first our grid and block settings, then the actual parameters to the function (converting UVecs to
+raw pointers). Finally, we call <code>device::sync()</code> to block the current thread until all of the
+kernels we&rsquo;ve launched have completed, then we print the results.</p>
+
+<p>At this point, I think it&rsquo;s useful to talk a bit about how to design a Rust GPU project. Accel&rsquo;s
+procedural macro can really only handle a single function, and that&rsquo;s not enough to build anything
+interesting. However, it does know about crates. You&rsquo;ll definitely need the <code>accel-core</code> crate - it
+provides access to compiler built-ins like the <code>threadIdx</code> values which are necessary for GPU
+programming. I think it&rsquo;s also useful to put the majority of your code into a second sub-crate in a
+local subdirectory. This makes it easy to share common structures and functions between your GPU
+and CPU code, and even execute the kernel on the CPU for debugging and testing purposes. In my path
+tracer, the <code>#[kernel]</code> function is nothing more than a simple wrapper around my actual kernel
+function which is defined in a separate crate. If you do this, however, note that rustc will not
+inline functions from one crate into another unless they&rsquo;re tagged with <code>#[inline]</code>, which can ruin
+the performance of your kernel. Handily, the generated PTX file is plain text, so if you&rsquo;re familiar
+with reading assembly code you can open it up (<code>.rust2ptx/kernel.ptx</code>) and see what&rsquo;s going on.</p>
+
+<h2 id="pitfalls">Pitfalls</h2>
+
+<p>Now that you can compile and run Rust code on your GPU, you should be aware that LLVM&rsquo;s PTX backend
+is not really all that mature at this point, and there are many pitfalls to doing this. Here are
+some of the ones that I ran into.</p>
+
+<p>First, this whole process likes to generate invalid PTX files, and CUDA typically gives no
+indication what went wrong - just an <code>INVALID_PTX</code> error at runtime. Indexing into a slice in the
+kernel code produces this error, for example. I thought it might be because of an unresolved
+reference to some code used in handling panics, but it happened for me even when I used
+<code>get_unchecked</code>. I was kind of bummed about this, since I&rsquo;d hoped that I could just convert the raw
+pointers into a slice at the top of the kernel and get back my nice Rust memory-safety, but no such
+luck. It would be nice if there was some way to panic on the GPU (even if it only terminated the
+kernel somehow) instead of generating an invalid PTX file. Relatedly, indexing into a fixed-size
+array also produced this error, but in that case using <code>get_unchecked</code> did work.</p>
+
+<p>I also found a couple even-stranger cases which produce <code>INVALID_PTX</code> errors. You can&rsquo;t use the
+<code>for x in 0..y</code> loop at all and instead must use a while loop, manually incrementing a counter.
+It&rsquo;s easy to forget the increment, creating an infinite loop. Windows will automatically kill any
+kernel that runs for more than a few seconds on the primary display GPU, which helpfully saves you
+from misbehaving kernels bringing down the entire system but limits how much computing time you can
+use at once. Additionally, implementing any of the <code>core::ops</code> traits like Add or Mul produces
+<code>INVALID_PTX</code> errors for some reason. That&rsquo;s especially annoying when working with Vectors, where
+operator-overloading is natural. Another way to trigger <code>INVALID_PTX</code> errors is to
+<code>#[derive(Debug)]</code> for any struct in the kernel code, though deriving <code>Clone</code> appears to work just
+fine.</p>
+
+<p>Also, for some reason Xargo insists that every crate must have the target-specification JSON file,
+which makes it somewhat annoying to use any third-party crate even if they do support <code>#![no_std]</code>.
+Accel generates it for you in the <code>#[build_path]</code> directory, but you&rsquo;ll need to add your own to any
+crate that your kernel depends on.</p>
+
+<p>On that note - everything callable by the kernel must be <code>#![no_std]</code>-compatible. This is a problem
+because a lot of core math routines - including basic stuff like <code>powf</code> and <code>sin/cos</code> require std
+and are not directly available in core. Since you have to use Nightly anyway, though, you can use
+many of them anyway by adding <code>#![feature(core_intrinsics)]</code> to your lib.rs file and then calling
+the unsafe intrinsics in <code>core::intrinsics</code>. Bizarrely, I ran into linker errors with some of the
+functions - notably the trigonometry functions like sin and cos - when I did this, although others
+worked fine. Ultimately, I ended up copying a pure-Rust implementation of these functions from the
+<a href="https://github.com/shingtaklam1324/mish">mish crate</a>. It gets the job done, but it would be better
+if rustc could emit the <code>sin/cos</code> instructions so that these functions could be
+hardware-accelerated.</p>
+
+<p>Additionally, there are a lot of things that CUDA programmers are used to which are just not
+accessible in rust. There is no way to access any memory space but global memory - local, shared,
+texture and constant memory are all unavailable. Furthermore, Accel does not yet provide anything
+beyond the basics - there are no streams and no asynchronous memory transfers.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Although it&rsquo;s true that GPU-compatible Rust code is a lot more similar to C than I&rsquo;d like, there are
+some aspects that make it worth the hassle.</p>
+
+<p>Rust-on-the-GPU still provides a lot of the conveniences of regular Rust. Tuples make for an easy
+way to return multiple values. Enums and Structs all work as expected, including pattern-matching,
+destructuring and Option (frankly, Option alone is worth all of the trouble necessary to use Rust).</p>
+
+<p>I hope somebody out there finds this useful - this is the document that I wish that I&rsquo;d had when I
+started this crazy project. With that said, though, all of this could benefit greatly from
+additional developer attention, from Accel all the way down to rustc and the LLVM PTX backend. It&rsquo;s
+my hope that this post can raise some interest and awareness of some of the ways that Rust GPGPU
+support is not yet awesome. Maybe we&rsquo;ll see some improvements in this area in the future!</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-06-14T19:00:00-06:00">
+    14 Jun, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/accel/">Accel</a>, <a href="/tags/gpgpu/">GPGPU</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">2570</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/jarvis-impressions-of-rust-libraries/">JARVIS - Notes on Rust Crates From Writing an RSS Reader</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
+        <time datetime="5M">5 minutes</time>
+      
+        <li><a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a>
+        <time datetime="22M">22 minutes</time>
+      
+        <li><a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
+        <time datetime="11M">11 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>
