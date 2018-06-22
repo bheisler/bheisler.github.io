@@ -6,10 +6,20 @@
     <description>Recent content in Code on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 14 Jun 2018 19:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Thu, 21 Jun 2018 19:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/categories/code/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 1</title>
+      <link>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-1/</link>
+      <pubDate>Thu, 21 Jun 2018 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-1/</guid>
+      <description>Well, it&amp;rsquo;s that time again. This is the start of a second series of articles on raytracing in Rust following on from my previous series. This time, I&amp;rsquo;ll be doing all of the rendering on a GPU using Accel - see my previous post on Accel. I thought this would be a good project for learning about GPU programming, see.
+Second, this time I want to write a path tracer, rather than a raytracer.</description>
+    </item>
     
     <item>
       <title>Running Rust on the GPU with Accel</title>

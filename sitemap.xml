@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-1/</loc>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/rust-on-the-gpu-with-accel/</loc>
     <lastmod>2018-06-14T19:00:00-06:00</lastmod>
   </url>
@@ -107,7 +112,7 @@
   
   <url>
     <loc>https://bheisler.github.io/categories/code/</loc>
-    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -131,7 +136,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/gpgpu/</loc>
-    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -160,6 +165,12 @@
   </url>
   
   <url>
+    <loc>https://bheisler.github.io/tags/pathtracer/</loc>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/tags/pennys-sword/</loc>
     <lastmod>2017-10-19T19:00:00-06:00</lastmod>
     <priority>0</priority>
@@ -167,7 +178,7 @@
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -185,13 +196,13 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/raytracer/</loc>
-    <lastmod>2017-04-02T00:00:00-06:00</lastmod>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/tags/rust/</loc>
-    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -209,7 +220,7 @@
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2018-06-14T19:00:00-06:00</lastmod>
+    <lastmod>2018-06-21T19:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 1 | bheisler.github.io</title>
+    <meta name="description" content="Well, it&rsquo;s that time again. This is the start of a second series of articles on raytracing in Rust following on from my previous series. This time, I&rsquo;ll be doing all of the rendering on a GPU using Accel - see my previous post on Accel. I thought this would be a good project for learning about GPU programming, see.
+Second, this time I want to write a path tracer, rather than a raytracer.">
+    <meta name="keywords" content="Rust, GPGPU, Raytracer, Pathtracer">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="Brook Heisler">
+
+
+    <meta property="og:title" content="Writing a GPU-Accelerated Path Tracer in Rust - Part 1" />
+<meta property="og:description" content="Well, it&rsquo;s that time again. This is the start of a second series of articles on raytracing in Rust following on from my previous series. This time, I&rsquo;ll be doing all of the rendering on a GPU using Accel - see my previous post on Accel. I thought this would be a good project for learning about GPU programming, see.
+Second, this time I want to write a path tracer, rather than a raytracer." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-1/" />
+
+  <meta property="og:image" content="https://bheisler.github.io/static/path_tracer_green_teapot.png" />
+
+
+
+<meta property="article:published_time" content="2018-06-21T19:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-06-21T19:00:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-1/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Writing a GPU-Accelerated Path Tracer in Rust - Part 1">
+<meta itemprop="description" content="Well, it&rsquo;s that time again. This is the start of a second series of articles on raytracing in Rust following on from my previous series. This time, I&rsquo;ll be doing all of the rendering on a GPU using Accel - see my previous post on Accel. I thought this would be a good project for learning about GPU programming, see.
+Second, this time I want to write a path tracer, rather than a raytracer.">
+
+
+<meta itemprop="datePublished" content="2018-06-21T19:00:00-06:00" />
+<meta itemprop="dateModified" content="2018-06-21T19:00:00-06:00" />
+<meta itemprop="wordCount" content="2990">
+
+  <meta itemprop="image" content="https://bheisler.github.io/static/path_tracer_green_teapot.png">
+
+
+
+<meta itemprop="keywords" content="Rust,GPGPU,Raytracer,Pathtracer," />
+
+    <header>
+      <h1 itemprop="headline">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>15 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-06-21T19:00:00-06:00">21 Jun, 2018</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>Well, it&rsquo;s that time again. This is the start of a second series of articles on raytracing in Rust
+following on from <a href="/post/writing-raytracer-in-rust-part-1/">my previous series</a>. This time, I&rsquo;ll be
+doing all of the rendering on a GPU using Accel - see <a href="/post/rust-on-the-gpu-with-accel.md">my previous post on
+Accel</a>. I thought this would be a good project for learning
+about GPU programming, see.</p>
+
+<p>Second, this time I want to write a path tracer, rather than a raytracer.</p>
+
+<p>You don&rsquo;t need to know anything about GPU programming to follow along - I&rsquo;ll explain things as
+needed. If you intend to run your code on the GPU though, you should read that post about Accel. As
+before, I will assume that you&rsquo;re familiar with the basics of linear algebra (you should know about
+vectors and matrices, as well as what the dot and cross products are). I&rsquo;ll also assume that you&rsquo;ve
+read the previous series.</p>
+
+<h2 id="path-tracing">Path Tracing</h2>
+
+<p>A path tracer is like a raytracer in that it traces rays of light backwards from the camera through
+a scene. Unlike a raytracer, however, a path tracer traces many rays - often thousands - for each
+pixel. The rays are scattered randomly off of the objects until they reach a light source, leave
+the scene entirely, or end for some other reason (eg. reaching a fixed bounce limit). Each ray is
+colored according to the objects it bounced off of and the light source it reached, and the final
+color of a pixel is the average of all rays traced through it.</p>
+
+<p>This more-accurately reflects the behavior of real light; what our eyes see is the sum total of all
+light received from a point in the world; those photons took many different paths and were colored
+by many different objects on their way to that point. For example, when a bright red object is in
+bright light it makes nearby objects appear to glow red with reflected light. When a sunbeam shines
+through a glass object, you can see a pattern of light and dark where the object focuses some of
+the light (these patterns are called &lsquo;caustics&rsquo;). Path tracing makes it easy to render these effects
+where ray tracing does not.</p>
+
+<p>That randomness has a downside as well - it can produce very noisy images if not enough paths are
+traced per pixel. We say that the image has converged when there are enough paths to remove visible
+noise. Additionally, tracing hundreds or thousands of rays per pixel takes much more computation
+than tracing one, so, all else being equal, path tracers take longer to render an image. Caustics
+in particular only show up if the scattered rays take very precise paths and so are even noisier
+than the rest of the scene. More advanced algorithms like Bi-Directional Path Tracing speed up
+rendering times by making the image converge with fewer paths, especially when rendering special
+effects like caustics. I&rsquo;ll just be implementing the basic path tracing algorithm here though.</p>
+
+<h2 id="basics-of-gpu-acceleration">Basics of GPU Acceleration</h2>
+
+<p>Raytracing is a good problem for GPU acceleration because it&rsquo;s massively parallel - every pixel (or
+in a path tracer, potentially every ray), can be computed in parallel with every other pixel. GPUs
+are fast because they can efficiently run thousands of parallel threads. Even though each
+individual thread is significantly slower than a CPU thread, working together they can do a lot of
+work quickly.</p>
+
+<p>It&rsquo;s not necessary to know a whole lot about GPU acceleration for this series. I will mostly ignore
+efficiency in this post; I&rsquo;ll make it work, then make it fast later on. I&rsquo;ll explain more about how
+to write efficient GPU code if and when it becomes relevant.</p>
+
+<h2 id="setting-the-scene">Setting the Scene</h2>
+
+<p>My raytracer only handled spheres and planes. I was bored with that, so the path tracer will work
+with polygon meshes instead. Crates.io already has a <a href="https://crates.io/crates/obj">Wavefront OBJ parsing
+library</a>. Polygons in the OBJ format consist of a list of indexes
+into a position array. I expanded that into a structure where each polygon contains three 3D
+vectors representing the vertices. I made this choice on the basis that this is easier to work
+with, but it also avoids the indirection of looking up the vertex index, then looking up the
+vertex. This structure is quite inefficient, but it&rsquo;s good enough for now. I may opt to rework this
+later.</p>
+
+<p>My meshes only contain triangles but some have quads or even more complex polygons. We&rsquo;ll convert
+those polygons to triangles for simplicity. To do this, take the first vertex then iterate over the
+remaining vertices using a two-element sliding window. This produces a series of three-vertex
+triangles. See the following pseudocode:</p>
+
+<pre><code>vertex1 = polygon[0]
+for (int k = 1; k &lt; polygon.length - 1; k++) {
+    vertex2 = polygon[k]
+    vertex3 = polygon[k+1]
+    add_triangle(vertex1, vertex2, vertex3)
+}
+</code></pre>
+
+<p>Now that we have triangles, we need rays and a way to intersect those rays against the triangles.
+To start with, we only need prime rays (the initial rays traced from the camera out). I just copied
+the prime-ray generation code from the old raytracer. This is an advantage to writing the path tracer
+in pure Rust rather than CUDA C - I can reuse existing Rust code without needing to rewrite it.</p>
+
+<h2 id="ray-triangle-intersection-test">Ray-Triangle Intersection Test</h2>
+
+<p>The nice thing about triangles is that all points lie in the same plane. This is helpful for the
+intersection test, since we can break it into two tests - does the ray intersect the plane, and if
+so, does it intersect the plane inside the triangle?</p>
+
+<p>First, we calculate the normal of the plane. Recall that the cross product of two vectors produces
+a new vector perpendicular to both. To generate the normal of a plane we take the cross product of
+two vectors which lie in that plane. We can generate two vectors in the plane of the triangle by
+subtracting the vertices from each other:</p>
+
+<pre><code>let a = v1 - v0;
+let b = v2 - v0;
+
+let normal = a.cross(b).normalize();
+</code></pre>
+
+<p>This will result in one of two vectors depending on the order of the vertices. This makes sense; a
+plane has two sides and therefore two opposing normal vectors. Which one we see depends on whether
+the vertices were stored in clockwise or counterclockwise order. Correct OBJ files are always in
+counterclockwise order and Scratchapixel uses the same convention so we should be OK.</p>
+
+<p>Last time, I passed over explaining how the plane-intersection test works, but I&rsquo;ll try now. I
+can&rsquo;t think of a good intuitive geometric explanation of why this works, so I&rsquo;ll just explain the
+math.</p>
+
+<p>Planes are defined by an equation <code>Ax + By + Cz + D = 0</code>. Some sources use <code>Ax + By + Cz
+= D</code> instead; this is just a different convention. You can convert between the two by negating D, but
+Scratchapixel uses the former equation so I will as well.</p>
+
+<p>Scratchapixel&rsquo;s derivation and implementation of this equation
+(<a href="https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution">here</a>)
+is wrong. This confused me for <em>hours</em> until I found another source that derived it correctly. The
+other source used the other convention, which confused me even more. Eventually I did the
+derivation myself on paper and spotted the mistake. I&rsquo;ll give the correct version.</p>
+
+<p>This equation is equivalent to <code>N dot P + D = 0</code> where N is a normal of the plane <code>(A, B, C)</code>, P is
+any point on the plane <code>(x, y, z)</code>, and D is the smallest distance between the plane and the
+origin. We also have the ray equation <code>Ray(t) = O + tR</code> where O is the origin of the ray, R is the
+direction, and t is some distance along the direction. If the ray intersects the plane then the
+intersection point must lie in the plane, so we can substitute Ray(t) for P get the following
+equation:</p>
+
+<pre><code>N dot Ray(t) + D = 0
+N dot (O + tR) + D = 0
+N dot O + t(N dot R) + D = 0
+
+// Rearrange to solve for t...
+N dot O + t(N dot R) = -D
+t(N dot R) = -D - (N dot O)
+t = (-D - (N dot O))/(N dot R)
+</code></pre>
+
+<p>We have N from earlier. O and R are the components of the ray we&rsquo;re tracing. We need D before we
+can get t. We can calculate D using N and <em>any</em> point on the plane. The vertices of the triangle
+are also points on the plane, so plug any vertex (I&rsquo;ll use the first one) into the equation and
+solve for D like so:</p>
+
+<pre><code>N dot v0 + D = 0
+D = -(N dot v0)
+</code></pre>
+
+<p>(This is where Scratchapixel goes wrong; they forgot the negative sign)</p>
+
+<p>Thus, we have the pseudocode for the intersection of a ray and a plane:</p>
+
+<pre><code>let D = -(normal.dot(polygon.vertices[0]));
+let t = (-D - (normal.dot(ray.origin))/(normal.dot(ray.direction));
+
+// Remove the double-negation of D
+let neg_D = normal.dot(polygon.vertices[0]);
+let t = (neg_D - (normal.dot(ray.origin))/(normal.dot(ray.direction));
+</code></pre>
+
+<p>Finally, plug t back into the ray equation to get the intersection point:</p>
+
+<pre><code>let p = ray.origin + t * ray.direction;
+</code></pre>
+
+<p>There are a few corner cases, however. If the ray is parallel to the triangle, then the dot-product
+of the normal and the ray direction will be zero - a divide-by-zero error. In that case we know the
+ray will not intersect the plane at all so we can return no-intersection.</p>
+
+<p>If the distance is negative, this means that the triangle&rsquo;s plane is behind the origin of the ray,
+and so it can&rsquo;t intersect. Again, we check for that and return no-intersection.</p>
+
+<h2 id="triangle-intersection-part-2">Triangle Intersection Part 2</h2>
+
+<p>Now that we&rsquo;ve found the point where the ray intersects the triangle&rsquo;s plane, we need to check if
+that point is inside the triangle. First, we define a test to check if a point is on the left side
+or right side of a vector.</p>
+
+<p>Consider the following image:</p>
+
+<p><img src="left-or-right.png" alt="Left Or Right Vectors" /></p>
+
+<p>We can use the cross product and dot product to determine if the vectors B and B&rsquo; are on the left
+or right side of the vector A. For this example, let&rsquo;s use the following numbers:</p>
+
+<pre><code>A = (0, 1, 0)
+B = (-1, 1, 0)
+B' = (1, 1, 0)
+</code></pre>
+
+<p>Recall that the cross product is defined like so:</p>
+
+<pre><code>C.x = A.y * B.z - A.z * B.y
+C.y = A.z * B.x - A.x * B.z
+C.z = A.x * B.y - A.y * B.x
+</code></pre>
+
+<p>We&rsquo;ll calculate <code>C = A.cross(B)</code> and <code>C' = A.cross(B')</code>. A.z, B.z and B&rsquo;.z are all zero in this
+case, so C.x and C&rsquo;.x will also be zero. The same is true for C.y and C&rsquo;.y. C.z and C&rsquo;.z,
+however&hellip;</p>
+
+<pre><code>C.z = 0 * 1 - 1 * -1
+    = 0 - (-1)
+    = 1
+
+C'.z = 0 * 1 - 1 * 1
+     = 0 - 1
+     = -1
+</code></pre>
+
+<p>C = (0, 0, 1) and C&rsquo; = (0, 0, -1). Conventionally, negative-Z means &ldquo;into the screen&rdquo;, so this
+means that C points out of the screen while C&rsquo; points into it. This gives us our test; B is on the
+left side of A and so the cross product points out of the screen, where B&rsquo; is on the right side of
+A so the cross product points into the screen. To handle arbitrary planes in 3D space, we can
+calculate the dot product of C and C&rsquo; against the normal vector N. N and C point in the same
+direction so their dot product will be positive, while N and C&rsquo; point in opposite directions, so
+their dot product will be negative.</p>
+
+<p>Putting that all together, we get our left-side test: <code>left = A.cross(P).dot(N) &gt; 0</code> where A and P
+are the vector and point we want to check and N is the surface normal of the plane.</p>
+
+<p>Now that we have that, we can test if a point is inside the triangle. If the point is to the left
+of all three edges of the triangle (in counter-clockwise order), it&rsquo;s inside the triangle.</p>
+
+<p>This is an intersection test that we can implement in code. As a side note, this left-of-all-edges
+test works on all convex polygons, not just triangles.</p>
+
+<script src="//gist.github.com/bheisler/21ea8261e45ffefefb6188369ecbed22.js"></script>
+
+<h2 id="a-diversion">A Diversion</h2>
+
+<p>At this point my path tracer started crashing mysteriously - even forcing a display reset. I
+suspected a segfault (I&rsquo;m using raw pointers, so Rust can&rsquo;t prevent memory errors), but I checked
+my code and I couldn&rsquo;t find one. Then I noticed that it worked - but only if I rendered fewer
+polygons.</p>
+
+<p>After some internet searching, I discovered that most operating systems - including Linux and
+Windows - have a watchdog timer. If the GPU is busy and unable to repaint the screen for more than
+a few seconds, the OS resets it, killing the misbehaving kernel. There are ways around this (at
+least on Windows) by changing registry settings. Some graphics cards can be set into a different
+mode where it isn&rsquo;t available for painting the screen, but I only have the one GPU, so that doesn&rsquo;t
+work for me. For now, I&rsquo;ll break up the image into smaller blocks so that the card can render each
+block inside the time limit, and as my code grows more complex I will edit the registry to increase
+the time limit.</p>
+
+<h2 id="first-image">First Image</h2>
+
+<p>Whew! After all of that, I threw together some basic code to render an image. It&rsquo;s simple
+code for now; it traces one ray for each pixel and sets the color to bright green if it hits a
+polygon.</p>
+
+<script src="//gist.github.com/bheisler/88b54293249f670bba1da22a7e0394a7.js"></script>
+
+<p><img src="/static/path_tracer_green_teapot.png" alt="First Rendered Image" /></p>
+
+<p>What&rsquo;s that <del>Pokemon</del> object? The <a href="https://en.wikipedia.org/wiki/Utah_teapot">Utah Teapot</a> as
+seen from above!</p>
+
+<h2 id="positioning">Positioning</h2>
+
+<p>Using triangle meshes raises another consideration. We defined spheres with a center point and
+size; for planes we provided a point and a normal vector. How do we place a mesh within the scene?
+We can move a mesh by adding a constant to each component of each vertex - but how do we scale or
+rotate a mesh? We use matrices - specifically, 4x3 (or sometimes 4x4) matrices.</p>
+
+<p>This article is getting quite long already, so I&rsquo;ll just lay down some basics (again, assuming that
+you know what matrices and vectors are). It&rsquo;s easiest to describe this in software terms, so think
+of a 4x3 matrix as a function which takes a 3D vector and returns a transformed 3D vector. I won&rsquo;t
+go into too much detail (see links below for that), but it&rsquo;s possible to construct a matrix that
+performs the <code>translation</code> function - ie. it adds a value to each component of the vector.
+Likewise, there are matrices that will scale a vector or rotate it around the X/Y/Z axes.</p>
+
+<p>Those familiar with functional programming will know how you can package up a function, pass it
+around, combine it with other functions and ultimately apply it to some input to get some output.
+The same is true for these function-matrices (or really, any matrix). We apply a matrix to a vector
+by computing the matrix-vector multiplication, which produces a new vector. We can compose function
+matrices by multiplying the two matrices together to produce a new matrix which performs the
+function of both.</p>
+
+<p>To position an object in the world we construct a matrix/function that converts the vertex
+positions of the input object to some new vertex positions representing where we want the object to
+be in the world. More formally, this matrix converts from the object&rsquo;s coordinate space to the
+world&rsquo;s coordinate space - and this is why these matrices are typically called object-to-world
+matrices. Once we define the object-to-world matrix, we can apply it to (multiply it with) the
+vectors that make up the polygons of the object, producing new vertices which position the polygons
+in the right place in the world.</p>
+
+<p>Now, you could write the object-to-world matrix by hand, but just as with software it&rsquo;s easier to
+define building-blocks (eg. code to create translation or scaling matrices). We can then compose
+the functions together - for example, scale by <sup>3</sup>&frasl;<sub>5</sub>, then rotate about the X axis by 90 degrees,
+then translate down by one unit - to get the object-to-world matrix.</p>
+
+<p>Just like with function composition, it&rsquo;s important to be aware of the order in which the functions
+will be applied - <code>f(g(x))</code> is not necessary the same as <code>g(f(x))</code>, and <code>translate(0.0, 0.0,
+1.0).multiply(scale(0.6))</code> is not the same as <code>scale(0.6).multiply(translate(0.0, 0.0, 1.0)</code>.
+Depending on how you implement your matrix-multiply function, the function composition might go
+right-to-left (ie. the right-most operation is applied first) or left-to-right. It&rsquo;s important to
+know which one you&rsquo;re using when you construct the object-to-world matrix. This matrix-multiply
+code makes it so that matrices compose right-to-left, which is the normal convention:</p>
+
+<script src="//gist.github.com/bheisler/01ff742ff63a0681611fda60e44f3f9e.js"></script>
+
+<p>We then multiply the matrix against every vertex of every triangle and collect the new vectors into
+new triangles which represent the new position of the object in the world. As a side note - I
+didn&rsquo;t cover this in my last series (and it won&rsquo;t be needed in this one either) but you can use
+this technique to position the camera in the world as well. Apply the matrix to the origin and
+direction of the prime rays. Be aware that applying a matrix to a point in space is not the same as
+applying it to a direction vector - see the links below for more detail.</p>
+
+<p>If you&rsquo;re interested in the theory behind this, I recommend 3Blue1Brown&rsquo;s <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab">excellent series on
+linear algebra</a>. It
+covers the concept of matrices-as-functions with more depth and clarity than I could manage. Also
+check out <a href="https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry">Scratchapixel&rsquo;s articles on
+Geometry</a>,
+which I used when I wrote this matrix-math code for my last raytracer.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>We have some building blocks and a rudimentary GPU-accelerated raytracer. As usual, check out <a href="https://github.com/bheisler/pathtracer/tree/68027ce487229fe5de82ff81f5140300dfe827c7">the
+code on
+GitHub</a> and
+stay tuned for the next post, where we&rsquo;ll turn this into a true path-tracer and add support for
+refractive and reflective surfaces.</p>
+
+<p>Thanks to Daniel Hogan for beta-reading this article and offering helpful comments.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author">Brook Heisler</span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-06-21T19:00:00-06:00">
+    21 Jun, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/gpgpu/">GPGPU</a>, <a href="/tags/pathtracer/">Pathtracer</a>, <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">2990</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
+        <time datetime="11M">11 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
+        <time datetime="12M">12 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
+        <time datetime="9M">9 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/jarvis-impressions-of-rust-libraries/">JARVIS - Notes on Rust Crates From Writing an RSS Reader</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>
