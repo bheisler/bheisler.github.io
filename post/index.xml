@@ -6,10 +6,20 @@
     <description>Recent content in Posts on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 21 Jun 2018 19:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Thu, 12 Jul 2018 19:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 2</title>
+      <link>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-2/</link>
+      <pubDate>Thu, 12 Jul 2018 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-2/</guid>
+      <description>Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&amp;rsquo;d meant to have this post up sooner, but nothing ruins my productivity quite like Games Done Quick. I&amp;rsquo;m back now, though, so it&amp;rsquo;s time to turn the GPU ray-tracer from the last post into a real path tracer.
+Tracing Paths As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate global illumination.</description>
+    </item>
     
     <item>
       <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 1</title>

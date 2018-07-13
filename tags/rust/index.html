@@ -25,7 +25,7 @@
 
 
 
-<meta property="og:updated_time" content="2018-06-21T19:00:00-06:00"/>
+<meta property="og:updated_time" content="2018-07-12T19:00:00-06:00"/>
 
 
 
@@ -217,6 +217,41 @@ a:hover {
   <header>
     <h1>Rust</h1>
   </header>
+  
+    <article itemscope itemtype="http://schema.org/CreativeWork">
+  <header>
+    <h2 itemprop="name">
+      <a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
+    </h2>
+    
+      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>16 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-07-12T19:00:00-06:00">12 Jul, 2018</time>
+
+</p>
+    
+  </header>
+  
+  <div itemprop="description">
+    Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&rsquo;d meant to have this post up sooner, but nothing ruins my productivity quite like Games Done Quick. I&rsquo;m back now, though, so it&rsquo;s time to turn the GPU ray-tracer from the last post into a real path tracer.
+Tracing Paths As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate global illumination.
+  </div>
+  
+    <nav class="readmore"><a itemprop="url" href="/post/writing-gpu-accelerated-path-tracer-part-2/">Read More&nbsp;&raquo;</a></nav>
+  
+  <meta itemprop="inLanguage" content="en-us">
+  <meta itemprop="datePublished" content="2018-07-12T19:00:00-06:00">
+  <meta itemprop="dateModified" content="2018-07-12T19:00:00-06:00">
+  
+</article>
+
   
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
@@ -529,43 +564,6 @@ Anyway, I&rsquo;ve been working on that project again lately, doing some mainten
   <meta itemprop="dateModified" content="2017-04-02T00:00:00-06:00">
   
     <meta itemprop="image" content="https://bheisler.github.io/static/rendered-by-python.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>12 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-03-27T00:00:00-06:00">27 Mar, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
-First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-3/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-27T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
   
 </article>
 

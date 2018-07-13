@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 2 | bheisler.github.io</title>
+    <meta name="description" content="Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&rsquo;d meant to have this post up sooner, but nothing ruins my productivity quite like Games Done Quick. I&rsquo;m back now, though, so it&rsquo;s time to turn the GPU ray-tracer from the last post into a real path tracer.
+Tracing Paths As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate global illumination.">
+    <meta name="keywords" content="Rust, GPGPU, Raytracer, Pathtracer">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="Brook Heisler">
+
+
+    <meta property="og:title" content="Writing a GPU-Accelerated Path Tracer in Rust - Part 2" />
+<meta property="og:description" content="Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&rsquo;d meant to have this post up sooner, but nothing ruins my productivity quite like Games Done Quick. I&rsquo;m back now, though, so it&rsquo;s time to turn the GPU ray-tracer from the last post into a real path tracer.
+Tracing Paths As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate global illumination." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-2/" />
+
+
+
+<meta property="article:published_time" content="2018-07-12T19:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-07-12T19:00:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-2/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Writing a GPU-Accelerated Path Tracer in Rust - Part 2">
+<meta itemprop="description" content="Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&rsquo;d meant to have this post up sooner, but nothing ruins my productivity quite like Games Done Quick. I&rsquo;m back now, though, so it&rsquo;s time to turn the GPU ray-tracer from the last post into a real path tracer.
+Tracing Paths As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate global illumination.">
+
+
+<meta itemprop="datePublished" content="2018-07-12T19:00:00-06:00" />
+<meta itemprop="dateModified" content="2018-07-12T19:00:00-06:00" />
+<meta itemprop="wordCount" content="3240">
+
+
+
+<meta itemprop="keywords" content="Rust,GPGPU,Raytracer,Pathtracer," />
+
+    <header>
+      <h1 itemprop="headline">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>16 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-07-12T19:00:00-06:00">12 Jul, 2018</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&rsquo;d
+meant to have this post up sooner, but nothing ruins my productivity quite like
+<a href="https://gamesdonequick.com/">Games Done Quick</a>. I&rsquo;m back now, though, so it&rsquo;s time to turn the
+GPU ray-tracer from the <a href="/post/writing-gpu-accelerated-path-tracer-part-1/">last post</a> into a real
+path tracer.</p>
+
+<h2 id="tracing-paths">Tracing Paths</h2>
+
+<p>As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate
+global illumination. That is, the light that you see from objects or areas that don&rsquo;t have a direct
+path to light sources. If you look around, you can probably find places which are shaded from all
+local light sources and yet are not completely dark. This is because some light is being scattered
+off other objects, lighting up the dark corners and then reaching your eyes.</p>
+
+<p>Path tracing attempts to simulate this by tracing a complete path from the camera back to a light
+source, scattering randomly off of objects in the way. In reality, there are infinitely many
+different paths a photon might have taken to reach your eyes, and it may have bounced arbitrarily
+many times. Our computing power is unfortunately finite, so we need to find ways to cheat. We can
+make this problem manageable using a technique called Monte Carlo Integration. You can look that up
+in more detail if you want to. For our purposes this means that we take a random sample of the
+problem (ie. a number of random paths through the scene) and compute the average brightness.</p>
+
+<p>As you might imagine, the random nature of this causes visual noise to appear in the final image.
+We&rsquo;ll deal with this by ignoring it, and just cranking up the number of paths we trace per pixel -
+this will decrease the noise but not eliminate it. Real path tracers use more-advanced algorithms
+which produce less noise for a given number of paths and sometimes perform a de-noising operation
+after rendering as well. I have no idea how that works. Maybe I&rsquo;ll take the time to learn someday!</p>
+
+<p>We can further simplify matters by using the path-tracing algorithm to do all of our lighting
+calculations, rather than tracing shadow rays like we did in the original raytracer series. A
+production-quality renderer would probably use the global illumination as just a part of the
+lighting equation, but it&rsquo;s good enough for us all by itself.</p>
+
+<p>Additionally, we&rsquo;ll cut off paths after a fixed number of bounces. In practice, most photons lose
+almost all of their energy after a few bounces anyway, so they can mostly be ignored without a
+major effect on the resulting image. This does bias the results a bit, making the image darker than
+it really should be, but hopefully not enough to be noticeable.</p>
+
+<h2 id="on-surfaces">On Surfaces</h2>
+
+<p>It&rsquo;s easy enough to bounce rays off of polished glass or metal surfaces. We implemented that in the
+previous series on raytracing, and it&rsquo;s no different now. For these surfaces, there&rsquo;s a single
+deterministic direction for the new ray, based on the surface normal and the incident ray.</p>
+
+<p>Matte surfaces (also known as diffuse surfaces) are different, however. They scatter incident light
+randomly over a half-sphere above the point of contact, centered on the surface normal. To simulate
+this, we&rsquo;ll have to generate random numbers on the GPU. Ideally, they should be very cheap to
+generate but still have good-quality pseudorandomness. Then, we need to use those random numbers
+to choose a direction vector in the appropriate half-sphere. First, let&rsquo;s look at selecting a
+direction for the bounce ray; I&rsquo;ll come back to generating random numbers later.</p>
+
+<h2 id="hemispheres">Hemispheres</h2>
+
+<p>At a high level, selecting a random direction goes like this. Suppose you wanted to pick a random
+spot in the sky to point a telescope at. You might do this by generating one random number to
+indicate which direction you should face (eg. zero to two*PI radians from north) and one number to
+indicate how high you should look (ranging from zero at the horizon to PI/2 radians, or straight
+up). These two numbers are called the azimuth (direction angle) and elevation (angle up into the
+sky), and together they&rsquo;re called polar coordinates. Then we need to convert these two coordinates
+into the Cartesian system used by our other code.</p>
+
+<p>Normally, converting polar coordinates to cartesian would be done with the following equations:</p>
+
+<pre><code>// r here is the radius of the sphere, which in our case is always 1
+// so I'll ignore it from now on.
+azimuth = rand() * PI * 2
+elevation = rand() * PI / 2
+x = r * sin(elevation) * cos(azimuth)
+y = r * cos(elevation)
+z = r * sin(elevation) * sin(azimuth)
+</code></pre>
+
+<p>For efficiency, it would be nice if we could avoid computing so many trigonometric functions. They
+tend to be slow at the best of times. What&rsquo;s worse is that I had to use software implementations of
+these functions because I couldn&rsquo;t figure out how to get rustc to generate the appropriate
+sin/cos/tan PTX instructions, so they&rsquo;re even slower on the GPU.</p>
+
+<p>Instead, we can generate a random number for <code>cos(elevation)</code> directly, and then calculate
+<code>sin(elevation)</code> from that.</p>
+
+<pre><code>// We have the following rule from trigonometry:
+sin^2(angle) + cos^2(angle) = 1
+
+// Move the cos term to the other side of the equals
+sin^2(angle) = 1 - cos^2(angle)
+
+// Take the square root
+sin(angle) = sqrt(1 - cos^2(angle))
+
+// cos^2(angle) = cos(angle)^2, and we already have cos(angle), so...
+y = rand()
+sin(angle) = sqrt(1 - y * y);
+</code></pre>
+
+<p>This gives us a faster way to generate a point on a hemisphere:</p>
+
+<pre><code>azimuth = rand() * PI * 2
+y = rand()
+sin_elevation = sqrt(1 - y * y)
+x = sin_elevation * cos(azimuth);
+z = sin_elevation * sin(azimuth);
+</code></pre>
+
+<p>Now we only have to compute two slow trigonometric functions instead of four.</p>
+
+<p>Technically, this is not just an optimization. This is known as Cosine-weighted Importance Sampling
+and apparently it has some nice statistical properties which reduce the noise in the final image.
+I&rsquo;m afraid I don&rsquo;t really know the details and couldn&rsquo;t find a good explanation - if you know of one
+then please send me a link.</p>
+
+<p>This code generates vectors in a hemisphere centered on the Y axis above the origin. We want them
+to be centered on the surface normal above the intersection point. We can do this by defining a new
+coordinate system using the surface normal as our &lsquo;Y-axis&rsquo; and creating other vectors to serve as
+X and Z axes. Then we can transform our hemisphere-vector into this new coordinate system.</p>
+
+<p>The Y axis of our temporary coordinate system is given - it&rsquo;s the surface normal. How do we generate
+the other vectors? We really only need one vector perpendicular to the surface normal. If we have
+that, we can generate the third using the cross product.</p>
+
+<p>First, lets return to the plane equation from last time:</p>
+
+<pre><code>Ax + By + Cz + D = 0
+// Alternately, we could use the coordinates of our hit normal N.
+N.x * x + N.y * y + N.z * z + D = 0
+</code></pre>
+
+<p>In this case, we don&rsquo;t care about D so we&rsquo;ll just ignore it. Additionally, in this case we&rsquo;re
+interested in a plane that is perpendicular to the hit normal (our Y axis) and so every point on
+that plane will have a Y coordinate of zero, so we can ignore that as well.</p>
+
+<pre><code>N.x * x + N.z * z = 0
+N.x * x = -(N.z * z)
+</code></pre>
+
+<p>Now, consider - which values of x and z could make this equation true (remember that N.x and N.z
+are fixed already)? Well, if x = -N.z and z = N.x, that would make both sides equal. Another option
+would be if z = -N.x and x = N.z. We can use this to generate a perpendicular vector to our hit
+normal. I admit, I don&rsquo;t fully get why this works, but it does. I think we just need to find a
+vector that points to some point on the plane, since any point on the plane creates a vector
+perpendicular to the hit normal.</p>
+
+<pre><code>let Nt = Vector(N.z, 0, -N.x).normalize();
+let Nb = N.cross(Nt);
+</code></pre>
+
+<p>There is one more wrinkle, though. If N.z and N.x are both close to zero then normalizing (which
+involves dividing by <code>sqrt(N.x * N.x + N.z * N.z)</code>) could result in a very long vector, or even a
+divide-by-zero. We can avoid this by performing a similar trick using the Y coordinate if that&rsquo;s
+larger than the X coordinate, like so:</p>
+
+<pre><code>if (fabs(N.x) &gt; fabs(N.y)) {
+    Nt = Vector(N.z, 0, -N.x).normalize();
+}
+else {
+    Nt = Vector(0, -N.z, N.y).normalize();
+}
+Nb = N.cross(Nt);
+</code></pre>
+
+<p>Now we have an X/Y/Z coordinate system comprised of (Nb, N, Nt). To transform our hemisphere vector
+to this coordinate system, we multiply and sum all of the vectors against the hemisphere vector,
+like so:</p>
+
+<pre><code>new_ray_direction = Vector(
+    hemisphere.x * Nb.x + hemisphere.y * N.x + hemisphere.z * Nt.x,
+    hemisphere.x * Nb.y + hemisphere.y * N.y + hemisphere.z * Nt.y,
+    hemisphere.x * Nb.z + hemisphere.y * N.z + hemisphere.z * Nt.z,
+)
+</code></pre>
+
+<p>You may notice that this looks a lot like a matrix multiplication. Recall from the previous post
+how we use matrices to transform vectors into new positions? It&rsquo;s the same principle here, except
+that I&rsquo;ve performed the multiplication directly rather than constructing a matrix object.</p>
+
+<h2 id="generating-random-floats">Generating Random Floats</h2>
+
+<p>Next we need to be able to generate random numbers that we can use in this process. Normally, I
+would just use the <code>rand</code> crate, but in this case I can&rsquo;t. It does have <code>no_std</code> support, but Xargo
+needs a target JSON file for every crate and <code>rand</code> doesn&rsquo;t provide one. I could clone <code>rand</code>
+locally and add one, but it&rsquo;s kind of fun to DIY it. I don&rsquo;t need a cryptographically-secure RNG to
+render pretty pictures, so I&rsquo;m just going to wing it.</p>
+
+<p>You can use any pseudo-random number generator you like. I&rsquo;m I&rsquo;m going with an
+<a href="https://en.wikipedia.org/wiki/Xorshift#xorshift">xorshift</a> generator because it&rsquo;s small (both in
+terms of code and memory) and because it&rsquo;s fast. This generates a 32-bit unsigned integer as
+output. We need a floating-point value in the range [0.0-1.0]. We could simply divide by the
+maximum value of a u32. Or, we could do some <a href="https://en.wikipedia.org/wiki/Fast_inverse_square_root#Overview_of_the_code">evil floating-point bit-level
+hacking</a> to make it go
+faster. I know which one I&rsquo;m going with!</p>
+
+<p>Standard (IEEE754) floating-point numbers are made up of a sign bit, some number of exponent bits
+and the rest are mantissa bits. The sign bit we already know; it should be positive. Think
+of the exponent bits as selecting a window between two consecutive powers-of-two, and the
+mantissa bits as selecting an offset within that window (see <a href="http://fabiensanglard.net/floating_point_visually_explained/">Floating Point Visually
+Explained</a> for more details).</p>
+
+<p>Therefore, if we can generate a random mantissa section and set the sign and exponent bits to the
+right value, we can generate a random float without doing a floating-point division (which is
+somewhat expensive).</p>
+
+<p>As a side note - this is silly levels of micro-optimization, especially considering that we haven&rsquo;t
+even tried to optimize the rendering algorithm yet. I&rsquo;m just doing this for fun, not because I
+think the extra performance is actually worth it. Additionally, this algorithm was inspired by
+<a href="https://xor0110.wordpress.com/2010/09/24/how-to-generate-floating-point-random-numbers-efficiently/">this blog post.</a></p>
+
+<p>Anyway, we know the right window for our numbers - [0.0 to 1.0]. However, it&rsquo;s easiest to do this
+if we select the window of the right width to start with, so I&rsquo;ll go with generating a number in
+the range of [1.0 to 2.0] and then subtract 1.0 from it afterwards. This also allows us to ignore
+some extra complexity that comes with values close to zero.</p>
+
+<p>For IEEE single-precision floating points, this gives us a fixed bit pattern for the first 9 bits,
+followed by 23 random bits. I used a floating-point converter I found on Google to get the correct
+bit pattern for the sign and exponent bits - 0x3F800000. Then we mask out the lower 23 bits of
+our random integer (mask is 0x007FFFFF) and combine. Finally, we transmute the resulting bit
+pattern into a 32-bit float, subtract 1.0 and return.</p>
+
+<pre><code>fn random_float(seed: &amp;mut u32) -&gt; f32 {
+    let mut x = *seed;
+    x ^= x &gt;&gt; 13;
+    x ^= x &lt;&lt; 17;
+    x ^= x &gt;&gt; 5;
+    *seed = x;
+    let float_bits = (x &amp; 0x007FFFFF) | 0x3F800000;
+    let float: f32 = unsafe { ::core::mem::transmute(float_bits) };
+    return float - 1.0;
+}
+</code></pre>
+
+<p>Some quick testing confirms that the output is at least approximately uniform, so it&rsquo;s probably
+good enough for our purposes. One neat thing about this trick is that it&rsquo;s customizable; if you
+want numbers in the range [-1.0, 1.0] you can use 0x40000000 instead of 0x3F800000 to select the
+exponent for the [2.0, 4.0] range and then subtract 3.0.</p>
+
+<h2 id="putting-it-all-together">Putting it All Together</h2>
+
+<p>Now we can create a random scatter direction, so we can have our backwards light rays bounce
+realistically when they intersect an object. We need to bounce each ray through the scene, adding
+the emission of any glowing objects it encounters.</p>
+
+<p>On the CPU, I would do this recursively. I might have a function to trace a ray and return the color
+of the light coming from that direction, and it would then call itself recursively to some bounce
+limit. I&rsquo;d multiply that light by the albedo and color of the object, a factor based on the angle
+of incidence and maybe a constant fudge factor to make things look nice, and return it.</p>
+
+<p>CUDA code technically can do recursion, but every time I try it causes the kernel launch to fail
+with an <code>OUT_OF_RESOURCES</code> error. CUDA&rsquo;s error messages are super unhelpful, so I have no idea why.</p>
+
+<p>I&rsquo;ll have to do this with iteration, then. This is a bit tricky to think about because it&rsquo;s sort of
+backwards from how I would normally think about light. I keep an accumulator color to hold the
+color for the path as it&rsquo;s being traced, and another mask color. The mask color is multiplied by
+the emission of each intersected object and added to the accumulator. The mask represents the
+accumulated absorption of all of the objects that the ray has intersected until now.</p>
+
+<p>Some examples are in order. If the ray we trace directly intersects a glowing object (0.8, 0.8,
+0.8), the mask will be (1.0, 1.0, 1.0), so the glow color of the object will be added directly to
+the accumulator. If we bounce off a green (0.0, 1.0, 0.0) object first, the mask picks up the green
+color, and it might be set to (0.0, G, 0.0), where G is &lt; 1.0. Then, when we multiply the mask by
+the emission of the glowing object on the next intersection, the accumulator is set to (0.0, 0.8 *
+G, 0.0).</p>
+
+<p>The reason why the mask is less bright than the color of the object has to do with the albedo of
+the object (how much of the incoming light does it reflect away) and the angle of incidence of that
+light.</p>
+
+<p>Afterwards, we generate a new random direction for the ray and repeat the process.</p>
+
+<script src="//gist.github.com/bheisler/ef9072ea70da1c3e2783cbc0a5c0e464.js"></script>
+
+<p>Now that we have code to sample the color at a pixel, we need to average the colors together to
+form a pixel in our resulting image. Since the scattered rays may not ever intersect with a light
+source, there would be a huge amount of noise in our image if we only sampled each pixel once.
+Instead, path tracers trace many (hundreds or thousands) of scattered paths through the scene and
+average all of the resulting samples together.</p>
+
+<p>This raises another problem. Remember the 3-second time limit on kernel execution I mentioned in
+the last post? There&rsquo;s no way my card can render a decent-sized image with thousands of paths per
+pixel in 3 seconds. It can&rsquo;t even come close to tracing enough rays in one 3-second window to make
+even a small part of the image converge.</p>
+
+<p>To work around this, I render each block of the image many times, accumulating the results in the
+image buffer. In this way, I can render an arbitrarily complex scene (within limits, anyway; it has
+to be able to complete at least one sample for each pixel in time) given enough time.</p>
+
+<script src="//gist.github.com/bheisler/e48c1080603c8f156778ffb1d0b0761a.js"></script>
+
+<p>Currently, this takes hours for a decent-sized image of a not-very-complex scene. There are ways
+to speed it up, though, and I&rsquo;ll cover that in the next post.</p>
+
+<p><img src="/static/path_tracer_lit_teapot.png" alt="Teapot With Lighting" /></p>
+
+<h2 id="reflection-and-refraction">Reflection and Refraction</h2>
+
+<p>The math behind reflective and refractive surfaces is the same for path tracers as it is for
+raytracers, so I won&rsquo;t re-tread old ground here. See <a href="./post/writing-raytracer-in-rust-part-2">the previous
+series</a> for more on that. Instead I&rsquo;ll cover some of the
+challenges that I ran into while implementing them in my path tracer.</p>
+
+<p>Reflection is pretty simple; if a surface is reflective we use the code from the last series to
+generate the bounce direction instead of the random-point-on-hemisphere code. Refraction is more
+complex to implement though.</p>
+
+<p>See, the iterative path-tracing loop I created above assumes that it&rsquo;s only ever tracing one ray at
+a time. This assumption doesn&rsquo;t work with refraction, though, which requires tracing both a
+reflection ray and a transmission ray, each containing part of the power of the original ray.</p>
+
+<p>In the old CPU-based raytracer, we could implement this by making another recursive call with the
+other direction and combining the two colors. As I mentioned earlier though, recursion on the GPU
+doesn&rsquo;t seem to work for me, so we have to find a way to do it iteratively.</p>
+
+<p>The normal trick when converting these sorts of recursive algorithms to be iterative is to keep
+some extra space to store the data that would otherwise be stored in the call stack (think of how
+you might use a Stack data structure to perform an iterative depth-first-search of a tree, for
+example). In this case, our options are somewhat limited. We don&rsquo;t have a heap on the GPU, so we
+can&rsquo;t use any sort of dynamic memory allocation. Instead, everything must be pre-allocated by the
+CPU code and provided to the kernel.</p>
+
+<p>Instead, we&rsquo;ll create a fixed-size scratch-space in GPU memory for each thread to use, and we can
+store our extra rays there. Then we merely have to loop over the scratch space and trace/update
+each ray there, just as we already trace and update a single ray.</p>
+
+<script src="//gist.github.com/bheisler/cfdb013987f0c320d5c16eb9ad4ff21f.js"></script>
+
+<p>While I was working on this, I talked to a friend about it and he suggested that I could randomly
+decide whether the ray passed through or bounced off of transparent surfaces. That is a very good
+idea, but I think it would require more complex math to produce the correct result without biasing
+the statistics so I didn&rsquo;t implement it that way. If you want to, though, go ahead! I expect it
+will be more efficient and less complex than what I did.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>With that, we&rsquo;ve built a working (albeit very slow) path tracer. As always, feel free to check out
+<a href="https://github.com/bheisler/pathtracer/tree/95a6b885d9a9642661346f777a30d2502439a1a7">the code</a> on
+GitHub.</p>
+
+<p>In the next article, we&rsquo;ll take this slow path tracer and speed it up a great deal by adding an
+acceleration structure - a way of organizing the scene data such that we don&rsquo;t have to trace every
+ray against every polygon. I&rsquo;ll also do some other algorithmic and data structure improvements.
+Until next time!</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author">Brook Heisler</span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-07-12T19:00:00-06:00">
+    12 Jul, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/gpgpu/">GPGPU</a>, <a href="/tags/pathtracer/">Pathtracer</a>, <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">3240</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-1/">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
+        <time datetime="11M">11 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
+        <time datetime="12M">12 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
+        <time datetime="9M">9 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/jarvis-impressions-of-rust-libraries/">JARVIS - Notes on Rust Crates From Writing an RSS Reader</a>
+        <time datetime="15M">15 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>
