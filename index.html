@@ -23,7 +23,7 @@
 
 
 
-<meta property="og:updated_time" content="2018-07-12T19:00:00-06:00"/>
+<meta property="og:updated_time" content="2018-07-19T18:30:00-06:00"/>
 
 
 
@@ -221,6 +221,44 @@ a:hover {
   <header>
     <h1>bheisler.github.io</h1>
   </header>
+  
+    <article itemscope itemtype="http://schema.org/CreativeWork">
+  <header>
+    <h2 itemprop="name">
+      <a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+    </h2>
+    
+      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>17 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-07-19T18:30:00-06:00">19 Jul, 2018</time>
+
+</p>
+    
+  </header>
+  
+  <div itemprop="description">
+    Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the last post, we implemented all of the logic necessary to build a true path tracer. Problem is, even on the GPU it&rsquo;s terrifically slow. This post is (mostly) about fixing that.
+But first, we need to fix a bug or two, because I goofed. *sad trombone*
+Step -1: Fixing Bugs /u/anderslanglands on Reddit pointed out that, since I&rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the results.
+  </div>
+  
+    <nav class="readmore"><a itemprop="url" href="/post/writing-gpu-accelerated-path-tracer-part-3/">Read More&nbsp;&raquo;</a></nav>
+  
+  <meta itemprop="inLanguage" content="en-us">
+  <meta itemprop="datePublished" content="2018-07-19T18:30:00-06:00">
+  <meta itemprop="dateModified" content="2018-07-19T18:30:00-06:00">
+  
+    <meta itemprop="image" content="https://bheisler.github.io/static/path_tracer_dragons.png">
+  
+</article>
+
   
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
@@ -536,40 +574,6 @@ Blueprints &amp; Design First, a quick overview of how I intended to do this bui
   <meta itemprop="dateModified" content="2017-10-14T12:00:00-06:00">
   
     <meta itemprop="image" content="https://bheisler.github.io/static/pennys-sword-parts.jpg">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>22 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-08-20T11:35:37-06:00">20 Aug, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Inspired by the always-incredible work on Dolphin, I decided to write myself an NES emulator called Corrosion a couple years ago. I managed to get it working well enough to play basic games, and then put the project aside. This post is not about the emulator itself, but rather the JIT compiler I added to it last year and the upgrades to said JIT compiler I&rsquo;ve made over the past few weeks.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/experiments-in-nes-jit-compilation/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-08-20T11:35:37-06:00">
-  <meta itemprop="dateModified" content="2017-08-20T11:35:37-06:00">
   
 </article>
 

@@ -6,10 +6,21 @@
     <description>Recent content in Rust on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 12 Jul 2018 19:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Thu, 19 Jul 2018 18:30:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/tags/rust/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 3</title>
+      <link>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-3/</link>
+      <pubDate>Thu, 19 Jul 2018 18:30:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-3/</guid>
+      <description>Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the last post, we implemented all of the logic necessary to build a true path tracer. Problem is, even on the GPU it&amp;rsquo;s terrifically slow. This post is (mostly) about fixing that.
+But first, we need to fix a bug or two, because I goofed. *sad trombone*
+Step -1: Fixing Bugs /u/anderslanglands on Reddit pointed out that, since I&amp;rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the results.</description>
+    </item>
     
     <item>
       <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 2</title>

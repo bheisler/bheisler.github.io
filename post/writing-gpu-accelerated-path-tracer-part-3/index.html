@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 3 | bheisler.github.io</title>
+    <meta name="description" content="Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the last post, we implemented all of the logic necessary to build a true path tracer. Problem is, even on the GPU it&rsquo;s terrifically slow. This post is (mostly) about fixing that.
+But first, we need to fix a bug or two, because I goofed. *sad trombone*
+Step -1: Fixing Bugs /u/anderslanglands on Reddit pointed out that, since I&rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the results.">
+    <meta name="keywords" content="Rust, GPGPU, Raytracer, Pathtracer">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="Brook Heisler">
+
+
+    <meta property="og:title" content="Writing a GPU-Accelerated Path Tracer in Rust - Part 3" />
+<meta property="og:description" content="Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the last post, we implemented all of the logic necessary to build a true path tracer. Problem is, even on the GPU it&rsquo;s terrifically slow. This post is (mostly) about fixing that.
+But first, we need to fix a bug or two, because I goofed. *sad trombone*
+Step -1: Fixing Bugs /u/anderslanglands on Reddit pointed out that, since I&rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the results." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-3/" />
+
+  <meta property="og:image" content="https://bheisler.github.io/static/path_tracer_dragons.png" />
+
+
+
+<meta property="article:published_time" content="2018-07-19T18:30:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-07-19T18:30:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/writing-gpu-accelerated-path-tracer-part-3/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Writing a GPU-Accelerated Path Tracer in Rust - Part 3">
+<meta itemprop="description" content="Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the last post, we implemented all of the logic necessary to build a true path tracer. Problem is, even on the GPU it&rsquo;s terrifically slow. This post is (mostly) about fixing that.
+But first, we need to fix a bug or two, because I goofed. *sad trombone*
+Step -1: Fixing Bugs /u/anderslanglands on Reddit pointed out that, since I&rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the results.">
+
+
+<meta itemprop="datePublished" content="2018-07-19T18:30:00-06:00" />
+<meta itemprop="dateModified" content="2018-07-19T18:30:00-06:00" />
+<meta itemprop="wordCount" content="3469">
+
+  <meta itemprop="image" content="https://bheisler.github.io/static/path_tracer_dragons.png">
+
+
+
+<meta itemprop="keywords" content="Rust,GPGPU,Raytracer,Pathtracer," />
+
+    <header>
+      <h1 itemprop="headline">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>17 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-07-19T18:30:00-06:00">19 Jul, 2018</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the
+<a href="/post/writing-gpu-accelerated-path-tracer-part-2/">last post</a>, we implemented all of the logic
+necessary to build a true path tracer. Problem is, even on the GPU it&rsquo;s terrifically slow. This
+post is (mostly) about fixing that.</p>
+
+<p>But first, we need to fix a bug or two, because I goofed. *sad trombone*</p>
+
+<h2 id="step-1-fixing-bugs">Step -1: Fixing Bugs</h2>
+
+<p><a href="https://www.reddit.com/user/anderslanglands">/u/anderslanglands</a> on Reddit pointed out that, since
+I&rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the
+results.</p>
+
+<p>I&rsquo;ll try to explain this as best I can, though I&rsquo;m not totally sure I understand it myself. I think
+it works something like this: Monte-Carlo Integration isn&rsquo;t just about taking the average of all of
+the samples. You have to weight each sample based on how likely it is for that sample to be chosen.
+In this case, that means how likely it is for each direction to be chosen. If we were choosing
+directions uniformly, then we could ignore this (because each sample would be equally likely and
+therefore every sample would have the same weight) but Cosine-weighted Importance Sampling means
+that we&rsquo;re more likely to choose directions with a higher elevation than with a lower one. To
+correct for this, we need to calculate and return an additional weighting factor in
+<code>create_scatter_direction</code>. This is something I will definitely have to learn more about for
+future raytracing projects.</p>
+
+<p>According to /u/anderslanglands, the weight is equal to the reciprocal of the dot product between
+the scatter direction and the surface normal. That&rsquo;s easy enough to calculate:</p>
+
+<script src="//gist.github.com/bheisler/97ada74bd6ca87d0920cf7b6fb5429f9.js"></script>
+
+<p>And then in <code>get_radiance</code> we multiply the reflected_color against the returned weight:</p>
+
+<pre><code>let reflected_color = color
+    .mul_s(cosine_angle)
+    .mul_s(reflected_power)
+    .mul_s(weight);
+</code></pre>
+
+<p>Conveniently, fixing this bug makes the scene bright enough that I can get away with removing an
+annoying hack where I multiplied all of the light values by a fudge factor. Hurray for correctness!</p>
+
+<p>Now that the path tracer code works, it&rsquo;s time to make it fast.</p>
+
+<h2 id="step-0-computing-the-normal-on-demand">Step 0: Computing the Normal On-Demand</h2>
+
+<p>First, I&rsquo;ll set up a scene that I can time without waiting for hours. By turning down the number of
+rays per pixel, the number of polygons, and the size of the image, I set up a scene that I can
+trace in about 45 seconds.</p>
+
+<p>I had initially written the code to compute the polygon normals on the CPU and store them in the
+polygon structure. This costs 12 bytes per polygon, and three memory fetches each time we need the
+normal. Later on, I decided that this wasn&rsquo;t a good compute/memory tradeoff, and changed the code
+so that the ray-triangle intersection test would calculate and return the normal as well. I didn&rsquo;t
+expect this to make it much faster, but it did - rendering time for my test scene dropped to 35
+seconds.</p>
+
+<p>I&rsquo;d expected a performance improvement, but I didn&rsquo;t expect it to be so large. It avoids six memory
+fetches, or maybe only 3 is the compiler is smart enough, but I had thought that it was running
+enough threads at a time to hide the latency of the memory fetches. Perhaps I was incorrect.</p>
+
+<p>The other performance improvement comes from packing the polygons closer together in memory. I
+haven&rsquo;t written much about GPU performance concerns yet in this series, so I guess I&rsquo;ll start here
+by explaining memory coalescing. You see, GPU&rsquo;s don&rsquo;t do caching like CPU&rsquo;s do.<sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> When a CPU
+instruction needs to read memory, the CPU will typically fetch many bytes (say, 128) following the
+area that it actually needs, and store them in a fast, on-chip memory space known as the cache.
+When the CPU then needs to read the next byte of memory, it doesn&rsquo;t need to send a request all the
+way to main memory; it can fetch the result right out of the cache.</p>
+
+<p>GPU&rsquo;s instead do something called memory coalescing. When a GPU instruction needs to read memory,
+the GPU will fetch a block of memory, just like a CPU does (except even larger, like 1024 bytes).
+It will then pause the thread that requested it and process other threads in the meantime. Those
+other threads might make their own requests for memory, and it&rsquo;s common for the other threads to
+request a location in memory that is in the same block of memory. When that block comes back, the
+GPU can wake up all threads waiting for the data it contains. This is called memory coalescing.
+Unlike the CPU, however, the GPU does not cache the returned block; if all of those threads then
+make another request for the next byte, that requires a second complete round-trip to memory.</p>
+
+<p>Because of this, it&rsquo;s beneficial when programming a GPU to arrange your memory and threads such
+that many threads&rsquo; requests can be satisfied with each memory fetch. Another way of thinking of
+it is that you should maximize the percentage of each fetch that will actually be used by a thread
+- if a single thread fetches one byte, that&rsquo;s 1023 bytes that were loaded from memory and then
+discarded, and that&rsquo;s inefficient.</p>
+
+<p>I think this explains the speedup seen from calculating the normals on-demand rather than storing
+them in memory; the computation time of the calculation is small compared to the latency of the
+memory fetches, and meanwhile it makes all other memory fetches more efficient by packing the
+polygons closer together.</p>
+
+<h2 id="step-1-moller-trumbore">Step 1: Moller-Trumbore</h2>
+
+<p>Having already done some profiling, I know that the majority of the time is spent evaluating
+ray-triangle intersections. The intersection algorithm described earlier is not the most efficient
+possible algorithm, it&rsquo;s just the only one that I was able to understand well enough to explain.</p>
+
+<p>Frankly, I have no idea how the Moller-Trumbore intersection algorithm works, but I&rsquo;m going to try
+it anyway. I don&rsquo;t think it&rsquo;s the fastest possible algorithm either, but it should be at least a
+bit faster. If your math-fu is stronger than mine, you can find Scratchapixel&rsquo;s explanation
+<a href="https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection">here</a>.</p>
+
+<script src="//gist.github.com/bheisler/f22aa651ca7f0155b535688b0a61514a.js"></script>
+
+<p>Once again, I was surprised at the magnitude of the change - this reduced the rendering time to
+just 15 seconds. And once again I&rsquo;m puzzled as to why. It requires the same number of memory
+fetches. The computation is reduced somewhat, and this code is (or at least was) compute-bound, but
+I&rsquo;m surprised that it would make it more than 50% faster. My best guess is that it allows more
+intersection tests to return early and skip much of the computation. In particular, it only
+computes the normal if the ray does intersect, where in the previous code it needed to compute the
+normal at the start of every test.</p>
+
+<p>After some profiling, however, it appears that there is another factor at work. With this
+intersection-test code, the compiler has chosen to generate a kernel that uses fewer registers -
+few enough that the GPU can execute twice as many threads in parallel. This explains the majority
+of the speed increase.</p>
+
+<h2 id="step-2-structure-of-arrays">Step 2: Structure-of-Arrays</h2>
+
+<p>Up until now, I&rsquo;ve been using a simple polygon structure:</p>
+
+<pre><code>pub struct Polygon {
+    pub vertices: [Vector3; 3],
+    pub material_idx: usize,
+}
+</code></pre>
+
+<p>My polygons are just collected together in a big array of polygon structures. That means that, for
+example, when a bunch of threads attempt to access the X coordinates of the first vertex in the
+first 32 polygons, each one is 44 bytes apart. As I discussed earlier, that means that every memory
+transaction will fetch a lot of bytes that ultimately end up discarded. A more efficient layout
+would have the X coordinates of the first vertices all together in one array, and then the Y
+coordinates in a second array, and so on.</p>
+
+<p>However, I tried implementing this and it actually made the code go slower - two times slower, in
+fact. It appears as if this change caused the compiler to no longer be able to fit the kernel into
+64 registers, and thus once again halved the number of concurrent threads. I&rsquo;m going to keep these
+changes in a branch though; perhaps later changes will cause the register count to increase again,
+at which point this should become beneficial once more.</p>
+
+<h2 id="step-3-bounding-volumes">Step 3: Bounding Volumes</h2>
+
+<p>Although I can&rsquo;t easily profile at the level of individual functions, I know from my last raytracer
+that ray intersection tests typically take up the large majority of time, especially for simple
+renderers like this. Right now, the path tracer traces every ray against every polygon. If you
+think about it, though, each ray will only ever pass through a small number of polygons; it would
+be better if we could build a data structure that would allow us to skip testing for intersections
+against polygons that won&rsquo;t succeed.</p>
+
+<p>There are many such data structures available. I&rsquo;m going to go with one of the simpler ones, but
+before that, there&rsquo;s some work to do first.</p>
+
+<p>First up, I&rsquo;ll add more polygons to the scene to bring the rendering time back up. Second, I&rsquo;ll add
+some statistics measurement so we can see how many intersection tests are actually being performed:</p>
+
+<pre><code>18984 polygons in scene
+Trace time: 91692.906250ms
+Traced 27072102 rays
+Performed 513936784368 triangle intersections
+</code></pre>
+
+<p>Well, look at that. 27 million rays and over half a trillion intersection tests done in a minute
+and a half (and with not-very-optimized code). GPUs are pretty great.</p>
+
+<p>Incidentally, just adding the statistics counting broke whatever spell had caused the compiler to
+use fewer registers, so I tried using my structure-of-arrays changes from earlier, and that
+actually made it slower. Go figure.</p>
+
+<p>One way to reduce the number of intersection tests is to first test each ray against some kind of
+bounding volume; a simple shape that is cheap to test against, but which contains many polygons
+(eg. all polygons for an object). If a ray doesn&rsquo;t intersect the bounding volume, we know that it
+won&rsquo;t intersect any of the polygons it contains, so we can skip testing those polygons.</p>
+
+<p>In this case, I&rsquo;ll go with an axis-aligned bounding box because those are easy to construct - just
+loop over all vertices of all polygons in an object and track the min/max x, y, and z coordinates.
+These become the bounds of our bounding box. The down-side of using a bounding box is that there
+are a lot of rays that will intersect with the box that don&rsquo;t actually intersect any of the
+polygons, but that&rsquo;s the price we pay for simplicity.</p>
+
+<p>Now that we have a bounding box for each object, we need to be able to test rays against it. I&rsquo;ll
+start in two dimensions and then generalize to three.</p>
+
+<p><img src="/static/bounding_box_test.PNG" alt="Bounding Box Test" /></p>
+
+<p>From geometry, we know that the equation of a line is <code>y = mx + b</code>. We can use this to calculate
+the y coordinate at the point where the ray intersects with an axis-aligned plane. Consider ray A
+in the image above. It intersects the line at <code>min_x</code>. We can calculate the y coordinate of that
+intersection by substituting into that line equation - <code>y = A.direction.y * (min_x - A.origin.x) +
+A.origin.y</code>. From there, we could test if the <code>min_y &lt;= y &lt;= max_y</code>, and if so, there&rsquo;s an
+intersection. If not, we&rsquo;d repeat for the other three sides of the box.</p>
+
+<p>However, this is slower than it needs to be, especially in 3D. With three dimensions, you&rsquo;d have to
+check if the y and the z values are in the right ranges for a total of four comparisons times six
+sides, as well as the calculations to find the intersection points. Instead, take another look at
+the image, specifically ray B. Notice that the distance to the min_y plane is greater than the
+distance to the max_x plane? This makes it possible to use a faster test. Specifically, if the
+distance to min_x is greater than the distance to max_y or if the distance to min_y is greater than
+the distance to max_x, the ray will miss the bounding box. Note that if the ray direction is
+something other than up-and-right, we might have to swap the different planes around a bit. This
+test even works if the ray origin is inside the bounding box, like ray C. For that ray, the
+distance to min_x and min_y will be negative, and therefore always less than the distance to max_y
+or max_x, so the test will always detect an intersection. If you like, take some time thinking
+through various scenarios and convince yourself that this works. <sup class="footnote-ref" id="fnref:2"><a rel="footnote" href="#fn:2">2</a></sup></p>
+
+<script src="//gist.github.com/bheisler/5d15b919441e2f4ba52dc72abeb4d48c.js"></script>
+
+<pre><code>18984 polygons in scene
+Trace time: 54580.031250ms
+Traced 27073011 rays
+Performed 135365055 bounding-box intersections
+Performed 73669018592 triangle intersections
+</code></pre>
+
+<p>From 90 seconds down to 55 seconds, and the number of triangle intersections is down to 73 billion
+- just 14% of what it was previously, at the cost of a hundred million or so bounding-box tests.
+Much better!</p>
+
+<h2 id="step-4-grid-marching">Step 4 - Grid Marching</h2>
+
+<p>I&rsquo;m not finished yet, though. Even if a ray hits the bounding box, it will still only intersect a
+small number of the polygons contained within. Now that we can skip objects that can&rsquo;t intersect
+with a ray, it would be nice if we could likewise skip polygons within an object that can&rsquo;t
+intersect.</p>
+
+<p>For once, I&rsquo;m going to deviate from Scratchapixel here and do something different. I&rsquo;m going to use
+the algorithm proposed in <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.42.3443&amp;rep=rep1&amp;type=pdf">A Fast Voxel Traversal Algorithm for Ray
+Tracing</a> by
+Amanatides and Woo. The reason I picked this algorithm is because I&rsquo;m already familiar with it. You
+see, years ago I spent some time writing a mod for Minecraft which added a variety of customizable
+ray-guns and blasters to the game. I never did end up releasing it or anything (though the code is
+on my GitHub if you&rsquo;re really curious), but one of the things I needed while working on it was a
+fast way to trace a ray from the player&rsquo;s blaster through the blocky world of Minecraft. There was
+a built-in ray test function, but it could only return the first intersection with a block and
+(since some of the rayguns could shoot through blocks) I needed an alternate test that could
+produce a list of all blocks hit. In the end, I ended up modifying Amanatides and Woo&rsquo;s algorithm,
+so I thought it fitting that I should use it again for its intended purpose of raytracing.</p>
+
+<p>This algorithm works by dividing the scene (or, in my case, the object) into a 3D grid of boxes
+called voxels. To trace a ray agaist an object, we determine the point at which the ray enters the
+grid and some information about its direction, then step across the grid, testing the ray against
+all polygons in the current voxel - ignoring all polygons that aren&rsquo;t in one of the voxels the ray
+passes through. This requires some extra local variables:</p>
+
+<pre><code>let t_max_x, t_max_y, t_max_z;
+let t_delta_x, t_delta_y, t_delta_z;
+let step_x, step_y, step_z;
+let cur_x, cur_y, cur_z;
+</code></pre>
+
+<p>These require some explanation. <code>t_delta_x</code> represents how many units we must move along the ray
+such that the X component of that movement is equal to the width of a voxel in the X direction, and
+the same goes for the other deltas. <code>t_max_x</code> represents how many units away along the ray from the
+ray origin we would have to move to enter the next voxel in the X direction, and likewise the same
+goes for the other max values. The step variables hold positive or negative one, depending on the
+sign of the ray direction in that axis. As you might expect, <code>cur_x</code> simply holds the number for
+the current voxel in the X direction.</p>
+
+<p>The loop proceeds like this. First, we find which axis has the closest boundary to the next voxel -
+that is, the minimum of <code>t_max_x, t_max_y, t_max_z</code>. If, for example, <code>t_max_y</code> is the smallest,
+that means that the ray will pass into the next voxel in the Y direction first. Then, we step one
+voxel in that direction (add <code>step_y</code> to <code>cur_y</code>), update the appropriate maximum (The next Y-axis
+voxel boundary is <code>t_delta_y</code> units away, so add that to <code>t_max_y</code>), and test the polygons in the
+new voxel. That&rsquo;s it!</p>
+
+<p>Well, not quite. Some polygons will be in multiple voxels, and this creates an odd corner case that
+we need to deal with first.</p>
+
+<p>Image: voxel_marching_corner_case
+<img src="/static/voxel_marching_corner_case.PNG" alt="Voxel Marching Corner Case" /></p>
+
+<p>Consider the ray (yellow line) in this image. It first enters the voxel <code>b</code> and traces against
+polygon <code>B</code> - and indeed, it does intersect. If we stopped there, we would never notice that there
+is a closer intersection with polygon <code>A</code> in voxel <code>c</code>. We can handle this by checking the returned
+intersection distance to <code>B</code> - it will be greater than the minimum of <code>t_max_x, t_max_y, t_max_z</code>,
+so we know that that intersection is not in this voxel and we can ignore it until we actually reach
+the voxel containing the intersection. This does mean that we might perform an intersection test
+against the same polygon multiple times, but that&rsquo;s an acceptable price to pay for skipping all of
+the other polygons.</p>
+
+<p>There are still a few things left to do, however. How do we construct the grid? How do we determine
+how many boxes there should be in the grid?</p>
+
+<p>There is no algorithm for determining the optimal grid size, but we can come up with something
+fairly good using the following equation:</p>
+
+<p><code>n_x = d_x * cube_root((fudge_factor * num_polygons) / bounding_box_volume)</code></p>
+
+<p><code>n_x</code> is the number of grid cells in the x direction, and <code>d_x</code> is the size of the grid in the x
+direction. The fudge factor is just a user-defined parameter to adjust the grid size, and the rest
+are self-explanatory. I&rsquo;ll go with a fudge factor of 4.0 because that seems like a nice, round
+number. We can trivially apply the same formula to the other two axes as well. As for constructing
+the grid, we can take the bounding box of each polygon and insert it into every grid cell that
+intersects that bounding box. This is easy to implement, but it does mean that some polygons will
+be added to grid cells that they aren&rsquo;t actually in. Once again, we&rsquo;ll just ignore this.</p>
+
+<p>With all of that implemented, here&rsquo;s the new stats:</p>
+
+<pre><code>18984 polygons in scene
+Trace time: 21850.224609ms
+Traced 88874605 rays
+Performed 444373025 bounding-box intersections
+Performed 3181122057 triangle intersections
+</code></pre>
+
+<p>I&rsquo;ve changed some settings in the meantime, so this isn&rsquo;t quite a fair comparison. Note that the
+number of rays has gone way up to 89 million (previously 27 million), but despite that we&rsquo;re down
+to 3 billion triangle intersections (from 73 billion) and 20 seconds (from 55). That&rsquo;s pretty
+respectable!</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>These improvements don&rsquo;t just make the renderer faster; they also increase the complexity of the
+scenes that we can render in a reasonable time. Such as the beautiful image below:</p>
+
+<p><a href="https://imgur.com/a/uBScBUh"><img src="/static/path_tracer_dragons.png" alt="Dragons!" /></a></p>
+
+<p>Click for full size.</p>
+
+<p>Here&rsquo;s the stats for this one:</p>
+
+<pre><code>300024 polygons in scene
+Trace time: 49543072.000000ms
+Traced 118162718847 rays
+Performed 590813594235 bounding-box intersections
+Performed 8472990410182 triangle intersections
+</code></pre>
+
+<p>That works out to almost 14 hours. There&rsquo;s still a lot of room for improvement, but I&rsquo;m pretty
+happy with that.</p>
+
+<p>I think I&rsquo;m done with this particular project, at least for now. I&rsquo;ve had a lot of fun learning
+about GPU programming, even if it isn&rsquo;t always the easiest thing to do in Rust.</p>
+
+<p>There&rsquo;s a few things that I would consider for future renderers, if I ever decide to write one.
+First, my understanding of the math and the algorithms is largely based on whatever I could cobble
+together from online sources, so I&rsquo;d probably want to have a better understanding before doing a
+third renderer. I&rsquo;ve heard that Physically Based Rendering by Pharr et. al. is a good resource for
+this. Second, I probably wouldn&rsquo;t try to use path tracing and nothing else, like I did here. More
+sophisticated algorithms (or even basic ones like tracing both shadow rays and scattered paths)
+produce a much nicer image with far fewer rays than using path-tracing to do all of the lighting.
+Third, I&rsquo;m not sure about the design of my kernel code. I put everything into one giant kernel
+function, but this led to recurring problems with register pressure and code complexity. If I were
+doing it again, I would consider structuring it as a <a href="http://research.nvidia.com/publication/megakernels-considered-harmful-wavefront-path-tracing-gpus">Wavefront Path Tracer</a>
+instead.</p>
+
+<p>That&rsquo;s just about it from me. I hope you&rsquo;ve enjoyed reading, and as always, you can check out the
+code on
+<a href="https://github.com/bheisler/pathtracer/tree/2143b6407d7d426a0882d5eb7b28b21419cd0df2">GitHub</a>.</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:1">This is a bit of a simplification. Some memory accesses (not the ones we&rsquo;re doing here) are cached even on older GPU&rsquo;s, and newer ones have cached global memory accesses as well.
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2">Kudos to whoever invented this algorithm, by the way. I would not have spotted that. Same goes for most of the algorithms I&rsquo;ve talked about, actually.
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author">Brook Heisler</span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-07-19T18:30:00-06:00">
+    19 Jul, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/gpgpu/">GPGPU</a>, <a href="/tags/pathtracer/">Pathtracer</a>, <a href="/tags/raytracer/">Raytracer</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">3469</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
+        <time datetime="16M">16 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-1/">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
+        <time datetime="11M">11 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
+        <time datetime="12M">12 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
+        <time datetime="9M">9 minutes</time>
+      
+        <li><a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
+        <time datetime="7M">7 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>
