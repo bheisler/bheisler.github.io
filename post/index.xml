@@ -6,10 +6,19 @@
     <description>Recent content in Posts on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 19 Jul 2018 18:30:00 -0600</lastBuildDate>
+    <lastBuildDate>Wed, 08 Aug 2018 20:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The State of GPGPU in Rust</title>
+      <link>https://bheisler.github.io/post/state-of-gpgpu-in-rust/</link>
+      <pubDate>Wed, 08 Aug 2018 20:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/state-of-gpgpu-in-rust/</guid>
+      <description>At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was interested. I didn&amp;rsquo;t know anything about programming GPUs, so of course I said &amp;ldquo;Heck yes, I&amp;rsquo;m interested!&amp;ldquo;. I needed to learn about GPUs in a hurry, and that led to my GPU Path Tracer series. That was a lot of fun, but it showed me that CUDA support in Rust is pretty poor.</description>
+    </item>
     
     <item>
       <title>Writing a GPU-Accelerated Path Tracer in Rust - Part 3</title>
@@ -48,7 +57,8 @@ Second, this time I want to write a path tracer, rather than a raytracer.</descr
       <pubDate>Thu, 14 Jun 2018 19:00:00 -0600</pubDate>
       
       <guid>https://bheisler.github.io/post/rust-on-the-gpu-with-accel/</guid>
-      <description>For the past month or so, I&amp;rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&amp;rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&amp;rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.</description>
+      <description>NOTE: Much of what I discuss below is no longer accurate.
+For the past month or so, I&amp;rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&amp;rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&amp;rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.</description>
     </item>
     
     <item>

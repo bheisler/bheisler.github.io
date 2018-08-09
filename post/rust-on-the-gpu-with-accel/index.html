@@ -5,7 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Running Rust on the GPU with Accel | bheisler.github.io</title>
-    <meta name="description" content="For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.">
+    <meta name="description" content="NOTE: Much of what I discuss below is no longer accurate.
+For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.">
     <meta name="keywords" content="Rust, GPGPU, Accel">
     
     
@@ -13,11 +14,12 @@
     
     
 
-  <meta name="author" content="">
+  <meta name="author" content="Brook Heisler">
 
 
     <meta property="og:title" content="Running Rust on the GPU with Accel" />
-<meta property="og:description" content="For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing." />
+<meta property="og:description" content="NOTE: Much of what I discuss below is no longer accurate.
+For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://bheisler.github.io/post/rust-on-the-gpu-with-accel/" />
 
@@ -216,12 +218,13 @@ a:hover {
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
 <meta itemprop="name" content="Running Rust on the GPU with Accel">
-<meta itemprop="description" content="For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.">
+<meta itemprop="description" content="NOTE: Much of what I discuss below is no longer accurate.
+For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.">
 
 
 <meta itemprop="datePublished" content="2018-06-14T19:00:00-06:00" />
 <meta itemprop="dateModified" content="2018-06-14T19:00:00-06:00" />
-<meta itemprop="wordCount" content="2570">
+<meta itemprop="wordCount" content="2581">
 
 
 
@@ -249,6 +252,8 @@ a:hover {
 
     <div itemprop="articleBody">
       
+
+<p>NOTE: Much of what I discuss below is no longer accurate.</p>
 
 <p>For the past month or so, I&rsquo;ve been working on a follow-up to my series on <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in
 Rust</a>. This time around, I&rsquo;ll be talking about writing a
@@ -508,7 +513,7 @@ support is not yet awesome. Maybe we&rsquo;ll see some improvements in this area
   Published
   
     
-      by <span itemprop="author"></span>
+      by <span itemprop="author">Brook Heisler</span>
     
   
   <time itemprop="datePublished" datetime="2018-06-14T19:00:00-06:00">
@@ -520,7 +525,7 @@ support is not yet awesome. Maybe we&rsquo;ll see some improvements in this area
   
     and tagged <a href="/tags/accel/">Accel</a>, <a href="/tags/gpgpu/">GPGPU</a> and <a href="/tags/rust/">Rust</a>
   
-  using <span itemprop="wordCount">2570</span> words.
+  using <span itemprop="wordCount">2581</span> words.
 </p>
 
       

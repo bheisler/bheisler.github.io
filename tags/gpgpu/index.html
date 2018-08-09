@@ -25,7 +25,7 @@
 
 
 
-<meta property="og:updated_time" content="2018-07-19T18:30:00-06:00"/>
+<meta property="og:updated_time" content="2018-08-08T20:00:00-06:00"/>
 
 
 
@@ -221,6 +221,40 @@ a:hover {
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
     <h2 itemprop="name">
+      <a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
+    </h2>
+    
+      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>6 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-08-08T20:00:00-06:00">8 Aug, 2018</time>
+
+</p>
+    
+  </header>
+  
+  <div itemprop="description">
+    At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was interested. I didn&rsquo;t know anything about programming GPUs, so of course I said &ldquo;Heck yes, I&rsquo;m interested!&ldquo;. I needed to learn about GPUs in a hurry, and that led to my GPU Path Tracer series. That was a lot of fun, but it showed me that CUDA support in Rust is pretty poor.
+  </div>
+  
+    <nav class="readmore"><a itemprop="url" href="/post/state-of-gpgpu-in-rust/">Read More&nbsp;&raquo;</a></nav>
+  
+  <meta itemprop="inLanguage" content="en-us">
+  <meta itemprop="datePublished" content="2018-08-08T20:00:00-06:00">
+  <meta itemprop="dateModified" content="2018-08-08T20:00:00-06:00">
+  
+</article>
+
+  
+    <article itemscope itemtype="http://schema.org/CreativeWork">
+  <header>
+    <h2 itemprop="name">
       <a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
     </h2>
     
@@ -350,7 +384,8 @@ Second, this time I want to write a path tracer, rather than a raytracer.
   </header>
   
   <div itemprop="description">
-    For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.
+    NOTE: Much of what I discuss below is no longer accurate.
+For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.
   </div>
   
     <nav class="readmore"><a itemprop="url" href="/post/rust-on-the-gpu-with-accel/">Read More&nbsp;&raquo;</a></nav>

@@ -4,28 +4,29 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accel | bheisler.github.io</title>
-    <meta name="description" content="">
-    <meta name="keywords" content="code, props, ">
+    <title>The State of GPGPU in Rust | bheisler.github.io</title>
+    <meta name="description" content="At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was interested. I didn&rsquo;t know anything about programming GPUs, so of course I said &ldquo;Heck yes, I&rsquo;m interested!&ldquo;. I needed to learn about GPUs in a hurry, and that led to my GPU Path Tracer series. That was a lot of fun, but it showed me that CUDA support in Rust is pretty poor.">
+    <meta name="keywords" content="Rust, GPGPU">
     
     
     
-    
-      <meta name="robots" content="noindex">
     
     
 
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Accel" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/tags/accel/" />
+    <meta property="og:title" content="The State of GPGPU in Rust" />
+<meta property="og:description" content="At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was interested. I didn&rsquo;t know anything about programming GPUs, so of course I said &ldquo;Heck yes, I&rsquo;m interested!&ldquo;. I needed to learn about GPUs in a hurry, and that led to my GPU Path Tracer series. That was a lot of fun, but it showed me that CUDA support in Rust is pretty poor." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/state-of-gpgpu-in-rust/" />
 
 
 
-<meta property="og:updated_time" content="2018-06-14T19:00:00-06:00"/>
+<meta property="article:published_time" content="2018-08-08T20:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-08-08T20:00:00-06:00"/>
+
 
 
 
@@ -49,9 +50,7 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/tags/accel/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
-    
-    <link rel="canonical" href="https://bheisler.github.io/tags/accel/">
+    <link rel="canonical" href="https://bheisler.github.io/post/state-of-gpgpu-in-rust/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -214,55 +213,214 @@ a:hover {
 
 </header>
     <main>
-  <header>
-    <h1>Accel</h1>
-  </header>
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
-    </h2>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+<meta itemprop="name" content="The State of GPGPU in Rust">
+<meta itemprop="description" content="At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was interested. I didn&rsquo;t know anything about programming GPUs, so of course I said &ldquo;Heck yes, I&rsquo;m interested!&ldquo;. I needed to learn about GPUs in a hurry, and that led to my GPU Path Tracer series. That was a lot of fun, but it showed me that CUDA support in Rust is pretty poor.">
+
+
+<meta itemprop="datePublished" content="2018-08-08T20:00:00-06:00" />
+<meta itemprop="dateModified" content="2018-08-08T20:00:00-06:00" />
+<meta itemprop="wordCount" content="1152">
+
+
+
+<meta itemprop="keywords" content="Rust,GPGPU," />
+
+    <header>
+      <h1 itemprop="headline">The State of GPGPU in Rust</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>13 minute read</span>
+<span>6 minute read</span>
 <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2018-06-14T19:00:00-06:00">14 Jun, 2018</time>
+  Published: <time datetime="2018-08-08T20:00:00-06:00">8 Aug, 2018</time>
 
-</p>
+
+      </p>
+    </header>
     
-  </header>
-  
-  <div itemprop="description">
-    NOTE: Much of what I discuss below is no longer accurate.
-For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/rust-on-the-gpu-with-accel/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-06-14T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-06-14T19:00:00-06:00">
-  
-</article>
+    
 
+    <div itemprop="articleBody">
+      
+
+<p>At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was
+interested. I didn&rsquo;t know anything about programming GPUs, so of course I said &ldquo;Heck yes, I&rsquo;m
+interested!&ldquo;. I needed to learn about GPUs in a hurry, and that led to my <a href="/post/writing-gpu-accelerated-path-tracer-part-1.md">GPU Path Tracer
+series</a>. That was a lot of fun, but it showed
+me that CUDA support in Rust is pretty poor. If our experiments ever turn into an actual product, I
+would have to recommend we write the GPU code in C.</p>
+
+<p>To spare myself and others that dreadful fate, I decided to work towards making Rust&rsquo;s GPGPU story
+as good as C&rsquo;s. The first step was to survey the landscape to see what&rsquo;s out there.</p>
+
+<h2 id="opencl">OpenCL</h2>
+
+<p>I started by looking at OpenCL crates. I found two -
+<a href="https://github.com/luqmana/rust-opencl">rust-opencl</a> and <a href="https://crates.io/crates/ocl">ocl</a>.
+<code>rust-opencl</code> is abandoned, so I&rsquo;ll focus on <code>ocl</code>.</p>
+
+<p>I&rsquo;m not very familiar with OpenCL, but <code>ocl</code> looks pretty solid to me. It provides Rustic
+abstractions over the OpenCL C API, but allows the programmer to drop down to the lower level if
+needed. OpenCL in Rust is already as good as it is in C. OpenCL works on AMD GPUs as well as
+NVIDIA ones, which is a nice bonus.</p>
+
+<p>I don&rsquo;t much like OpenCL, though. OpenCL kernels are written in OpenCL C, and the source code is
+passed to the GPU driver for compilation at runtime. I want to avoid writing C. Further, the
+runtime compilation model and change of language means that we lose all of the nice compile-time
+safety checks that Rust provides.</p>
+
+<h2 id="cuda">CUDA</h2>
+
+<p>Despite being NVIDIA-only, CUDA seems to be more widely used than OpenCL, and it&rsquo;s not hard to see
+why. It provides an easy, single-source approach to GPGPU - you write C or C++ and mark GPU code
+with special annotations. Compile the code with a compiler-wrapper called <code>nvcc</code>, and then you can
+launch kernels almost as easily as calling a function. The library APIs are well-designed and
+intuitive for C programmers. I used CUDA for my path tracer series. CUDA support in Rust was pretty
+rough, and it&rsquo;s hasn&rsquo;t gotten better.</p>
+
+<p>CUDA in Rust should be just as smooth as it is in C. <code>rustc</code> already supports LLVM&rsquo;s NVPTX
+backend. You can write Rust code, mark it with some procedural macros and execute it on the GPU.
+You can share structure definitions and functions between the CPU and the GPU, the compiler
+provides all of its usual compile-time checks, and it all works smoothly, right?</p>
+
+<p>Well, no. The NVPTX backend is right at the bottom of <a href="https://forge.rust-lang.org/platform-support.html">Tier 3 support</a>
+with a lot of asterisks. To compile to PTX, you have to use a specific nightly build (2018-04-10)
+and you have to use Xargo to cross-compile the <code>core</code> library. You have to install a bunch of extra
+LLVM tools to link together different crates (which may involve compiling them from source). Once
+you fight through all of that, <code>rustc</code> frequently produces an invalid PTX file or just crashes and
+you have to guess why. It&rsquo;s&hellip; not great.</p>
+
+<p><a href="https://github.com/rust-accel">accel</a> is still best-in-class here, but that&rsquo;s not saying much.
+They&rsquo;ve forked the Rust compiler to improve PTX support and made a tool to install their custom
+compiler into your <code>rustup</code> toolchains. Unfortunately, that tool only works on Linux. The
+documentation is poor, and even getting it to work on Linux requires digging into the source code
+to decipher mysterious error messages.</p>
+
+<p>There are Rust bindings for many CUDA libraries like <a href="https://crates.io/crates/cublas">CuBLAS</a>, but
+these are also abandoned.</p>
+
+<p>CUDA in Rust needs a lot of work to catch up to CUDA in C.</p>
+
+<h2 id="higher-level-libraries">Higher-Level Libraries</h2>
+
+<p>There are a number of libraries seeking to provide higher-level interfaces to the GPU.</p>
+
+<p>The oldest is <a href="https://github.com/autumnai/collenchyma">Collenchyma</a>, which came out of Leaf AI and
+focuses on neural networks. It was completely abandoned along with Leaf. A fork called
+<a href="https://github.com/jonysy/parenchyma">Parenchyma</a> was created, which changed a lot of
+Collenchyma&rsquo;s API and claims to be under active development. There hasn&rsquo;t been a Git commit in six
+months. It&rsquo;s probably abandoned as well, and remaining users are unable to compile it on the latest
+nightly compiler builds.</p>
+
+<p>The other big one is <a href="https://github.com/arrayfire/arrayfire-rust">arrayfire-rust</a>, which is a Rust
+binding to ArrayFire. This is attached to ArrayFire LLC, so it has some corporate backing and
+probably won&rsquo;t be totally abandoned. Unlike Parenchyma, it has some activity in the last few
+months. ArrayFire provides the ability to create and fill arrays of values and then apply pre-baked
+operations to them. If you want lower-level control to get that last bit of performance, or if your
+problem doesn&rsquo;t fit their model, then I think you&rsquo;re out of luck. I&rsquo;m skeptical of claims that it&rsquo;s
+portable across OpenCL, CUDA and CPUs. The performance characteristics of CPUs are so different
+from those of GPUs that it will be difficult to get optimal performance on both.</p>
+
+<p>ArrayFire in Rust is at least as good as ArrayFire in C, but that&rsquo;s about all I can say. There is
+nothing similar to <a href="https://developer.NVIDIA.com/thrust">Thrust</a> or
+<a href="https://developer.NVIDIA.com/openacc">OpenACC</a> yet.</p>
+
+<h2 id="other-rust-gpgpu-projects">Other Rust GPGPU Projects</h2>
+
+<p><a href="https://github.com/vulkano-rs/vulkano">Vulkano</a> is a Rust interface to the Vulkan graphics API. It
+supports compute shaders as well. All of my concerns with OpenCL apply here as well - it uses a
+special C-like language (similar to the one OpenCL uses) for the shaders rather than plain Rust.
+The surrounding API is quite verbose as well. I think Vulkan is primarily focused on graphics, and
+compute-shaders are provided as an extension to that.</p>
+
+<p>I&rsquo;d also like to mention <a href="https://github.com/MaikKlein/rlsl">rlsl</a> - Rust-Like Shading Language.
+This compiles a subset of Rust to Vulkan SPIR-V. It&rsquo;s an interesting project, but the README warns
+that it is not production-ready and does not accept contributions yet. This too is focused on
+writing shaders for graphics rather than general-purpose computation.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>If you like OpenCL, Vulkan or ArrayFire, all of them have excellent Rust bindings. On the other
+hand, CUDA in Rust is simply not ready for use in production. Rust has no alternative for many
+other GPGPU tools that C/C++ programmers have, like Thrust or OpenACC.</p>
+
+<p>GPGPU is an important use-case for a low-level, high-performance language like Rust. It&rsquo;s relevant
+to a number of fields, including machine learning, cryptography, cryptocurrency, image-processing,
+physical simulations, and scientific computing.</p>
+
+<p>I want to work to improve this situation. I think the CUDA model of writing host and device code in
+the same language is valuable, so that&rsquo;s what I&rsquo;ll start with. This will involve working with the
+Rust compiler team and contributing improvements to <code>rustc</code>, maybe even LLVM. Aside from some bug
+reports I&rsquo;ve never done that before, and it would help to have a mentor. If you&rsquo;d be willing to
+answer questions like &ldquo;what would have to happen before NVPTX could be a Tier 2 backend&rdquo; or &ldquo;how do
+I get this build system to work on Windows&rdquo;, please send me an email or post a comment.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
   
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-08-08T20:00:00-06:00">
+    8 Aug, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/gpgpu/">GPGPU</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">1152</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+        <time datetime="17M">17 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
+        <time datetime="16M">16 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-1/">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/jarvis-impressions-of-rust-libraries/">JARVIS - Notes on Rust Crates From Writing an RSS Reader</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
+        <time datetime="5M">5 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
 </main>
     <footer>
-  <nav>
-  <p>
-    
-    <span>Page 1 of 1</span>
-    
-  </p>
-</nav>
-
   
   <p class="muted">
     This page was generated using
