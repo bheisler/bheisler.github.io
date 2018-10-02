@@ -6,10 +6,20 @@
     <description>Recent content in Rust on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 08 Aug 2018 20:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Mon, 01 Oct 2018 19:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/tags/rust/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Porting My CUDA Path Tracer to ptx-builder/linker</title>
+      <link>https://bheisler.github.io/post/ptx-builder-and-linker/</link>
+      <pubDate>Mon, 01 Oct 2018 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/ptx-builder-and-linker/</guid>
+      <description>A bunch of stuff has happened since I published my post on The State of GPGPU in Rust. Most importantly, Denys Zariaiev (@denzp) released his work on a custom linker for Rust CUDA kernels, and a build.rs helper crate to make it easier to use.
+These two crates eliminate many of the problems I referred to in my previous post. The linker solves most of the &amp;ldquo;invalid PTX file&amp;rdquo; problems, while the ptx-builder crate does all of the magic that Accel was doing behind the scenes.</description>
+    </item>
     
     <item>
       <title>The State of GPGPU in Rust</title>

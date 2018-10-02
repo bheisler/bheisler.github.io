@@ -4,9 +4,10 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bheisler.github.io</title>
-    <meta name="description" content="">
-    <meta name="keywords" content="code, props, ">
+    <title>Porting My CUDA Path Tracer to ptx-builder/linker | bheisler.github.io</title>
+    <meta name="description" content="A bunch of stuff has happened since I published my post on The State of GPGPU in Rust. Most importantly, Denys Zariaiev (@denzp) released his work on a custom linker for Rust CUDA kernels, and a build.rs helper crate to make it easier to use.
+These two crates eliminate many of the problems I referred to in my previous post. The linker solves most of the &ldquo;invalid PTX file&rdquo; problems, while the ptx-builder crate does all of the magic that Accel was doing behind the scenes.">
+    <meta name="keywords" content="Rust, GPGPU">
     
     
     
@@ -16,14 +17,18 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="bheisler.github.io" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/" />
+    <meta property="og:title" content="Porting My CUDA Path Tracer to ptx-builder/linker" />
+<meta property="og:description" content="A bunch of stuff has happened since I published my post on The State of GPGPU in Rust. Most importantly, Denys Zariaiev (@denzp) released his work on a custom linker for Rust CUDA kernels, and a build.rs helper crate to make it easier to use.
+These two crates eliminate many of the problems I referred to in my previous post. The linker solves most of the &ldquo;invalid PTX file&rdquo; problems, while the ptx-builder crate does all of the magic that Accel was doing behind the scenes." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/ptx-builder-and-linker/" />
 
 
 
-<meta property="og:updated_time" content="2017-10-19T19:00:00-06:00"/>
+<meta property="article:published_time" content="2018-10-01T19:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2018-10-01T19:00:00-06:00"/>
+
 
 
 
@@ -38,12 +43,6 @@
     <meta name="theme-color" content="#000">
 
     
-      
-
-
-
-
-    
     
 <script>
 window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -53,9 +52,7 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
-    
-    <link rel="canonical" href="https://bheisler.github.io/">
+    <link rel="canonical" href="https://bheisler.github.io/post/ptx-builder-and-linker/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -207,7 +204,7 @@ a:hover {
     
       <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
     
-      <a itemprop="url" class="active" href="/"><span itemprop="name">All</span></a>
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
     
       <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
     
@@ -218,124 +215,25 @@ a:hover {
 
 </header>
     <main>
-  <header>
-    <h1>bheisler.github.io</h1>
-  </header>
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/pennys-sword-rwby-part2/">Penny&#39;s Sword - RWBY - Part 2</a>
-    </h2>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>11 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
+<meta itemprop="name" content="Porting My CUDA Path Tracer to ptx-builder/linker">
+<meta itemprop="description" content="A bunch of stuff has happened since I published my post on The State of GPGPU in Rust. Most importantly, Denys Zariaiev (@denzp) released his work on a custom linker for Rust CUDA kernels, and a build.rs helper crate to make it easier to use.
+These two crates eliminate many of the problems I referred to in my previous post. The linker solves most of the &ldquo;invalid PTX file&rdquo; problems, while the ptx-builder crate does all of the magic that Accel was doing behind the scenes.">
 
-  Published: <time datetime="2017-10-19T19:00:00-06:00">19 Oct, 2017</time>
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Salutations! Welcome to the second part of my post on my replica of Penny&rsquo;s Sword from Rooster Teeth&rsquo;s animated web show RWBY. If you haven&rsquo;t read part 1, go ahead and check it out. When we left off, most of the parts were shaped and primed but not yet assembled. This time we&rsquo;ll get into the painting, and some of it might be hard to visualize so take a look at the tournarounds if you&rsquo;re not sure what I mean.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/pennys-sword-rwby-part2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-10-19T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-10-19T19:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/pennys-sword-finished.jpg">
-  
-</article>
+<meta itemprop="datePublished" content="2018-10-01T19:00:00-06:00" />
+<meta itemprop="dateModified" content="2018-10-01T19:00:00-06:00" />
+<meta itemprop="wordCount" content="1562">
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/pennys-sword-rwby-part1/">Penny&#39;s Sword - RWBY - Part 1</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>12 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
 
-  Published: <time datetime="2017-10-14T12:00:00-06:00">14 Oct, 2017</time>
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    In this post, I&rsquo;ll show you how I built a light-up replica of Penny Polendina&rsquo;s unnamed swords from Rooster Teeth&rsquo;s excellent animated web show RWBY. RWBY is what originally got me into propmaking - I&rsquo;ve already made Yang&rsquo;s Ember Celica shotgauntlets and Adam&rsquo;s Wilt &amp; Blush Sword/Shotgun Combo. This is the first time I&rsquo;ve documented my process, so hopefully you find it useful.
-Blueprints &amp; Design First, a quick overview of how I intended to do this build.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/pennys-sword-rwby-part1/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-10-14T12:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-10-14T12:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/pennys-sword-parts.jpg">
-  
-</article>
+<meta itemprop="keywords" content="Rust,GPGPU," />
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>22 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-08-20T11:35:37-06:00">20 Aug, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Inspired by the always-incredible work on Dolphin, I decided to write myself an NES emulator called Corrosion a couple years ago. I managed to get it working well enough to play basic games, and then put the project aside. This post is not about the emulator itself, but rather the JIT compiler I added to it last year and the upgrades to said JIT compiler I&rsquo;ve made over the past few weeks.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/experiments-in-nes-jit-compilation/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-08-20T11:35:37-06:00">
-  <meta itemprop="dateModified" content="2017-08-20T11:35:37-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+    <header>
+      <h1 itemprop="headline">Porting My CUDA Path Tracer to ptx-builder/linker</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
@@ -344,185 +242,249 @@ Blueprints &amp; Design First, a quick overview of how I intended to do this bui
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2017-07-30T02:11:19&#43;00:00">30 Jul, 2017</time>
+  Published: <time datetime="2018-10-01T19:00:00-06:00">1 Oct, 2018</time>
 
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>A bunch of stuff has happened since I published my post on <a href="/post/state-of-gpgpu-in-rust.md">The State of GPGPU in Rust</a>.
+Most importantly, <a href="https://github.com/denzp">Denys Zariaiev (@denzp)</a> released his work on a
+<a href="https://github.com/denzp/rust-ptx-linker">custom linker</a> for Rust CUDA kernels, and a
+<a href="https://github.com/denzp/rust-ptx-builder">build.rs helper crate</a> to make it easier to use.</p>
+
+<p>These two crates eliminate many of the problems I referred to in my previous post. The linker
+solves most of the &ldquo;invalid PTX file&rdquo; problems, while the ptx-builder crate does all of the magic
+that Accel was doing behind the scenes. In addition, the
+<a href="https://github.com/rust-lang/rust/issues/38824">compiler bug</a> which prevented us from using current
+Rust builds has been resolved (again, thanks to @denzp. All glory to @denzp).</p>
+
+<p>I ported my <a href="/post/writing-gpu-accelerated-path-tracer-part-1.md">GPU Path Tracer</a> code to this new
+system to check it out. I&rsquo;ll be clear - there are still enough pitfalls and limitations and
+<a href="https://github.com/rust-lang/rust/issues/54115">compiler bugs</a> that I would not yet recommend using
+Rust for production CUDA work. I think we now have a stable base to build on, though.</p>
+
+<p>This post serves as a write-up of how I removed Accel from my path tracer and the problems I
+encountered along the way. It could also serve as a tutorial for the brave early-adopters out there
+who want to try something similar.</p>
+
+<h2 id="build-script">Build Script</h2>
+
+<p>I started by pasting the example <code>build.rs</code> script from the
+<a href="https://github.com/denzp/rust-ptx-builder">ptx-builder project</a>. I missed the bit where
+it says the build script is for the host-side (CPU) crate, not the kernel crate, but after I got
+that sorted out it worked without modification.</p>
+
+<script src="//gist.github.com/bheisler/5b61f3cc7dfb6d28e174a5c52caa0b81.js"></script>
+
+<p>I haven&rsquo;t worked with <code>build.rs</code> files before, so I think it&rsquo;s useful to break down
+what this script does. Much of the code at the top of the file is trivial, so I&rsquo;ll start with
+this:</p>
+
+<pre><code class="language-rust">let status = Builder::new(&quot;kernel&quot;)?.build()?;
+</code></pre>
+
+<p>This builds the <code>kernel</code> crate and links it and its dependencies into a PTX module. <code>kernel</code> in this
+case is a relative directory name. Then, if the build was successful&hellip;</p>
+
+<pre><code class="language-rust">// Provide the PTX Assembly location via env variable
+println!(
+    &quot;cargo:rustc-env=KERNEL_PTX_PATH={}&quot;,
+    output.get_assembly_path().to_str().unwrap()
+);
+
+// Observe changes in kernel sources
+for path in output.source_files()? {
+    println!(&quot;cargo:rerun-if-changed={}&quot;, path.to_str().unwrap());
+}
+</code></pre>
+
+<p>The build script reports the path to the PTX file to Cargo as an environment variable (so that we
+can embed it into our executable later using <code>include_str!(env!(&quot;KERNEL_PTX_PATH&quot;)))</code>, and informs
+Cargo that the host crate needs to be recompiled if any of the kernel source files change. This is
+really slick - props both to @denzp and the Cargo team for making this work so smoothly. If you had
+multiple kernel modules, you could call the builder multiple times and expose them as separate
+environment variables as well.</p>
+
+<h2 id="converting-the-kernel">Converting the Kernel</h2>
+
+<p>With Accel, I had a wrapper function tagged with the Accel procedural-macro attribute which was
+responsible for calling the function in my kernel crate to do the rendering work. I moved that into
+the kernel crate itself:</p>
+
+<script src="//gist.github.com/bheisler/b1b122814ba4829e84edccb7fad0ee5c.js"></script>
+
+<p>This is the only part of my kernel that accesses the NVPTX builtins, so I added the <code>cfg</code> attribute
+to remove this function when not compiling for CUDA. That way I could still call the rest of the
+kernel on the CPU for testing and easier debugging when needed. After that, there&rsquo;s the
+<code>#[no_mangle] pub unsafe extern &quot;ptx-kernel&quot; fn</code> dance necessary to expose this function as a
+kernel entry point, and the actual code. Using the &ldquo;ptx-kernel&rdquo; as the ABI tag means I needed to
+add <code>#![feature(abi_ptx)]</code> to the crate and run with a nightly build. If you&rsquo;re following along on
+Windows, you&rsquo;ll also need to use the <code>windows-gnu</code> nightly, as the PTX linker currently doesn&rsquo;t
+work with the <code>windows-msvc</code> builds.</p>
+
+<p>Accel has its own crate that provides wrappers for the <code>block_idx</code>/etc. functions, but I followed
+@denzp&rsquo;s guide and used the <a href="https://crates.io/crates/nvptx-builtins"><code>nvptx_builtins</code> crate</a>.
+<code>nvptx_builtins</code> is super bare-bones, but that&rsquo;s probably what you want here - the magic CUDA
+functions are very limited in scope so you don&rsquo;t really need anything complex.</p>
+
+<p>With that, converting the kernel was done. Remarkably easy, in fact.</p>
+
+<h2 id="data-transfer">Data Transfer</h2>
+
+<p>Next, I needed a way to transfer data to and from the GPU. Accel handles this with a special <code>UVec</code>
+type, which is essentially a fixed-size <code>Vec</code> in <a href="https://devblogs.nvidia.com/unified-memory-cuda-beginners/">Unified
+Memory</a>, meaning that it can be
+transparently read or written by both CPU and GPU code without an explicit transfer step. This is
+useful, but my memory access patterns were pretty simple so I just did the copying explicitly.</p>
+
+<p>This brings me to another point I&rsquo;d like to make - we need a better higher-level wrapper around
+CUDA. Accel&rsquo;s is pretty decent but is tied up with that project. I&rsquo;m using
+<a href="https://github.com/japaric/cuda">japaric/cuda</a> here because that&rsquo;s what @denzp used in his
+examples, but it&rsquo;s not ready for production use. I shouldn&rsquo;t have to write my own struct to safely
+handle allocating memory on the GPU, there are a bunch of simple structs that should implement
+Clone but don&rsquo;t, several parameters to important functions should be taken by reference, and
+so on. It doesn&rsquo;t appear to be maintained any longer, and was never published to Crates.io.</p>
+
+<p>In any case, I wrote a simple <code>DeviceBuffer</code> struct to allocate device memory, free it on Drop, and
+copy data to or from the device. Then I updated all of my code to use that structure instead of
+<code>UVec</code>.</p>
+
+<h2 id="cuda-context">CUDA Context</h2>
+
+<p>At this point, I had the code compiling (although I had commented out the code to launch the
+kernel). It failed as soon as it tried to allocate device memory, though, because I needed to
+initialize the CUDA context.</p>
+
+<p>Initializing the driver itself is easy:</p>
+
+<p><code>::cuda::driver::initialize().expect(&quot;Unable to initialize CUDA&quot;);</code></p>
+
+<p>Then I needed to create and manage a CUDA context. This was more difficult than it needed to be, but
+that&rsquo;s really my fault for my poor design when building the path tracer. The problem is that
+the CUDA context structure needs to be used to load PTX modules and launch kernels, so it had to be
+accessible in the launch function, several calls down from main.</p>
+
+<p>The natural way to handle this is to have a single <code>PathTracer</code> struct which contains all of the
+important shared state for the path tracer and have <code>main</code> instantiate and use that. I should have
+done that to start with, but I didn&rsquo;t and I didn&rsquo;t feel like refactoring. Instead, I just left
+everything as a local variable in <code>main</code>, and I didn&rsquo;t want to thread the reference to the context
+down to where it would be needed, so I cheated and used <code>lazy_static!</code> to make it global. Forgive
+me, programming gods, for I have sinned.</p>
+
+<script src="//gist.github.com/bheisler/468ba641f3816b0cc745b974f384ed26.js"></script>
+
+<p>I did the same for the CUDA module, which holds the compiled PTX code. Notice here
+that we&rsquo;re using the <code>env!</code> macro to get the path to the compiled kernel from the environment
+variable set by the build script. We then use <code>include_str!</code> to embed the kernel code into our
+executable. It&rsquo;s a bit unfortunate that we have to copy it to a heap-allocated CString before
+handing it off to CUDA - it would be nice to have an <code>include_cstr!</code> to include the kernel as a
+null-terminated string - but it&rsquo;s not a big deal. Likewise how we have to explicitly convert the
+rust <code>&amp;str</code> to a <code>CStr</code> on each call to the <code>kernel</code> function, even though the parameter is almost
+certainly a constant.</p>
+
+<p>I would like to explore the idea of building some macros (perhaps procedural macros) to help with
+this. One approach would be to have an <code>include_cstr!</code> macro. Another option would be for the build
+script to assemble the (text-based) PTX file using <code>ptxas</code>, and then embed the resulting binary
+using <code>include_bytes!</code>. In either case, it would also be great to have a <code>cstr!</code> macro for creating
+CStr literals.</p>
+
+<script src="//gist.github.com/bheisler/f8bde9a1a5ec152952e2838f0b95fa03.js"></script>
+
+<h2 id="launching-the-kernel">Launching the Kernel</h2>
+
+<p>With all that set up, now I could launch the actual kernel:</p>
+
+<script src="//gist.github.com/bheisler/9e37fffc987d6b6e128c78d1ee082f27.js"></script>
+
+<p>It&rsquo;s worth noting here that the launch function blocks until the kernel is complete. Normally,
+CUDA kernel launches are asynchronous - the launch returns almost immediately to allow the CPU to
+queue up more work or perform memory transfers to and from the GPU while it&rsquo;s working. This is
+another limitation of this particular wrapper library. I&rsquo;ve been thinking about using
+Rust&rsquo;s futures libraries to model this asynchronous behavior, but for now it would be nice if
+we could just have access to the same API that C programmers use.</p>
+
+<p>Also note the manual construction of the argument array to pass to the kernel. I think a lot of
+this verbosity can be eliminated with some macros. I should probably write those macros. Anyway,
+with this done, the path tracer port was complete.</p>
+
+<h2 id="conclusions">Conclusions</h2>
+
+<p>For me, the biggest take-away from this is that we need a well-designed, well-documented Rust wrapper
+around the CUDA driver and runtime APIs. The kernel side of things is basic but good enough for
+initial use (modulo compiler bugs) but the facilities for working with device memory and launching
+kernels are limited and awkward. Down the road, we&rsquo;ll need to tackle things like shared memory
+somehow, and we&rsquo;ll probably want to start building higher-level tools for kernels as well.</p>
+
+<p>Still, now that we have the PTX linker and build script tools, it&rsquo;s possible to reliably build CUDA
+kernels in Rust and execute them without relying on specific compiler versions. It&rsquo;s just more work
+than it really ought to be. That&rsquo;s a major step forward towards making GPGPU in Rust as good as it
+is in C.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2018-10-01T19:00:00-06:00">
+    1 Oct, 2018
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/gpgpu/">GPGPU</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">1562</span> words.
 </p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Long, long ago (December 2015) I wanted to learn how emulators worked, so I decided to write an NES emulator. Not only that, but I opted to write it in Rust, a language which I had never used before. A crazy idea, to be certain, but once I was done I had indeed learned a great deal about emulators, the NES, and Rust.
-Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work and upgrades.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/nes-rom-parser-with-nom/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-07-30T02:11:19&#43;00:00">
-  <meta itemprop="dateModified" content="2017-07-30T02:11:19&#43;00:00">
-  
-</article>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>11 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
+      
 
-  Published: <time datetime="2017-04-02T00:00:00-06:00">2 Apr, 2017</time>
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! This is a detailed example of exposing Rust code to other languages (in this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really trivial example functions, skipping over a lot of the complexity. Even the better ones out there typically don&rsquo;t have a pre-existing, reasonably complex program to work with. I&rsquo;m going to start with trivial functions and build my way up to being able to define a scene for my raytracer in Python using a series of calls to Rust, then render it and return the resulting image data back to Python.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/calling-rust-in-python/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-04-02T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-04-02T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/rendered-by-python.png">
-  
-</article>
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+        <time datetime="17M">17 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
+        <time datetime="16M">16 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-1/">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/jarvis-impressions-of-rust-libraries/">JARVIS - Notes on Rust Crates From Writing an RSS Reader</a>
+        <time datetime="15M">15 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+    </ul>
+  </aside>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>12 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
 
-  Published: <time datetime="2017-03-27T00:00:00-06:00">27 Mar, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
-First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-3/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-27T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>9 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-20T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-20T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/spherical-lights.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>7 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
-So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-02-20T11:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-02-20T11:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/raytracer-first-render.png">
-  
-</article>
-
-  
+    </footer>
+  </article>
 </main>
     <footer>
-  <nav>
-  <p>
-    
-      <a href="/">&laquo; Previous</a> |
-    
-    <span>Page 2 of 2</span>
-    
-  </p>
-</nav>
-
   
   <p class="muted">
     This page was generated using
