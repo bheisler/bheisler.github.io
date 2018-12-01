@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://bheisler.github.io/post/announcing-rustacuda/</loc>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/ptx-builder-and-linker/</loc>
     <lastmod>2018-10-01T19:00:00-06:00</lastmod>
   </url>
@@ -132,13 +137,19 @@
   
   <url>
     <loc>https://bheisler.github.io/categories/code/</loc>
-    <lastmod>2018-10-01T19:00:00-06:00</lastmod>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/tags/criterion.rs/</loc>
     <lastmod>2018-02-05T07:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bheisler.github.io/tags/cuda/</loc>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -156,7 +167,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/gpgpu/</loc>
-    <lastmod>2018-10-01T19:00:00-06:00</lastmod>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -198,7 +209,7 @@
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2018-10-01T19:00:00-06:00</lastmod>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -222,7 +233,13 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/rust/</loc>
-    <lastmod>2018-10-01T19:00:00-06:00</lastmod>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bheisler.github.io/tags/rustacuda/</loc>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -240,7 +257,7 @@
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2018-10-01T19:00:00-06:00</lastmod>
+    <lastmod>2018-12-01T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   

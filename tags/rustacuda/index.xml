@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rustacuda on bheisler.github.io</title>
+    <link>https://bheisler.github.io/tags/rustacuda/</link>
+    <description>Recent content in Rustacuda on bheisler.github.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 01 Dec 2018 15:00:00 -0600</lastBuildDate>
+    
+	<atom:link href="https://bheisler.github.io/tags/rustacuda/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Announcing RustaCUDA v0.1.0</title>
+      <link>https://bheisler.github.io/post/announcing-rustacuda/</link>
+      <pubDate>Sat, 01 Dec 2018 15:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/announcing-rustacuda/</guid>
+      <description>In my post on GPGPU in Rust, I declared that I intended to work on improving the state of CUDA support in Rust. Since then, I&amp;rsquo;ve been mostly radio-silent. I&amp;rsquo;m pleased to announce that I have actually been working on something, and I&amp;rsquo;ve finally published that something.
+RustaCUDA RustaCUDA is a new wrapper crate for the CUDA driver API. It allows the programmer to allocate and free GPU memory, copy data to and from the GPU, load CUDA modules and launch kernels, all with a mostly-safe, programmer-friendly, Rust-y interface.</description>
+    </item>
+    
+  </channel>
+</rss>

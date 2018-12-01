@@ -4,7 +4,7 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rust | bheisler.github.io</title>
+    <title>Rustacuda | bheisler.github.io</title>
     <meta name="description" content="">
     <meta name="keywords" content="code, props, ">
     
@@ -18,10 +18,10 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Rust" />
+    <meta property="og:title" content="Rustacuda" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/tags/rust/" />
+<meta property="og:url" content="https://bheisler.github.io/tags/rustacuda/" />
 
 
 
@@ -49,9 +49,9 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/tags/rust/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
+      <link href="https://bheisler.github.io/tags/rustacuda/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
     
-    <link rel="canonical" href="https://bheisler.github.io/tags/rust/">
+    <link rel="canonical" href="https://bheisler.github.io/tags/rustacuda/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -215,7 +215,7 @@ a:hover {
 </header>
     <main>
   <header>
-    <h1>Rust</h1>
+    <h1>Rustacuda</h1>
   </header>
   
     <article itemscope itemtype="http://schema.org/CreativeWork">
@@ -253,332 +253,12 @@ RustaCUDA RustaCUDA is a new wrapper crate for the CUDA driver API. It allows th
 </article>
 
   
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>8 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-10-01T19:00:00-06:00">1 Oct, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    A bunch of stuff has happened since I published my post on The State of GPGPU in Rust. Most importantly, Denys Zariaiev (@denzp) released his work on a custom linker for Rust CUDA kernels, and a build.rs helper crate to make it easier to use.
-These two crates eliminate many of the problems I referred to in my previous post. The linker solves most of the &ldquo;invalid PTX file&rdquo; problems, while the ptx-builder crate does all of the magic that Accel was doing behind the scenes.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/ptx-builder-and-linker/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-10-01T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-10-01T19:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>6 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-08-08T20:00:00-06:00">8 Aug, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    At work a few months ago, we started experimenting with GPU-acceleration. My boss asked if I was interested. I didn&rsquo;t know anything about programming GPUs, so of course I said &ldquo;Heck yes, I&rsquo;m interested!&ldquo;. I needed to learn about GPUs in a hurry, and that led to my GPU Path Tracer series. That was a lot of fun, but it showed me that CUDA support in Rust is pretty poor.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/state-of-gpgpu-in-rust/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-08-08T20:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-08-08T20:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>17 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-07-19T18:30:00-06:00">19 Jul, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! Welcome to my third and final post on my GPU-accelerated Path Tracer in Rust. In the last post, we implemented all of the logic necessary to build a true path tracer. Problem is, even on the GPU it&rsquo;s terrifically slow. This post is (mostly) about fixing that.
-But first, we need to fix a bug or two, because I goofed. *sad trombone*
-Step -1: Fixing Bugs /u/anderslanglands on Reddit pointed out that, since I&rsquo;m using Cosine-weighted Importance Sampling, I need to do some extra math to avoid biasing the results.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-gpu-accelerated-path-tracer-part-3/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-07-19T18:30:00-06:00">
-  <meta itemprop="dateModified" content="2018-07-19T18:30:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/path_tracer_dragons.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>16 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-07-12T19:00:00-06:00">12 Jul, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello, and welcome to part two of my series on writing a GPU-accelerated path tracer in Rust. I&rsquo;d meant to have this post up sooner, but nothing ruins my productivity quite like Games Done Quick. I&rsquo;m back now, though, so it&rsquo;s time to turn the GPU ray-tracer from the last post into a real path tracer.
-Tracing Paths As mentioned last time, Path Tracing is an extension to Ray Tracing which attempts to simulate global illumination.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-gpu-accelerated-path-tracer-part-2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-07-12T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-07-12T19:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-gpu-accelerated-path-tracer-part-1/">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>15 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-06-21T19:00:00-06:00">21 Jun, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Well, it&rsquo;s that time again. This is the start of a second series of articles on raytracing in Rust following on from my previous series. This time, I&rsquo;ll be doing all of the rendering on a GPU using Accel - see my previous post on Accel. I thought this would be a good project for learning about GPU programming, see.
-Second, this time I want to write a path tracer, rather than a raytracer.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-gpu-accelerated-path-tracer-part-1/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-06-21T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-06-21T19:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/path_tracer_green_teapot.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>13 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-06-14T19:00:00-06:00">14 Jun, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    NOTE: Much of what I discuss below is no longer accurate.
-For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/rust-on-the-gpu-with-accel/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-06-14T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-06-14T19:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/jarvis-impressions-of-rust-libraries/">JARVIS - Notes on Rust Crates From Writing an RSS Reader</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>15 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-04-22T16:00:00-06:00">22 Apr, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Way back in the dim mists of history (back in university) I wrote myself a custom RSS reader in Java and called it JARVIS1. You see, I read a lot of webcomics. Like, a lot. Some webcomics provide RSS feeds, but some don&rsquo;t, and as my collection grew it started to become a hassle to use Firefox&rsquo;s live bookmarks to manage it all. Ultimately, I wrote up a quick Swing GUI to use as a single interface for keeping up with blogs and tracking which comics had published updates since the last time I&rsquo;d checked2.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/jarvis-impressions-of-rust-libraries/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-04-22T16:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-04-22T16:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>4 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-02-05T07:00:00-06:00">5 Feb, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    I&rsquo;m pleased to announce the release of Criterion.rs v0.2, available today. Version 0.2 provides a number of new features including HTML reports and throughput measurements, fixes a handful of bugs, and adds a new, more powerful way to configure and construct your benchmarks. It also breaks backwards compatibility with the 0.1 versions in a number of small but important ways. Read on to learn more!
-What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/criterion-rs-0-2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-02-05T07:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-02-05T07:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>5 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-01-12T19:00:00-06:00">12 Jan, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    When I initially announced the release of Criterion.rs, I didn&rsquo;t expect that there would be so much demand for benchmarking on stable Rust. Now, I&rsquo;d like to announce the release of Criterion.rs 0.1.2, which supports the stable compiler. This post is an introduction to benchmarking with Criterion.rs and a discussion of reasons why you might or might not want to do so.
-What is Criterion.rs? Criterion.rs is a benchmarking library for Rust that aims to bring solid statistical confidence to benchmarking Rust code, while maintaining good ease-of-use, even for programmers without a background in statistics.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/benchmarking-with-criterion-rs/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-01-12T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-01-12T19:00:00-06:00">
-  
-</article>
-
-  
 </main>
     <footer>
   <nav>
   <p>
     
-    <span>Page 1 of 2</span>
-    
-      | <a href="/tags/rust/page/2/">Next &raquo;</a>
+    <span>Page 1 of 1</span>
     
   </p>
 </nav>
