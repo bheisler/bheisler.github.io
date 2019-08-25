@@ -4,28 +4,31 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benchmarking | bheisler.github.io</title>
-    <meta name="description" content="">
-    <meta name="keywords" content="code, props, ">
+    <title>Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes | bheisler.github.io</title>
+    <meta name="description" content="I&rsquo;m pleased to announce the release of Criterion.rs v0.3, available today. Version 0.3 provides a number of new features including preliminary support for plugging in custom measurements (eg. hardware timers or POSIX CPU time), hooks to start/stop profilers, a new BenchmarkGroup struct that provides more flexibility than the older Benchmark and ParameterizedBenchmark structs, and an implementation of a #[criterion] custom-test-framework macro for those on Nightly.
+What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust.">
+    <meta name="keywords" content="Rust, Benchmarking, Criterion.rs">
     
     
     
-    
-      <meta name="robots" content="noindex">
     
     
 
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Benchmarking" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/tags/benchmarking/" />
+    <meta property="og:title" content="Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes" />
+<meta property="og:description" content="I&rsquo;m pleased to announce the release of Criterion.rs v0.3, available today. Version 0.3 provides a number of new features including preliminary support for plugging in custom measurements (eg. hardware timers or POSIX CPU time), hooks to start/stop profilers, a new BenchmarkGroup struct that provides more flexibility than the older Benchmark and ParameterizedBenchmark structs, and an implementation of a #[criterion] custom-test-framework macro for those on Nightly.
+What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/criterion-rs-0-3/" />
 
 
 
-<meta property="og:updated_time" content="2019-08-25T10:30:00-06:00"/>
+<meta property="article:published_time" content="2019-08-25T10:30:00-06:00"/>
+
+<meta property="article:modified_time" content="2019-08-25T10:30:00-06:00"/>
+
 
 
 
@@ -49,9 +52,7 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/tags/benchmarking/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
-    
-    <link rel="canonical" href="https://bheisler.github.io/tags/benchmarking/">
+    <link rel="canonical" href="https://bheisler.github.io/post/criterion-rs-0-3/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -214,17 +215,25 @@ a:hover {
 
 </header>
     <main>
-  <header>
-    <h1>Benchmarking</h1>
-  </header>
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/criterion-rs-0-3/">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</a>
-    </h2>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+<meta itemprop="name" content="Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes">
+<meta itemprop="description" content="I&rsquo;m pleased to announce the release of Criterion.rs v0.3, available today. Version 0.3 provides a number of new features including preliminary support for plugging in custom measurements (eg. hardware timers or POSIX CPU time), hooks to start/stop profilers, a new BenchmarkGroup struct that provides more flexibility than the older Benchmark and ParameterizedBenchmark structs, and an implementation of a #[criterion] custom-test-framework macro for those on Nightly.
+What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust.">
+
+
+<meta itemprop="datePublished" content="2019-08-25T10:30:00-06:00" />
+<meta itemprop="dateModified" content="2019-08-25T10:30:00-06:00" />
+<meta itemprop="wordCount" content="618">
+
+
+
+<meta itemprop="keywords" content="Rust,Benchmarking,Criterion.rs," />
+
+    <header>
+      <h1 itemprop="headline">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
@@ -235,139 +244,166 @@ a:hover {
 
   Published: <time datetime="2019-08-25T10:30:00-06:00">25 Aug, 2019</time>
 
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>I&rsquo;m pleased to announce the release of Criterion.rs v0.3, available today. Version 0.3 provides a
+number of new features including preliminary support for plugging in custom measurements (eg.
+hardware timers or POSIX CPU time), hooks to start/stop profilers, a new <code>BenchmarkGroup</code> struct
+that provides more flexibility than the older <code>Benchmark</code> and <code>ParameterizedBenchmark</code> structs, and
+an implementation of a <code>#[criterion]</code> custom-test-framework macro for those on Nightly.</p>
+
+<h2 id="what-is-criterion-rs">What is Criterion.rs?</h2>
+
+<p>Criterion.rs is a statistics-driven benchmarking library for Rust. It provides precise measurements
+of changes in the performance of benchmarked code, and gives strong statistical confidence that
+apparent performance changes are real and not simply noise. Clear output, a simple API and
+reasonable defaults make it easy to use even for developers without a background in statistics.
+Unlike the benchmarking harness provided by Rust, Criterion.rs can be used with stable versions of
+the compiler.</p>
+
+<p>If you aren&rsquo;t already using Criterion.rs for your benchmarks, check out the <a href="https://bheisler.github.io/criterion.rs/book/getting_started.html">Getting Started
+guide</a> or go right to <a href="https://github.com/bheisler/criterion.rs">the GitHub
+repo</a>.</p>
+
+<h2 id="new-features">New Features</h2>
+
+<p>These are only some of the improvements made to Criterion.rs in v0.3.0 - for a more complete list, see
+the <a href="https://github.com/bheisler/criterion.rs/blob/master/CHANGELOG.md">CHANGELOG</a>.</p>
+
+<h3 id="custom-measurements">Custom Measurements</h3>
+
+<p>Criterion.rs now has basic support for plugging in custom measurements to replace the default
+wall-clock time measurement. This has been a highly-requested feature during the lifetime of 0.2.0,
+so I look forward to seeing all the neat things people use it for.</p>
+
+<h3 id="profiler-hooks">Profiler Hooks</h3>
+
+<p>Some profiling tools require the programmer to instrument their code with calls to start and stop
+the profiler. Criterion.rs now provides hooks for benchmark authors to plug in their preferred
+profiler so that it can be used in <code>--profile-time</code> mode, without having to constantly recompile
+the benchmarks.</p>
+
+<h3 id="added-the-benchmarkgroup-type">Added the <code>BenchmarkGroup</code> Type</h3>
+
+<p>The older <code>Benchmark</code> and <code>ParameterizedBenchmark</code> structs were used to group together related
+benchmarks so that Criterion.rs could generate summaries of the measurements comparing different
+functions on different inputs. Unfortunately, they could be very limiting. It was not possible
+to change the benchmark configuration based on the input or the function being tested (for example,
+to reduce the sample count on long-running benchmarks over large inputs while keeping the higher
+sample count for smaller inputs). It was also awkward to benchmark over multi-dimensional input
+ranges, they didn&rsquo;t allow much programmer control over the benchmark IDs, etc.</p>
+
+<p>After some re-thinking of the problem, I realized that a much simpler, more-flexible design was
+possible, so I built <code>BenchmarkGroup</code>. The older structs still exist and still work, but will be
+deprecated sometime during the lifetime of 0.3.0 and removed in 0.4.0.</p>
+
+<p>Examples:</p>
+
+<script src="//gist.github.com/bheisler/9bb536a426baa0cbc75f2a6c665d8400.js"></script>
+
+<h3 id="custom-test-framework">Custom Test Framework</h3>
+
+<p>Nightly-compiler users can now add a dependency on <code>criterion_macro</code> and use <code>#[criterion]</code>
+to mark their benchmarks instead of using the <code>criterion_group!/criterion_main!</code> macros.</p>
+
+<p>Examples:</p>
+
+<script src="//gist.github.com/bheisler/eb81b0d81e61a83f10d31ca663b37007.js"></script>
+
+<h2 id="breaking-changes">Breaking Changes</h2>
+
+<p>Unfortunately, some breaking changes were necessary to implement these new features.</p>
+
+<h3 id="the-format-of-the-raw-csv-file-has-changed">The format of the <code>raw.csv</code> file has changed</h3>
+
+<p>Some additional columns were added to include throughput information. Also, <code>sample_time_nanos</code>
+has been split into <code>sample_measured_value</code> and <code>unit</code> to accommodate custom measurements.</p>
+
+<h3 id="external-program-benchmarks-have-been-removed">External Program Benchmarks have been removed.</h3>
+
+<p>This feature was never used enough to justify the maintenance burden, so it was deprecated in 0.2.6
+and removed in 0.3.0. With some extra effort on the part of the benchmark author, the new
+<code>iter_custom</code> timing loop can be used to implement external program benchmarks.</p>
+
+<h3 id="throughput-has-been-expanded-to-u64">Throughput has been expanded to u64</h3>
+
+<p>Throughputs previously contained a u32 value representing the number of bytes or elements processed
+by an iteration of the benchmark. This has been expanded to u64 to allow for extremely large
+iterations.</p>
+
+<h2 id="thank-you">Thank You</h2>
+
+<p>Thank you to all of the many folks who have contributed pull requests or ideas and suggestions to
+Criterion over the last few years.</p>
+
+<p>Also, thank you to all you folks who use Criterion.rs for their benchmarks.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2019-08-25T10:30:00-06:00">
+    25 Aug, 2019
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/benchmarking/">Benchmarking</a>, <a href="/tags/criterion.rs/">Criterion.rs</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">618</span> words.
 </p>
-    
-  </header>
-  
-  <div itemprop="description">
-    I&rsquo;m pleased to announce the release of Criterion.rs v0.3, available today. Version 0.3 provides a number of new features including preliminary support for plugging in custom measurements (eg. hardware timers or POSIX CPU time), hooks to start/stop profilers, a new BenchmarkGroup struct that provides more flexibility than the older Benchmark and ParameterizedBenchmark structs, and an implementation of a #[criterion] custom-test-framework macro for those on Nightly.
-What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/criterion-rs-0-3/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2019-08-25T10:30:00-06:00">
-  <meta itemprop="dateModified" content="2019-08-25T10:30:00-06:00">
-  
-</article>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>4 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
+      
 
-  Published: <time datetime="2018-02-05T07:00:00-06:00">5 Feb, 2018</time>
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    I&rsquo;m pleased to announce the release of Criterion.rs v0.2, available today. Version 0.2 provides a number of new features including HTML reports and throughput measurements, fixes a handful of bugs, and adds a new, more powerful way to configure and construct your benchmarks. It also breaks backwards compatibility with the 0.1 versions in a number of small but important ways. Read on to learn more!
-What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/criterion-rs-0-2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-02-05T07:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-02-05T07:00:00-06:00">
-  
-</article>
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
+        <time datetime="5M">5 minutes</time>
+      
+        <li><a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/announcing-rustacuda/">Announcing RustaCUDA v0.1.0</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+        <time datetime="17M">17 minutes</time>
+      
+    </ul>
+  </aside>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>5 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
 
-  Published: <time datetime="2018-01-12T19:00:00-06:00">12 Jan, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    When I initially announced the release of Criterion.rs, I didn&rsquo;t expect that there would be so much demand for benchmarking on stable Rust. Now, I&rsquo;d like to announce the release of Criterion.rs 0.1.2, which supports the stable compiler. This post is an introduction to benchmarking with Criterion.rs and a discussion of reasons why you might or might not want to do so.
-What is Criterion.rs? Criterion.rs is a benchmarking library for Rust that aims to bring solid statistical confidence to benchmarking Rust code, while maintaining good ease-of-use, even for programmers without a background in statistics.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/benchmarking-with-criterion-rs/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-01-12T19:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-01-12T19:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>6 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2018-01-06T16:00:00-06:00">6 Jan, 2018</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    After I released the first version of Criterion.rs, (a statistics-driven benchmarking tool for Rust) I was asked about using it to detect performance regressions as part of a cloud-based continuous integration (CI) pipeline such as Travis-CI or Appveyor. That got me wondering - does it even make sense to do that?
-Cloud-CI pipelines have a lot of potential to introduce noise into the benchmarking process - unpredictable load on the physical hosts of the build VM&rsquo;s, or even unpredictable migrations of VMs between physical hosts.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/benchmarking-in-the-cloud/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2018-01-06T16:00:00-06:00">
-  <meta itemprop="dateModified" content="2018-01-06T16:00:00-06:00">
-  
-</article>
-
-  
+    </footer>
+  </article>
 </main>
     <footer>
-  <nav>
-  <p>
-    
-    <span>Page 1 of 1</span>
-    
-  </p>
-</nav>
-
   
   <p class="muted">
     This page was generated using

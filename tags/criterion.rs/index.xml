@@ -6,10 +6,20 @@
     <description>Recent content in Criterion.rs on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 05 Feb 2018 07:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Sun, 25 Aug 2019 10:30:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/tags/criterion.rs/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</title>
+      <link>https://bheisler.github.io/post/criterion-rs-0-3/</link>
+      <pubDate>Sun, 25 Aug 2019 10:30:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/criterion-rs-0-3/</guid>
+      <description>I&amp;rsquo;m pleased to announce the release of Criterion.rs v0.3, available today. Version 0.3 provides a number of new features including preliminary support for plugging in custom measurements (eg. hardware timers or POSIX CPU time), hooks to start/stop profilers, a new BenchmarkGroup struct that provides more flexibility than the older Benchmark and ParameterizedBenchmark structs, and an implementation of a #[criterion] custom-test-framework macro for those on Nightly.
+What is Criterion.rs? Criterion.rs is a statistics-driven benchmarking library for Rust.</description>
+    </item>
     
     <item>
       <title>Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</title>
