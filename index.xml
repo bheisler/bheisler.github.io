@@ -6,10 +6,19 @@
     <description>Recent content on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 25 Aug 2019 10:30:00 -0600</lastBuildDate>
+    <lastBuildDate>Mon, 01 Jun 2020 19:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Work-Efficiency vs. Step-Efficiency</title>
+      <link>https://bheisler.github.io/post/work-efficiency-vs-step-efficiency/</link>
+      <pubDate>Mon, 01 Jun 2020 19:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/work-efficiency-vs-step-efficiency/</guid>
+      <description>At work recently, I found myself trying to explain the Work-Efficiency vs Step-Efficiency tradeoff to a coworker, but when I searched for online resources to help I couldn&amp;rsquo;t find any that I liked, so I decided to take a shot at writing my own. I found this idea presented in a video lecture series about programming for GPGPUs on Youtube a while ago. However, it&amp;rsquo;s just as applicable to any form of parallel processing, from SIMD instructions running on a single CPU core up to massive clusters of thousands of computers.</description>
+    </item>
     
     <item>
       <title>Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</title>
