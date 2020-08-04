@@ -4,9 +4,10 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bheisler.github.io</title>
-    <meta name="description" content="">
-    <meta name="keywords" content="code, props, ">
+    <title>Efficient Use of Travis-CI&#39;s Cache For Rust Builds | bheisler.github.io</title>
+    <meta name="description" content="A while ago, I complained on Reddit about the Travis-CI build times for my Rust crates. Aleksey Kladov, better known in the Rust community as &ldquo;matklad&rdquo;, responded to mention that Travis-CI&rsquo;s caching behavior is&hellip; suboptimal for Rust crates and gave me a way to fix it.
+I figure there are probably other Rust developers out there who aren&rsquo;t aware of this, so I&rsquo;m writing a short post to explain it.">
+    <meta name="keywords" content="Rust">
     
     
     
@@ -16,14 +17,18 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="bheisler.github.io" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/" />
+    <meta property="og:title" content="Efficient Use of Travis-CI&#39;s Cache For Rust Builds" />
+<meta property="og:description" content="A while ago, I complained on Reddit about the Travis-CI build times for my Rust crates. Aleksey Kladov, better known in the Rust community as &ldquo;matklad&rdquo;, responded to mention that Travis-CI&rsquo;s caching behavior is&hellip; suboptimal for Rust crates and gave me a way to fix it.
+I figure there are probably other Rust developers out there who aren&rsquo;t aware of this, so I&rsquo;m writing a short post to explain it." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/efficient-use-of-travis-ci-cache-for-rust/" />
 
 
 
-<meta property="og:updated_time" content="2017-03-20T00:00:00-06:00"/>
+<meta property="article:published_time" content="2020-08-03T18:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2020-08-03T18:00:00-06:00"/>
+
 
 
 
@@ -38,12 +43,6 @@
     <meta name="theme-color" content="#000">
 
     
-      
-
-
-
-
-    
     
 <script>
 window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -53,9 +52,7 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
-    
-    <link rel="canonical" href="https://bheisler.github.io/">
+    <link rel="canonical" href="https://bheisler.github.io/post/efficient-use-of-travis-ci-cache-for-rust/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -207,7 +204,7 @@ a:hover {
     
       <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
     
-      <a itemprop="url" class="active" href="/"><span itemprop="name">All</span></a>
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
     
       <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
     
@@ -218,96 +215,185 @@ a:hover {
 
 </header>
     <main>
-  <header>
-    <h1>bheisler.github.io</h1>
-  </header>
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
-    </h2>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+<meta itemprop="name" content="Efficient Use of Travis-CI&#39;s Cache For Rust Builds">
+<meta itemprop="description" content="A while ago, I complained on Reddit about the Travis-CI build times for my Rust crates. Aleksey Kladov, better known in the Rust community as &ldquo;matklad&rdquo;, responded to mention that Travis-CI&rsquo;s caching behavior is&hellip; suboptimal for Rust crates and gave me a way to fix it.
+I figure there are probably other Rust developers out there who aren&rsquo;t aware of this, so I&rsquo;m writing a short post to explain it.">
+
+
+<meta itemprop="datePublished" content="2020-08-03T18:00:00-06:00" />
+<meta itemprop="dateModified" content="2020-08-03T18:00:00-06:00" />
+<meta itemprop="wordCount" content="809">
+
+
+
+<meta itemprop="keywords" content="Rust," />
+
+    <header>
+      <h1 itemprop="headline">Efficient Use of Travis-CI&#39;s Cache For Rust Builds</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>9 minute read</span>
+<span>4 minute read</span>
 <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time>
+  Published: <time datetime="2020-08-03T18:00:00-06:00">3 Aug, 2020</time>
 
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>A while ago, I complained on Reddit about the Travis-CI build times for my Rust crates.
+Aleksey Kladov, better known in the Rust community as &ldquo;matklad&rdquo;,
+<a href="https://www.reddit.com/r/rust/comments/hjx82b/compiler_team_roadmap_20202021/fwrrb62/?context=3">responded</a> to mention that
+Travis-CI&rsquo;s caching behavior is&hellip; suboptimal for Rust crates and gave me a way to fix it.</p>
+
+<p>I figure there are probably other Rust developers out there who aren&rsquo;t aware of this, so I&rsquo;m
+writing a short post to explain it. All credit for noticing this problem and the solution goes to
+matklad, I&rsquo;m just sharing it.</p>
+
+<p>As a side note, I have thought about looking at other CI solutions, but haven&rsquo;t bothered to make
+the switch. This isn&rsquo;t about comparing CI providers, just a useful configuration tweak that other
+Rust developers might find helpful.</p>
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>Rust builds are notoriously slow, especially when compiling from a clean slate. This is less true
+than it once was, but it&rsquo;s still slow enough to be a significant problem for CI systems. Travis-CI&rsquo;s
+documentation encourages users to enable build caching in their CI configuration; they even have
+a built-in <code>rust</code> profile for their caching system that configures the caching to save your <code>target</code>
+directory (among a few others). In theory, this enables you to save the compiled artifacts of your
+build from run to run and avoid wasting time compiling them over and over when nothing has changed.</p>
+
+<p>Documentation is sparse on the caching system, but from observation the way it seems to work is that
+at the end of a run, a handful of directories are scanned for new or changed files. If any are found
+then all of the directories are packaged into a tarball or something like it, and uploaded to some
+cache server. Building and uploading this packaged cache file is slow (Rust is also notorious for
+producing enormous build output, sometimes into the gigabytes), so we&rsquo;d like to avoid doing that if
+we don&rsquo;t need to.</p>
+
+<p>The simplicity of this system is the problem, though - every build will produce at least one new or
+changed file in the output. For libraries, this is the new crate file, metadata about the
+compilation, probably new test or benchmark executables. For binaries it will be the new
+executable. In any case, this means that the cache system will waste time packaging and uploading
+gigabytes of compiled objects on <em>every build</em>. Most of the time it will write <em>new</em> files, too.
+The new cache will include all of the previously cached build artifacts and more, meaning that the
+caches tend to grow endlessly - making the build slower and slower - until the repository
+maintainer manually deletes the caches and resets the clock.</p>
+
+<h2 id="the-solution">The Solution</h2>
+
+<p>Just delete those files before building the cache. That&rsquo;s basically it; add a <code>before_cache</code> step
+that deletes the files that shouldn&rsquo;t be cached. It can be a bit tricky to figure out which ones
+those are, though. Here&rsquo;s an annotated sample from Criterion.rs:</p>
+
+<pre><code>before_cache:
+# Delete loose files in the debug directory
+- find ./target/debug -maxdepth 1 -type f -delete
+# Delete the test and benchmark executables. Finding these all might take some 
+# experimentation.
+- rm -rf ./target/debug/deps/criterion*
+- rm -rf ./target/debug/deps/bench*
+# Delete the associated metadata files for those executables
+- rm -rf ./target/debug/.fingerprint/criterion*
+- rm -rf ./target/debug/.fingerprint/bench*
+# Note that all of the above need to be repeated for `release/` instead of 
+# `debug/` if your build script builds artifacts in release mode.
+# This is just more metadata
+- rm -f  ./target/.rustc_info.json
+# Also delete the saved benchmark data from the test benchmarks. If you
+# have Criterion.rs benchmarks, you'll probably want to do this as well, or set
+# the CRITERION_HOME environment variable to move that data out of the 
+# `target/` directory.
+- rm -rf ./target/criterion
+# Also delete cargo's registry index. This is updated on every build, but it's
+# way cheaper to re-download than the whole cache is.
+- rm -rf ~/.cargo/registry/index/
+</code></pre>
+
+<p>You&rsquo;ll probably need to do some experimentation to figure out the right set of deletion commands
+for your project. Travis-CI does (usually) helpfully log some of the files that changed to force a
+re-cache. Most of the time your builds should say that nothing changed.</p>
+
+<p>You will also probably want to disable Cargo&rsquo;s incremental compilation - it&rsquo;s not that useful for
+a CI build and it adds more files that you&rsquo;ll have to delete. To do this, set the
+<code>CARGO_INCREMENTAL</code> environment variable to <code>0</code>.</p>
+
+<p>Now, this doesn&rsquo;t entirely eliminate the problem of the cache files growing endlessly, since every
+new version of your dependencies will add another file to the cache. It does enormously slow it
+down though, and it means that you won&rsquo;t have to rebuild the cache on most build runs. Which in
+turn means snappier CI builds for you and your contributors and warm fuzzy feelings for using
+Travis-CI&rsquo;s infrastructure more efficiently.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2020-08-03T18:00:00-06:00">
+    3 Aug, 2020
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">809</span> words.
 </p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-20T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-20T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/spherical-lights.png">
-  
-</article>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>7 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
+      
 
-  Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time>
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
-So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-02-20T11:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-02-20T11:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/raytracer-first-render.png">
-  
-</article>
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/criterion-rs-0-3/">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</a>
+        <time datetime="3M">3 minutes</time>
+      
+        <li><a href="/post/announcing-rustacuda/">Announcing RustaCUDA v0.1.0</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+        <time datetime="17M">17 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
+        <time datetime="16M">16 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-1/">Writing a GPU-Accelerated Path Tracer in Rust - Part 1</a>
+        <time datetime="15M">15 minutes</time>
+      
+    </ul>
+  </aside>
 
-  
+
+    </footer>
+  </article>
 </main>
     <footer>
-  <nav>
-  <p>
-    
-      <a href="/page/2/">&laquo; Previous</a> |
-    
-    <span>Page 3 of 3</span>
-    
-  </p>
-</nav>
-
   
   <p class="muted">
     This page was generated using

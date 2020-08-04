@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://bheisler.github.io/post/efficient-use-of-travis-ci-cache-for-rust/</loc>
+    <lastmod>2020-08-03T18:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/work-efficiency-vs-step-efficiency/</loc>
     <lastmod>2020-06-01T19:00:00-06:00</lastmod>
   </url>
@@ -147,7 +152,7 @@
   
   <url>
     <loc>https://bheisler.github.io/categories/code/</loc>
-    <lastmod>2020-06-01T19:00:00-06:00</lastmod>
+    <lastmod>2020-08-03T18:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -219,7 +224,7 @@
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2020-06-01T19:00:00-06:00</lastmod>
+    <lastmod>2020-08-03T18:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -243,7 +248,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/rust/</loc>
-    <lastmod>2019-08-25T10:30:00-06:00</lastmod>
+    <lastmod>2020-08-03T18:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -267,7 +272,7 @@
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2020-06-01T19:00:00-06:00</lastmod>
+    <lastmod>2020-08-03T18:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
