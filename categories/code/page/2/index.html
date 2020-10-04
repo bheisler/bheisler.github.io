@@ -25,7 +25,7 @@
 
 
 
-<meta property="og:updated_time" content="2018-04-22T16:00:00-06:00"/>
+<meta property="og:updated_time" content="2018-06-14T19:00:00-06:00"/>
 
 
 
@@ -217,6 +217,41 @@ a:hover {
   <header>
     <h1>Code</h1>
   </header>
+  
+    <article itemscope itemtype="http://schema.org/CreativeWork">
+  <header>
+    <h2 itemprop="name">
+      <a href="/post/rust-on-the-gpu-with-accel/">Running Rust on the GPU with Accel</a>
+    </h2>
+    
+      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>13 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-06-14T19:00:00-06:00">14 Jun, 2018</time>
+
+</p>
+    
+  </header>
+  
+  <div itemprop="description">
+    NOTE: Much of what I discuss below is no longer accurate.
+For the past month or so, I&rsquo;ve been working on a follow-up to my series on Writing a Raytracer in Rust. This time around, I&rsquo;ll be talking about writing a GPU-accelerated Path Tracer. As always, I&rsquo;m writing it in Rust - including the GPU kernel code. Compiling Rust for GPUs at this point is difficult and error-prone, so I thought it would be good to start with some documentation on that aspect of the problem before diving into path tracing.
+  </div>
+  
+    <nav class="readmore"><a itemprop="url" href="/post/rust-on-the-gpu-with-accel/">Read More&nbsp;&raquo;</a></nav>
+  
+  <meta itemprop="inLanguage" content="en-us">
+  <meta itemprop="datePublished" content="2018-06-14T19:00:00-06:00">
+  <meta itemprop="dateModified" content="2018-06-14T19:00:00-06:00">
+  
+</article>
+
   
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
@@ -536,43 +571,6 @@ Multiple Objects It&rsquo;s pretty easy to change our scene definition to contai
 </article>
 
   
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>7 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
-So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-02-20T11:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-02-20T11:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/raytracer-first-render.png">
-  
-</article>
-
-  
 </main>
     <footer>
   <nav>
@@ -580,7 +578,9 @@ So what is a raytracer anyway? The short version is it&rsquo;s a computer progra
     
       <a href="/categories/code/">&laquo; Previous</a> |
     
-    <span>Page 2 of 2</span>
+    <span>Page 2 of 3</span>
+    
+      | <a href="/categories/code/page/3/">Next &raquo;</a>
     
   </p>
 </nav>

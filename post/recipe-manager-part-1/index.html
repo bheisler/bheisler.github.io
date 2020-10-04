@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Recipe Manager - Part 1 | bheisler.github.io</title>
+    <meta name="description" content="Something you might not know about me is that I&rsquo;m an avid home cook. As such, I like to experiment in the kitchen, improvise new recipes, and modify existing ones. I also track my calorie and macronutrient intake. I have software tools for this, but I don&rsquo;t like them and eventually I got fed up and decided to write my own.
+I also thought it would be interesting to try working with the garage door up and writing more publicly about what I&rsquo;m working on, so this is part one of an ongoing series where I do just that.">
+    <meta name="keywords" content="Rust">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="">
+
+
+    <meta property="og:title" content="Building a Recipe Manager - Part 1" />
+<meta property="og:description" content="Something you might not know about me is that I&rsquo;m an avid home cook. As such, I like to experiment in the kitchen, improvise new recipes, and modify existing ones. I also track my calorie and macronutrient intake. I have software tools for this, but I don&rsquo;t like them and eventually I got fed up and decided to write my own.
+I also thought it would be interesting to try working with the garage door up and writing more publicly about what I&rsquo;m working on, so this is part one of an ongoing series where I do just that." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/recipe-manager-part-1/" />
+
+
+
+<meta property="article:published_time" content="2020-10-04T13:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2020-10-04T13:00:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/recipe-manager-part-1/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Building a Recipe Manager - Part 1">
+<meta itemprop="description" content="Something you might not know about me is that I&rsquo;m an avid home cook. As such, I like to experiment in the kitchen, improvise new recipes, and modify existing ones. I also track my calorie and macronutrient intake. I have software tools for this, but I don&rsquo;t like them and eventually I got fed up and decided to write my own.
+I also thought it would be interesting to try working with the garage door up and writing more publicly about what I&rsquo;m working on, so this is part one of an ongoing series where I do just that.">
+
+
+<meta itemprop="datePublished" content="2020-10-04T13:00:00-06:00" />
+<meta itemprop="dateModified" content="2020-10-04T13:00:00-06:00" />
+<meta itemprop="wordCount" content="2619">
+
+
+
+<meta itemprop="keywords" content="Rust," />
+
+    <header>
+      <h1 itemprop="headline">Building a Recipe Manager - Part 1</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>13 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2020-10-04T13:00:00-06:00">4 Oct, 2020</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>Something you might not know about me is that I&rsquo;m an avid home cook. As such, I like to experiment
+in the kitchen, improvise new recipes, and modify existing ones. I also track my calorie and
+macronutrient intake. I have software tools for this, but I don&rsquo;t like them and eventually I got
+fed up and decided to write my own.</p>
+
+<p>I also thought it would be interesting to try <a href="https://notes.andymatuschak.org/Work_with_the_garage_door_up">working with the garage door up</a> and writing more
+publicly about what I&rsquo;m working on, so this is part one of an ongoing series where I do just that.
+This isn&rsquo;t going to be a tutorial series like I did for <a href="/post/writing-raytracer-in-rust-part-1/">raytracing</a> and <a href="/post/writing-gpu-accelerated-path-tracer-part-1/">path tracing</a>, just
+whatever I&rsquo;m thinking about or working on at the time.</p>
+
+<h2 id="project-goals">Project Goals</h2>
+
+<p>A lot of people have trouble with developing software from scratch, starting with a blank repository.
+It can be difficult to decide where to start, to pick one manageable piece out of the complexity
+of the finished project, or even to decide what project to build in the first place.</p>
+
+<p>For my part, I generally have more project ideas than I have the time or energy to build. I usually
+let them sit in the back of my mind, simmering away on the back burner as it were, for months or
+even years before I commit to building them. This serves two useful purposes. First, most of the
+less-interesting project ideas fade away and are forgotten - a helpful filter to weed out the
+weaker ideas. Second, the ones that don&rsquo;t usually get stronger in the process - I&rsquo;ll find myself
+thinking about the project in my downtime - in the shower, on walks, and so on - and come
+up with further ideas about what I want the project to be, what implementation or design
+decisions would make sense, that sort of thing. I write these down to save them for if and when I
+finally do commit to building it.</p>
+
+<p>By the time I do finally start building the project, this means I usually already have a pretty
+solid idea of what I&rsquo;m going for, the general shape of the design, major technology choices, and
+the rough order of operations. I start by figuring out the desiderata - what do I want in a
+$PROJECT?</p>
+
+<p>In this case, what I want in a recipe manager/calorie tracker is:</p>
+
+<ul>
+<li>It should be wicked fast. I&rsquo;m going to be using this live, while cooking. I don&rsquo;t have time to wait for
+several multi-second page-loads per ingredient.</li>
+<li>It should be low-friction. See above. The app should do as much of the work for me as it can.</li>
+<li>It should be mostly usable with just the keyboard. It&rsquo;s going to have a GUI, but this means
+things like tab-focusing need to work well. I&rsquo;ll have a laptop in my kitchen when I&rsquo;m using this
+app, and the trackpad is neither wicked-fast nor low-friction for me as the user.</li>
+<li>It should be local-first. Storing all data locally is key to achieving wicked-fastness. This also
+means I get to keep total control over my data, which is nice.</li>
+<li>It&rsquo;s not necessary for the first version, but later on I&rsquo;ll want to be able to sync data to other
+devices for backups and the like. I&rsquo;d also like to be able to access it on my phone, so I can
+look at my recipes while at the grocery store.</li>
+</ul>
+
+<p>These design principles lead pretty naturally to major technology choices:</p>
+
+<ul>
+<li>I&rsquo;ll be using Rust. Rust is my first choice for pretty much everything anyway, but this project
+will benefit from Rust&rsquo;s speed and light weight. I could probably build it in Java (certainly
+Java&rsquo;s GUI toolkits are far better than Rust&rsquo;s) but then I&rsquo;d have to install a JVM and have it
+taking up a bunch of RAM and that&rsquo;s a drag. So, Rust it is.</li>
+<li>Some of the ideas I have for minimizing friction will require custom widget rendering, so I&rsquo;ve
+picked <a href="https://github.com/linebender/druid">Druid</a> for my GUI framework. It&rsquo;s still quite unfinished, but it provides powerful tools
+for building custom widgets and Raph Levien and the other Druid contributors seem to share my
+performance goals.</li>
+<li>I&rsquo;m not using a database. I&rsquo;d originally considered sqlite - it&rsquo;s fast, robust, small - on paper
+it&rsquo;s exactly what I want for this project. But after thinking about it for a while I realized it
+would get in my way when it comes to implementing syncing. My data is relatively simple, so I&rsquo;m
+going to store it as a regular folder full of regular text files - probably TOML, maybe some
+custom text format for the recipes themselves. This is handy in that I can implement a
+basic version of syncing just by storing the folder in Dropbox or something similar.<sup class="footnote-ref" id="fnref:sqlite"><a rel="footnote" href="#fn:sqlite">1</a></sup>
+Also, I can look up my recipes on my phone by opening them in the Dropbox app&rsquo;s text
+editor until I get around to learning how to write Android apps. Down the line, when the time
+comes to implement real syncing, I&rsquo;ll be able to build it on top of git, which is already
+optimized for text and will even give me a history of all my changes for free.</li>
+<li>I&rsquo;m going to load all of the data at startup and keep it in memory while the app runs. This is a
+major simplification and performance optimization, especially for things like searching. I can
+build n-gram indexes and the like in memory while I load the data. It will cost some memory, but
+it&rsquo;s just text, it won&rsquo;t be that large. I&rsquo;m not worried about startup time either - it can all be
+loaded in the background in parallel, and anyway SSDs are super fast.</li>
+<li>To keep the GUI fast and responsive, all of the heavy work will be done in the background. In
+particular, I&rsquo;ll be using Rust&rsquo;s async-await support with <a href="https://github.com/async-rs/async-std">async-std</a> as my reactor of
+choice.<sup class="footnote-ref" id="fnref:reactor"><a rel="footnote" href="#fn:reactor">2</a></sup></li>
+</ul>
+
+<p>Any or all of these decisions might bite me later, but I have to pick something. Most of them I&rsquo;m
+pretty sure about, but Druid is a particular risk - Druid describes itself as experimental, and
+it&rsquo;s clearly missing a lot of features that would be required for a production GUI toolkit. I think
+for the most part I can work around those or provide my own custom widgets to fill in the gaps.
+Just to be safe (and for general architectural reasons) though, I&rsquo;m going to try to build my code
+so that the GUI code isn&rsquo;t too tightly coupled to the rest. That will limit the damage if I
+ultimately decide I have to replace Druid with something else. I expect breaking changes, but I&rsquo;m
+sure I&rsquo;m going to be maintaining this code occasionally for pretty much the rest of my life (like I
+have maintained my <a href="/post/jarvis-impressions-of-rust-libraries/">RSS reader</a><sup class="footnote-ref" id="fnref:jarvis"><a rel="footnote" href="#fn:jarvis">3</a></sup> ever since I wrote the first version back in university)
+so I&rsquo;m OK with that.</p>
+
+<p>When I&rsquo;m doing side projects like this, I also generally try to pack as much learning and
+experimentation into these projects as seems practical. If I&rsquo;m going to be spending my free time
+building something, I might as well be as efficient as I can and get as much value out of it as I
+can manage. In this case, the major areas of experimentation are using Druid, heavy usage of
+async-await with async-std (rather than a more normal thread pool like I would in Java) and writing
+this blog series.</p>
+
+<p>When I&rsquo;m building things for work, I usually don&rsquo;t have the luxury of spending months thinking
+about a problem. On the other hand, work tasks are usually a lot better-defined - fix bug, add
+feature. For the bigger ones that aren&rsquo;t so well defined - refactor this large section of code,
+make this app run automatically without needing as much tricky configuration by the user - I will
+still take the time to figure out what I&rsquo;m building, though. I believe in building the right thing
+and building it the right way. Happily, I have an employer who tolerates me in this. Even at work,
+every once in a while I do get to think about a problem for a long time before I build it, and
+that&rsquo;s when I do my very best work.</p>
+
+<h2 id="order-of-operations">Order of Operations</h2>
+
+<p>The term comes from mathematics, but I&rsquo;m often inspired by the ways that <a href="formerly of
+the Mythbusters">Adam Savage</a>, in his build videos on Youtube, talks about how he thinks through his builds. It
+got me thinking about how I do my own.</p>
+
+<p>When I&rsquo;m building a program, I usually follow the data path. There&rsquo;s usually a pretty obvious
+dependency tree - component A gets data from B gets data from C, which gets data from the user, or
+a data file, or a network service or whatever. I always start with one of the leaf nodes in that
+tree, the places where data enters my system. When I wrote my <a href="https://github.com/bheisler/Corrosion">NES emulator</a>, I started by
+hand-writing a iNES ROM parser. It wouldn&rsquo;t make sense to have a CPU implementation with no ROM
+data to run it on. For <a href="https://github.com/bheisler/TinyTemplate">TinyTemplate</a>, I started with the template parser.</p>
+
+<p>From there, I build something that builds on the part I just finished - like the memory access
+code that maps memory addresses in the NES&rsquo; 16-bit memory space to parts of the ROM. That then
+gives me more things I can build on, and I can continue until ultimately I have a working system.</p>
+
+<p>These dependencies are always pretty soft, of course. As I build things out, I end up reaching
+places in that hierarchy where I don&rsquo;t have all of the dependencies built yet. That&rsquo;s fine. I can
+build out the CPU emulation without first finishing the graphics rendering, sound output, or
+controller input.</p>
+
+<p>Of course, you don&rsquo;t have to do it this way - you can always write artificial data to use in unit
+tests if you want to start with something higher-level. This is just how I do it.</p>
+
+<p>For the recipe manager that is nominally the subject of this post, I&rsquo;ll start with the ingredient
+editor.</p>
+
+<h2 id="the-ingredient-editor">The Ingredient Editor</h2>
+
+<p>I&rsquo;ll need to have a database (in the sense of a collection of data) of all of the ingredients that
+I cook with and their nutritional values before I can start combining them into recipes. Several
+months ago I experimented with loading up the <a href="https://fdc.nal.usda.gov/">USDA food nutrition dataset</a> to pre-populate this
+database, but I found that there&rsquo;s just too much noise in there, too many things I wouldn&rsquo;t use
+that make searching and finding the right records into a harder problem than it needs to be. I
+might provide a way to import an ingredient from that dataset into the database to save the hassle
+of typing the nutrition data in by hand, but for now it will all be manual.</p>
+
+<p>I started putting together an editor with Druid&rsquo;s widgets. This took some time - Druid has a rough
+learning curve, since it doesn&rsquo;t work quite like any other GUI toolkit I&rsquo;ve ever used. Rust has a
+lot of things that work well, but are not quite like anything else you&rsquo;re used to, so Rust
+programmers will be familiar with that feeling. Still, I was able to get it working.</p>
+
+<p><img src="ingredient-editor-v1.png" alt="Prototype Ingredient Editor" /></p>
+
+<p>Building it raised a few user-experience questions.</p>
+
+<p>How am I going to handle validating the data the user enters? It doesn&rsquo;t make sense for an
+ingredient to carry &lsquo;foobar&rsquo; calories. Druid has a component for that, but it doesn&rsquo;t provide any
+visual feedback to the user to indicate that what they entered was invalid, let alone how or why.
+It&rsquo;s not very user-friendly. I&rsquo;ll probably have to build a widget for that myself.</p>
+
+<p>How am I going to save the data? When I&rsquo;m cooking I won&rsquo;t want to have to mouse over to the &ldquo;Save&rdquo;
+button and click it all the time, so auto-saving is a must. It would be nice to give the user some
+visual feedback about the state of their data too. So I built that little green indicator you see
+in the bottom-right corner - that&rsquo;s a custom widget that toggles between Saved, Invalid (to
+indicate that the data is invalid in some way - it gives no further details yet), Failed (saving
+failed for some reason) and a little animated timer ticking down. Every time the user edits
+anything in the form, if the data is valid, it starts a three-second timer in the background and
+then saves the data if no new change is made in that time. It&rsquo;s my first custom widget in Druid,
+and I&rsquo;m actually pretty happy with how easy it was to build. In the process, I found and filed one
+<a href="https://github.com/linebender/druid/issues/1277">bug report</a> and I think I may have found a second one but I&rsquo;m not sure. I&rsquo;ve hooked up async-std
+to do the saving asynchronously, but that&rsquo;s all - I haven&rsquo;t actually implemented saving anything
+yet. Instead it just prints a message to stdout.</p>
+
+<p>How am I going to handle errors? It&rsquo;s always a possibility that writing my ingredient file to disk
+will fail for some reason, and the user should be notified if that happens. So far I don&rsquo;t have a
+good solution to this; I&rsquo;m using <a href="https://github.com/dtolnay/anyhow">anyhow</a> to handle errors but right now just printing them to
+stderr. I want to get this right before I move on to another editor because all of the editors will
+have to deal with this problem. They might as well share code.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I hope that was useful and/or interesting. I expect I&rsquo;ll write more about Druid in later posts, but
+this one is getting long enough so I&rsquo;ll leave it there for now.</p>
+
+<p>I&rsquo;d say I&rsquo;ve gotten to this point with maybe 10-12 hours of active work since I started working on
+it on Thursday, Oct 1 (not counting the time I spent writing this post or building a test case for
+that bug report). Decent enough progress. I intend to make this a weekly thing, but next weekend is
+Thanksgiving weekend here in Canada. I expect I&rsquo;ll be in a food coma and not interested in
+writing anything very much, so I guess the next post will probably be in two weeks. Cheers!</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:sqlite">I could keep a sqlite database in Dropbox as well, but that&rsquo;s a recipe for irreconcilable conflicts and database corruption - sqlite quite reasonably isn&rsquo;t designed for other programs to access its database files. I used to do exactly this with my RSS reader&rsquo;s sqlite database, and every few months it would break and I&rsquo;d have to use Dropbox to roll it back to the last working database file.
+ <a class="footnote-return" href="#fnref:sqlite"><sup>[return]</sup></a></li>
+<li id="fn:reactor">If you&rsquo;re wondering, I don&rsquo;t have any strong reason to prefer async-std over tokio (the other main async reactor in Rust), I just picked one. Hopefully it works out. I used tokio for my RSS reader and it works fine.
+ <a class="footnote-return" href="#fnref:reactor"><sup>[return]</sup></a></li>
+<li id="fn:jarvis">Incidentally, since I wrote that post, I&rsquo;ve fully converted JARVIS (my RSS reader) into an HTTP server (using <a href="https://github.com/tomaka/rouille">Rouille</a>) and a WASM front-end that I can use in the browser (using <a href="https://github.com/seed-rs/seed/">Seed</a>). Both are written in Rust, naturally. It uses <a href="https://www.nginx.com/">nginx</a> as a reverse proxy to serve the static front-end files and terminate HTTPS connections with a certificate provided by <a href="https://letsencrypt.org/">LetsEncrypt</a>. Data storage is still handled by sqlite through <a href="https://github.com/diesel-rs/diesel">Diesel</a>. The server runs on an always-free tier Google Cloud VM with 512Mbyte of RAM and half of a virtual CPU and it is <em>hilariously</em> over-provisioned - I&rsquo;ve tried to benchmark it for kicks, but I end up saturating my home internet connection before I hit 100% of that half-CPU - and that&rsquo;s including compressing the responses and the HTTPS encryption overhead. Rust is pretty great.
+ <a class="footnote-return" href="#fnref:jarvis"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2020-10-04T13:00:00-06:00">
+    4 Oct, 2020
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">2619</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/efficient-use-of-travis-ci-cache-for-rust/">Efficient Use of Travis-CI&#39;s Cache For Rust Builds</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-3/">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</a>
+        <time datetime="3M">3 minutes</time>
+      
+        <li><a href="/post/announcing-rustacuda/">Announcing RustaCUDA v0.1.0</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+        <time datetime="17M">17 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-2/">Writing a GPU-Accelerated Path Tracer in Rust - Part 2</a>
+        <time datetime="16M">16 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>
