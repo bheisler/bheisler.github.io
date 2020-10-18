@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta name="generator" content="Hugo 0.36.1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Recipe Manager - Part 2 - Druid Experience Report | bheisler.github.io</title>
+    <meta name="description" content="It&rsquo;s been a couple of weeks since the last post, and as promised I&rsquo;m back with some progress on the ingredient editor. The last post talked about my goals for this project, technical design decisions based on those goals, and my philosophy on starting challenging projects. This post is more of an experience report from my first few weeks of working with Druid.
+Before we dig into Druid though, the progress in the last two weeks.">
+    <meta name="keywords" content="Rust">
+    
+    
+    
+    
+    
+
+  <meta name="author" content="">
+
+
+    <meta property="og:title" content="Building a Recipe Manager - Part 2 - Druid Experience Report" />
+<meta property="og:description" content="It&rsquo;s been a couple of weeks since the last post, and as promised I&rsquo;m back with some progress on the ingredient editor. The last post talked about my goals for this project, technical design decisions based on those goals, and my philosophy on starting challenging projects. This post is more of an experience report from my first few weeks of working with Druid.
+Before we dig into Druid though, the progress in the last two weeks." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/recipe-manager-part-2-druid-experience-report/" />
+
+
+
+<meta property="article:published_time" content="2020-10-18T15:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2020-10-18T15:00:00-06:00"/>
+
+
+
+
+
+
+
+
+
+
+
+    
+    <meta name="theme-color" content="#000">
+
+    
+    
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-96560207-1', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+    
+    <link rel="canonical" href="https://bheisler.github.io/post/recipe-manager-part-2-druid-experience-report/">
+    
+      <link rel="prev" href="/post/recipe-manager-part-1/">
+    
+    
+    <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
+
+    <style>
+  html{font-size:12px}*{box-sizing:border-box;text-rendering:geometricPrecision}body{font-size:1rem;line-height:1.5rem;margin:0;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;word-wrap:break-word}h1,h2,h3,h4,h5,h6{line-height:1.3em}fieldset{border:none;padding:0;margin:0}pre{padding:2rem;margin:1.75rem 0;background-color:#fff;border:1px solid #ccc;overflow:auto}code[class*=language-],pre[class*=language-],pre code{font-weight:100;text-shadow:none;margin:1.75rem 0}a{cursor:pointer;color:#ff2e88;text-decoration:none;border-bottom:1px solid #ff2e88}a:hover{background-color:#ff2e88;color:#fff}.grid{display:-ms-flexbox;display:flex;-ms-flex-wrap:wrap;flex-wrap:wrap}.grid.\-top{-ms-flex-align:start;-ms-grid-row-align:flex-start;align-items:flex-start}.grid.\-middle{-ms-flex-align:center;-ms-grid-row-align:center;align-items:center}.grid.\-bottom{-ms-flex-align:end;-ms-grid-row-align:flex-end;align-items:flex-end}.grid.\-stretch{-ms-flex-align:stretch;-ms-grid-row-align:stretch;align-items:stretch}.grid.\-baseline{-ms-flex-align:baseline;-ms-grid-row-align:baseline;align-items:baseline}.grid.\-left{-ms-flex-pack:start;justify-content:flex-start}.grid.\-center{-ms-flex-pack:center;justify-content:center}.grid.\-right{-ms-flex-pack:end;justify-content:flex-end}.grid.\-between{-ms-flex-pack:justify;justify-content:space-between}.grid.\-around{-ms-flex-pack:distribute;justify-content:space-around}.cell{-ms-flex:1;flex:1;box-sizing:border-box}@media screen and (min-width:768px){.cell.\-1of12{-ms-flex:0 0 8.33333%;flex:0 0 8.33333%}.cell.\-2of12{-ms-flex:0 0 16.66667%;flex:0 0 16.66667%}.cell.\-3of12{-ms-flex:0 0 25%;flex:0 0 25%}.cell.\-4of12{-ms-flex:0 0 33.33333%;flex:0 0 33.33333%}.cell.\-5of12{-ms-flex:0 0 41.66667%;flex:0 0 41.66667%}.cell.\-6of12{-ms-flex:0 0 50%;flex:0 0 50%}.cell.\-7of12{-ms-flex:0 0 58.33333%;flex:0 0 58.33333%}.cell.\-8of12{-ms-flex:0 0 66.66667%;flex:0 0 66.66667%}.cell.\-9of12{-ms-flex:0 0 75%;flex:0 0 75%}.cell.\-10of12{-ms-flex:0 0 83.33333%;flex:0 0 83.33333%}.cell.\-11of12{-ms-flex:0 0 91.66667%;flex:0 0 91.66667%}}@media screen and (max-width:768px){.grid{-ms-flex-direction:column;flex-direction:column}.cell{-ms-flex:0 0 auto;flex:0 0 auto}}.hack,.hack blockquote,.hack code,.hack em,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack strong{font-size:1rem;font-style:normal;font-family:Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif}.hack blockquote,.hack code,.hack em,.hack strong{line-height:20px}.hack blockquote,.hack code,.hack footer,.hack h1,.hack h2,.hack h3,.hack h4,.hack h5,.hack h6,.hack header,.hack li,.hack ol,.hack p,.hack section,.hack ul{float:none;margin:0;padding:0}.hack blockquote,.hack h1,.hack ol,.hack p,.hack ul{margin-top:20px;margin-bottom:20px}.hack h1{position:relative;display:inline-block;display:table-cell;padding:20px 0 30px;margin:0;overflow:hidden}.hack h1:after{content:"====================================================================================================";position:absolute;bottom:10px;left:0}.hack h1+*{margin-top:0}.hack h2,.hack h3,.hack h4,.hack h5,.hack h6{position:relative;margin-bottom:1.75rem}.hack h2:before,.hack h3:before,.hack h4:before,.hack h5:before,.hack h6:before{display:inline}.hack h2:before{content:"## "}.hack h3:before{content:"### "}.hack h4:before{content:"#### "}.hack h5:before{content:"##### "}.hack h6:before{content:"###### "}.hack li{position:relative;display:block;padding-left:20px}.hack li:after{position:absolute;top:0;left:0}.hack ul>li:after{content:"-"}.hack ol{counter-reset:a}.hack ol>li:after{content:counter(a) ".";counter-increment:a}.hack blockquote{position:relative;padding-left:17px;padding-left:2ch;overflow:hidden}.hack blockquote:after{content:">\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>\A>";white-space:pre;position:absolute;top:0;left:0;line-height:20px}.hack em:after,.hack em:before{content:"*";display:inline}.hack pre code:after,.hack pre code:before{content:''}.hack code{font-weight:700}.hack code:after,.hack code:before{content:"`";display:inline}.hack hr{position:relative;height:20px;overflow:hidden;border:0;margin:20px 0}.hack hr:after{content:"----------------------------------------------------------------------------------------------------";position:absolute;top:0;left:0;line-height:20px;width:100%;word-wrap:break-word}@-moz-document url-prefix(){.hack h1{display:block}}.hack-ones ol>li:after{content:"1."}p{margin:0 0 1.75rem}.container{max-width:70rem}.container,.container-fluid{margin:0 auto;padding:0 1rem}.inner{padding:1rem}.inner2x{padding:2rem}.pull-left{float:left}.pull-right{float:right}.progress-bar{height:8px;opacity:.8;background-color:#ccc;margin-top:12px}.progress-bar.progress-bar-show-percent{margin-top:38px}.progress-bar-filled{background-color:gray;height:100%;transition:width .3s ease;position:relative;width:0}.progress-bar-filled:before{content:'';border:6px solid transparent;border-top-color:gray;position:absolute;top:-12px;right:-6px}.progress-bar-filled:after{color:gray;content:attr(data-filled);display:block;font-size:12px;white-space:nowrap;position:absolute;border:6px solid transparent;top:-38px;right:0;-ms-transform:translateX(50%);transform:translateX(50%)}table{width:100%;border-collapse:collapse;margin:1.75rem 0;color:#778087}table td,table th{vertical-align:top;border:1px solid #ccc;line-height:15px;padding:10px}table thead th{font-size:10px}table tbody td:first-child{font-weight:700;color:#333}.form{width:30rem}.form-group{margin-bottom:1.75rem;overflow:auto}.form-group label{border-bottom:2px solid #ccc;color:#333;width:10rem;display:inline-block;height:38px;line-height:38px;padding:0;float:left;position:relative}.form-group.form-success label{color:#4caf50!important;border-color:#4caf50!important}.form-group.form-warning label{color:#ff9800!important;border-color:#ff9800!important}.form-group.form-error label{color:#f44336!important;border-color:#f44336!important}.form-control{outline:none;border:none;border-bottom:2px solid #ccc;padding:.5rem 0;width:20rem;height:38px;background-color:transparent}.form-control:focus{border-color:#555}.form-group.form-textarea label:after{position:absolute;content:'';width:2px;background-color:#fff;right:-2px;top:0;bottom:0}textarea.form-control{height:auto;resize:none;padding:1rem 0;border-bottom:2px solid #ccc;border-left:2px solid #ccc;padding:.5rem}select.form-control{border-radius:0;background-color:transparent;-webkit-appearance:none;-moz-appearance:none;-ms-appearance:none}.help-block{color:#999;margin-top:.5rem}.form-actions{margin-bottom:1.75rem}.btn{display:-ms-inline-flexbox;display:inline-flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;cursor:pointer;outline:none;padding:.65rem 2rem;font-size:1rem;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;position:relative;z-index:1}.btn:active{box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}.btn.btn-ghost{border-color:#757575;color:#757575;background-color:transparent}.btn.btn-ghost:focus,.btn.btn-ghost:hover{border-color:#424242;color:#424242;z-index:2}.btn.btn-ghost:hover{background-color:transparent}.btn-block{width:100%;display:-ms-flexbox;display:flex}.btn-default{color:#fff;background-color:#e0e0e0;border:1px solid #e0e0e0;color:#333}.btn-default:focus:not(.btn-ghost),.btn-default:hover{background-color:#dcdcdc;border-color:#dcdcdc}.btn-success{color:#fff;background-color:#4caf50;border:1px solid #4caf50}.btn-success:focus:not(.btn-ghost),.btn-success:hover{background-color:#43a047;border-color:#43a047}.btn-success.btn-ghost{border-color:#4caf50;color:#4caf50}.btn-success.btn-ghost:focus,.btn-success.btn-ghost:hover{border-color:#388e3c;color:#388e3c;z-index:2}.btn-error{color:#fff;background-color:#f44336;border:1px solid #f44336}.btn-error:focus:not(.btn-ghost),.btn-error:hover{background-color:#e53935;border-color:#e53935}.btn-error.btn-ghost{border-color:#f44336;color:#f44336}.btn-error.btn-ghost:focus,.btn-error.btn-ghost:hover{border-color:#d32f2f;color:#d32f2f;z-index:2}.btn-warning{color:#fff;background-color:#ff9800;border:1px solid #ff9800}.btn-warning:focus:not(.btn-ghost),.btn-warning:hover{background-color:#fb8c00;border-color:#fb8c00}.btn-warning.btn-ghost{border-color:#ff9800;color:#ff9800}.btn-warning.btn-ghost:focus,.btn-warning.btn-ghost:hover{border-color:#f57c00;color:#f57c00;z-index:2}.btn-info{color:#fff;background-color:#00bcd4;border:1px solid #00bcd4}.btn-info:focus:not(.btn-ghost),.btn-info:hover{background-color:#00acc1;border-color:#00acc1}.btn-info.btn-ghost{border-color:#00bcd4;color:#00bcd4}.btn-info.btn-ghost:focus,.btn-info.btn-ghost:hover{border-color:#0097a7;color:#0097a7;z-index:2}.btn-primary{color:#fff;background-color:#2196f3;border:1px solid #2196f3}.btn-primary:focus:not(.btn-ghost),.btn-primary:hover{background-color:#1e88e5;border-color:#1e88e5}.btn-primary.btn-ghost{border-color:#2196f3;color:#2196f3}.btn-primary.btn-ghost:focus,.btn-primary.btn-ghost:hover{border-color:#1976d2;color:#1976d2;z-index:2}.btn-group{overflow:auto}.btn-group .btn{float:left}.btn-group .btn-ghost:not(:first-child){margin-left:-1px}.card{border:1px solid #ccc}.card .card-header{color:#333;text-align:center;background-color:#ddd;padding:.5rem 0}.alert{color:#ccc;padding:1rem;border:1px solid #ccc;margin-bottom:1.75rem}.alert-success{color:#4caf50;border-color:#4caf50}.alert-error{color:#f44336;border-color:#f44336}.alert-info{color:#00bcd4;border-color:#00bcd4}.alert-warning{color:#ff9800;border-color:#ff9800}.media:not(:last-child){margin-bottom:1.25rem}.media-left{padding-right:1rem}.media-left,.media-right{display:table-cell;vertical-align:top}.media-right{padding-left:1rem}.media-body{display:table-cell;vertical-align:top}.media-heading{font-size:1.16667rem;font-weight:700}.media-content{margin-top:.3rem}.avatarholder,.placeholder{background-color:#f0f0f0;text-align:center;color:#b9b9b9;font-size:1rem;border:1px solid #f0f0f0}.avatarholder{width:48px;height:48px;line-height:46px;font-size:2rem;background-size:cover;background-position:50%;background-repeat:no-repeat}.avatarholder.rounded{border-radius:33px}.loading{display:inline-block;content:'&nbsp;';height:20px;width:20px;margin:0 .5rem;animation:a .6s infinite linear;border:2px solid #e91e63;border-right-color:transparent;border-radius:50%}.btn .loading{margin-bottom:0;width:14px;height:14px}.btn div.loading{float:left}.alert .loading{margin-bottom:-5px}@keyframes a{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}.menu{width:100%}.menu .menu-item{display:block;color:#616161;border-color:#616161}.menu .menu-item.active,.menu .menu-item:hover{color:#000;border-color:#000;background-color:transparent}@media screen and (max-width:768px){.form-group label{display:block;border-bottom:none;width:100%}.form-group.form-textarea label:after{display:none}.form-control{width:100%}textarea.form-control{border-left:none;padding:.5rem 0}pre::-webkit-scrollbar{height:3px}}@media screen and (max-width:480px){.form{width:100%}}.dark{color:#ccc}.dark,.dark pre{background-color:#000}.dark pre{padding:0;border:none}.dark pre code{color:#00bcd4}.dark h1 a,.dark h2 a,.dark h3 a,.dark h4 a,.dark h5 a{color:#ccc}.dark code,.dark strong{color:#fff}.dark code{font-weight:100}.dark table{color:#ccc}.dark table td,.dark table th{border-color:#444}.dark table tbody td:first-child{color:#fff}.dark .form-group label{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-group.form-textarea label:after{background-color:#000}.dark .form-control{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .form-control:focus{border-color:#ccc;color:#ccc}.dark textarea.form-control{color:#ccc}.dark .card{border-color:rgba(95,95,95,.78)}.dark .card .card-header{background-color:transparent;color:#ccc;border-bottom:1px solid rgba(95,95,95,.78)}.dark .btn.btn-ghost.btn-default{border-color:#ababab;color:#ababab}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#9c9c9c;color:#9c9c9c;z-index:1}.dark .btn.btn-ghost.btn-default:focus,.dark .btn.btn-ghost.btn-default:hover{border-color:#e0e0e0;color:#e0e0e0}.dark .btn.btn-ghost.btn-primary:focus,.dark .btn.btn-ghost.btn-primary:hover{border-color:#64b5f6;color:#64b5f6}.dark .btn.btn-ghost.btn-success:focus,.dark .btn.btn-ghost.btn-success:hover{border-color:#81c784;color:#81c784}.dark .btn.btn-ghost.btn-info:focus,.dark .btn.btn-ghost.btn-info:hover{border-color:#4dd0e1;color:#4dd0e1}.dark .btn.btn-ghost.btn-error:focus,.dark .btn.btn-ghost.btn-error:hover{border-color:#e57373;color:#e57373}.dark .btn.btn-ghost.btn-warning:focus,.dark .btn.btn-ghost.btn-warning:hover{border-color:#ffb74d;color:#ffb74d}.dark .avatarholder,.dark .placeholder{background-color:transparent;border-color:#333}.dark .menu .menu-item{color:#ccc;border-color:rgba(95,95,95,.78)}.dark .menu .menu-item.active,.dark .menu .menu-item:hover{color:#fff;border-color:#ccc}
+  :root {
+  --screen-size-small: 30em; /* breakpoint reference only */
+}
+@keyframes intro {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+.readmore {
+  margin-bottom: 2.2em;
+}
+.responsive-iframe {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+}
+.responsive-iframe iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+iframe {
+  border: 0;
+}
+main, footer {
+  animation: intro 0.3s both;
+  animation-delay: 0.15s;
+}
+footer time[datetime$="M"]:before {
+  content: "\2013\0020";
+}
+@media only screen
+  and ( max-width: 30em ) {
+  footer time[datetime$="M"] {
+    display: none;
+  }
+}
+blockquote cite {
+  display: block;
+}
+blockquote cite::before {
+   content: "\2014";
+}
+:target {
+  color: #fff;
+}
+/* hack.css overrides and enhancements */
+.hack li ul {
+  margin: 0;
+}
+.main {
+  padding: 20px 10px;
+}
+nav a.active {
+  background-color: #ff2e88;
+  color: #fff;
+}
+a[itemprop="url"] {
+  color: #ff9800;
+}
+a[itemprop="url"]:hover {
+  color: #fff;
+}
+a[href*="://"]::after,
+a[rel*="external"] {
+  content: " " url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20class='i-external'%20viewBox='0%200%2032%2032'%20width='14'%20height='14'%20fill='none'%20stroke='%23ff9800'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='9.38%'%3E%3Cpath%20d='M14%209%20L3%209%203%2029%2023%2029%2023%2018%20M18%204%20L28%204%2028%2014%20M28%204%20L14%2018'/%3E%3C/svg%3E");
+}
+figure a[href*="://"]::after,
+figure a[rel*="external"] {
+  content: "";
+}
+html {
+  font-size: 13px;
+}
+.hack pre {
+  font-size: 17px;
+}
+article [itemprop="description"] {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  html {
+    font-size: 1em;
+  }
+  .container {
+    max-width: 50rem;
+  }
+}
+
+  nav a.active {
+    background-color: orange;
+    color: black;
+}
+a {
+  color: orange;
+  border-bottom: 1px solid orange;
+}
+a:hover {
+  background-color: orange;
+  color: black;
+}
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover {
+    color: black
+}
+/* Override the bits of the dark theme that affect gists. */
+.gist table tbody td:first-child {
+    color: rgba(0,0,0,0.3) !important;
+}
+.gist table td, .dark table th {
+    border-color: #ccc !important;
+}
+
+</style>
+
+    
+    
+    
+      <script async src="/js/bpgdec8a.js"></script>
+      <script async src="/js/bpgdec8.js"></script>
+      <script async src="/js/bpgdec.js"></script>
+    
+  </head>
+  
+  <body class="hack dark main container">
+    <header>
+  
+  <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+    
+    
+      <a itemprop="url" class="" href="/about/about/"><span itemprop="name">About</span></a>
+    
+      <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
+    
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
+    
+      <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
+    
+  </nav>
+
+
+</header>
+    <main>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
+    
+<meta itemprop="name" content="Building a Recipe Manager - Part 2 - Druid Experience Report">
+<meta itemprop="description" content="It&rsquo;s been a couple of weeks since the last post, and as promised I&rsquo;m back with some progress on the ingredient editor. The last post talked about my goals for this project, technical design decisions based on those goals, and my philosophy on starting challenging projects. This post is more of an experience report from my first few weeks of working with Druid.
+Before we dig into Druid though, the progress in the last two weeks.">
+
+
+<meta itemprop="datePublished" content="2020-10-18T15:00:00-06:00" />
+<meta itemprop="dateModified" content="2020-10-18T15:00:00-06:00" />
+<meta itemprop="wordCount" content="3269">
+
+
+
+<meta itemprop="keywords" content="Rust," />
+
+    <header>
+      <h1 itemprop="headline">Building a Recipe Manager - Part 2 - Druid Experience Report</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>16 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2020-10-18T15:00:00-06:00">18 Oct, 2020</time>
+
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>It&rsquo;s been a couple of weeks since the <a href="/post/recipe-manager-part-1/">last post</a>, and as promised I&rsquo;m back with some progress on
+the ingredient editor. The last post talked about my goals for this project, technical design
+decisions based on those goals, and my philosophy on starting challenging projects. This post
+is more of an experience report from my first few weeks of working with Druid.</p>
+
+<p>Before we dig into Druid though, the progress in the last two weeks.</p>
+
+<h2 id="the-current-ingredient-editor">The Current Ingredient Editor</h2>
+
+<p><img src="/static/ingredient-editor-v2.png" alt="Prototype Ingredient Editor" /></p>
+
+<p>I&rsquo;ve done quite a bit of work on this so far. Compared to last week, probably the biggest thing is
+that it now displays error messages to the user when they type something wrong.</p>
+
+<p>As discussed last time, Druid&rsquo;s built-in <a href="https://docs.rs/druid/0.6.0/druid/widget/struct.Parse.html">Parse</a> widget simply discards parse errors. It&rsquo;s not
+possible to get that information out of the Parse widget so I had to write my own, which I creatively
+named BetterParse. Druid upstream has since broken my BetterParse widget and I haven&rsquo;t figured out
+how to fix it yet, but more on that later. Even when it works, my widget is a bit janky - I&rsquo;d
+like to make it wait until the textbox loses focus before it displays an error, for instance -
+but it works pretty well.</p>
+
+<p>As you can see next to the Carbs value, there&rsquo;s a placeholder on each text box that describes what
+sort of data to fill in when the box is empty. This is something that Druid just has built-in
+support for, so it&rsquo;s not too exciting from a development perspective, but it does help the user
+understand how to use the GUI. That&rsquo;s important for a smooth user experience. Unfortunately,
+in the revision of Druid that I&rsquo;m using, textboxes sometimes get confused about the text styling
+between real values and placeholders - here the placeholder is solid (like the other user-entered
+values) when it should be faded. Sometimes textboxes also display the last thing you typed in them
+as the placeholder - I&rsquo;ve seen that with the textbox in the Aliases field.</p>
+
+<p>Speaking of which, there&rsquo;s a totally new widget for adding aliases. They were taking up a lot of
+vertical space and I figured they wouldn&rsquo;t need to be edited much, so I wrote a custom widget
+that displays each alias in its own little bubble with a delete button. You can&rsquo;t see it in this
+image but the bubbles are automatically wrapped to fit in the space allotted, which was
+surprisingly tricky to implement. I plan to reuse this widget for defining tags on recipes for easy
+searching later.</p>
+
+<p>I&rsquo;ve also added the Mass and Volume fields. These will later be used for automatic unit conversion.
+See, I like to measure everything by mass when I&rsquo;m cooking. It&rsquo;s more precise and consistent than
+measuring things by volume and that appeals to my engineering brain, but that&rsquo;s not the main
+reason. The biggest reason is that it&rsquo;s so much <em>cleaner</em>. I can just pop the bowl on the scale and
+scoop or pour ingredients straight into the bowl - I don&rsquo;t have to dirty measuring cups or spoons.
+Unfortunately, many recipes haven&rsquo;t gotten the memo on this and still list measurements in terms of
+volume, which means I frequently need to pull out my phone, open <a href="https://frinklang.org/">Frink</a> and do some quick math.
+But hey, if I&rsquo;m writing my own tooling I can just make it do the math for me. In order to do that,
+it will need to know the density of each ingredient. I hope to be able to type in &ldquo;Butter, 3 tbsp&rdquo;
+or &ldquo;6 ounces&rdquo; and have it instantly figure out the mass I need to measure out in grams - and also
+the precise caloric and macronutrient content of that amount of butter, without me needing to
+figure out exactly how many &lsquo;servings&rsquo; of butter that represents.</p>
+
+<p>The unit parsing is currently powered by the <a href="https://crates.io/crates/uom">uom</a> crate. It&rsquo;s not quite as human-friendly as I
+want it to be - uom&rsquo;s parsing code will accept &ldquo;1 g&rdquo;, but won&rsquo;t accept any of &ldquo;1g&rdquo; (no space), &ldquo;1
+gram&rdquo;, &ldquo;<sup>1</sup>&frasl;<sub>2</sub> lb&rdquo;, or &ldquo;½ lb&rdquo;. All of these will certainly be needed for a good user experience. I&rsquo;ve
+built my own parsing layer on top of uom&rsquo;s which at least allows for missing spaces. I plan to
+extend that to handle fractions as well, but uom doesn&rsquo;t provide any way to parse units from
+strings that contain the full unit name (eg. &ldquo;gram&rdquo; or &ldquo;grams&rdquo;, rather than &ldquo;g&rdquo;). I&rsquo;ve filed a
+feature request for that; I hope they can implement something for that soon.</p>
+
+<p>Finally, the auto-save actually works, asynchronously writing the data out to a TOML file. It&rsquo;s
+pretty janky right now and doesn&rsquo;t properly handle save errors, but it works on the happy path at
+least.</p>
+
+<h2 id="druid-experience-report">Druid Experience Report</h2>
+
+<p>If you&rsquo;re like me, you might have seen that Druid is officially unfinished and wondered &ldquo;just how
+unfinished is it, really?&rdquo; Unfinished as in &ldquo;not even usable yet&rdquo;, or unfinished as in
+&ldquo;perfectionist obsessing over the last little bit of polish&rdquo;?</p>
+
+<p>After working with it so far, I&rsquo;d say it&rsquo;s unfinished as in &ldquo;usable for the serious early-adopters,
+but still missing a lot of things that a production-quality GUI toolkit should have.&rdquo; Despite that,
+I actually really like it so far, from my perspective as a serious early-adopter.</p>
+
+<h3 id="what-i-like-about-it">What I like about it</h3>
+
+<p>I think I&rsquo;d like to start with the praise. I&rsquo;m actually pretty happy with Druid so far. It&rsquo;s fast
+and light - even in debug builds, which is nice for development. I didn&rsquo;t expect a Rust GUI
+framework to be as mature as the Java ones I&rsquo;m more familiar with.</p>
+
+<p>I think the thing I like most about Druid is the freedom it gives me to just write my own widgets
+when the built-in ones are missing or insufficient. The underlying drawing primitives and
+text-layout systems are great - they Just Work and do everything I&rsquo;ve needed from them yet with
+minimal trouble. It&rsquo;s really quite easy to write custom widgets that work in exactly the way you
+want them to work - my custom alias-list widget above took me maybe 2-3 hours to develop from
+scratch, including the time to write and debug my hacky code to flow aliases and the text box to
+the next line when there isn&rsquo;t enough space.</p>
+
+<p>This level of performance and fine control over the low-level details when you want it makes Druid
+feel genuinely Rusty - just like it&rsquo;s been designed to work with the borrow-checker, it feels like
+it&rsquo;s been designed with the same core values and design goals at Rust itself.</p>
+
+<p>The way widgets compose together also feels very Rusty - to add parsing to a text box, you wrap it
+in another widget. To add padding or custom behavior to a widget, you wrap it in different widgets
+- just like how you wrap iterators or futures in other structures to modify their behavior. There
+are a lot of helper functions to make this easy, and it all works quite well.</p>
+
+<p>I hope that as it matures it will solve a lot of the problems that I discuss below. If the Druid
+developers are listening, I think the in-window modals are probably #1 on my wishlist - I can work
+around, roll my own, or just live with pretty much everything else, but I can&rsquo;t build an
+auto-completing text box without that.</p>
+
+<h3 id="missing-features">Missing Features</h3>
+
+<p>As I mentioned above, the Parse widget gives the user no feedback at all if they type something that
+can&rsquo;t be parsed. Since the Parse widget works with data in an <code>Option&lt;T&gt;</code> rather than a
+<code>Result&lt;T, Err&gt;</code>, there&rsquo;s no way for the application itself to extract the error message to display
+it separately, either - the application can only tell that it was invalid at all if the Parse
+widget sets the value to None rather than Some. This wouldn&rsquo;t fly at all in a production-quality
+GUI toolkit, which is why I had to write my own BetterParse widget. I understand that the Druid
+developers are aware of this problem and it&rsquo;s on the roadmap to be fixed someday, but I don&rsquo;t
+want to wait for someday.</p>
+
+<p>The existing widget containers are very primitive - there&rsquo;s no way to align objects on a grid, for
+instance. Early adopters should get used to manually specifying insets, widget sizes, and the like,
+though fortunately it <em>does</em> provide the <a href="https://docs.rs/druid/0.6.0/druid/widget/struct.Flex.html">Flex</a> type to help with positioning. Also, Druid only
+supports a single size for each widget, rather than the min/desired/max sizes like JavaFX and
+Swing. Among other things, that means that Druid cannot automatically compute a minimum size for
+the window that would prevent widgets from running off the edge of the window or overlapping each
+other. Thus, the rendering goes pretty wonky if the user shrinks the window too small, and if any
+widget is added or changes size the window won&rsquo;t resize to accomodate. Although it was kinda fun to
+implement my own reflowing logic for the alias list, I&rsquo;m sure I got it wrong in a bunch of subtle
+ways - it would be nice if Druid provided a container for this.</p>
+
+<p>There are no modals of any kind yet, which means that combo-boxes, auto-completion lists, tooltips
+and error dialogs are all completely absent. Worse, they can&rsquo;t be implemented by the application
+developer either. This is a big problem for me, since I planned to have extensive autocomplete
+support, especially for adding ingredients to recipes. For now I&rsquo;m going to just let the user type
+in their text and have the recipe manager automatically select the best match, rather than
+displaying a list of the top 5-10 and letting the user select one.</p>
+
+<p>A non-exhaustive list of other things I&rsquo;ve found that are missing:</p>
+
+<ul>
+<li>There&rsquo;s no way to disable or grey-out widgets.</li>
+<li>Multi-line text-boxes are only just recently supported (in fact, that&rsquo;s the work which broke my
+BetterParse widget, so I don&rsquo;t have it yet in my pinned revision of Druid). It&rsquo;s not in a published
+version yet though.</li>
+<li>No tabs for switching back and forth between views; the user can probably approximate this using
+existing widgets though.</li>
+<li>No widget for a visually-distinct toolbar along the bottom. I rolled my own with a Flex and a
+black border, but it&rsquo;s ugly and I&rsquo;m going to need to replace it with something better eventually.</li>
+<li>No widget to visually separate different regions of a window into separate logical groupings.</li>
+<li>No Table widget for displaying tabular data, let alone sorting, filtering, or editing it.</li>
+<li>There doesn&rsquo;t seem to be any event when a window loses focus?</li>
+</ul>
+
+<p>I don&rsquo;t mean any of this as a criticism of Druid&rsquo;s developers - I fully understand that it is a
+phenomenal amount of work to build a production-quality GUI toolkit and I don&rsquo;t expect Druid to
+provide everything that a fully-mature toolkit would at this early stage of development. However,
+if you&rsquo;re considering using Druid for a project, you should expect to need to do a lot of the layout
+by hand, write a lot of custom widgets, and in some cases you&rsquo;ll have to adapt your UI design
+around things that Druid doesn&rsquo;t yet support.</p>
+
+<h3 id="unclear-design-guidance">Unclear Design Guidance</h3>
+
+<p>Some UI toolkits are fully reactive - web frameworks tend to be like this, where the data model is
+held separately and passed to a function that constructs and returns a widget graph. In these, user
+actions cause the model to be updated and the widget-graph to be reconstructed (a process which is
+typically optimized using a virtual DOM). Some UI toolkits are fully retained - the data model is
+stored in (or at least directly attached to) a persistent widget graph. User input causes direct
+changes in the widget graph that are reflected in the data model. This is how most object-oriented
+GUI toolkits work, especially the Java ones that I&rsquo;m quite familiar with from doing a lot of Java
+GUI work at a previous employer.</p>
+
+<p>Druid tries to be a hybrid of both approaches, and I&rsquo;m not really convinced it&rsquo;s quite got all the
+kinks worked out.</p>
+
+<p>For example, when you open a Druid window, you give it the data model struct which will be used to
+store the information for the GUI and a function to build a widget tree - like a reactive system.
+But the data model is not passed to the function - instead you need to build and return a widget
+tree in isolation, without looking at the data model. A system of lens objects is used to define
+which widgets map to which fields, and this works reasonably well. These lenses are used to directly
+modify the data model in response to user input, which then updates the existing widget tree - more
+like a retained system.</p>
+
+<p>But some GUI widgets need to have access to the data to define their contents. Any list of
+widgets that grows as the user adds data, any widget that should only be visible under some
+circumstances, etc. These widgets take a closure that generates their contents based on the data
+they&rsquo;re loaded with. It works just fine, but it feels incongruous with the rest of the design.</p>
+
+<p>On top of this, there are two different ways to communicate with a widget. Most widgets connect to
+a field in the data model structure through lenses. I&rsquo;m simplifying here, but you can think of a
+Lens as a bi-directional function. To connect a textbox to a field in a structure, a Lens is
+provided which can either retrieve the field from the structure or update the field in the structure
+to match a new value. Most lenses are simple and automatically generated by a procedural macro,
+but they can be quite powerful when written by hand. For instance, you can transform the model data
+in pretty much arbitrary ways - my first attempt at the alias list used a custom lens to transform
+each String into a custom struct that included the string itself and a boolean flag which indicated
+whether that alias should be deleted. The delete button set the flag to true, and the lens simply
+dropped &lsquo;deleted&rsquo; aliases when it did the reverse transformation - the data model wouldn&rsquo;t contain
+the deleted ones. Since the data model was updated, the GUI would then be updated again and
+delete the widgets associated with the deleted value. It&rsquo;s sort of strange, but it works quite well
+once you get used to it. This use of functional transforms feels like a reactive GUI approach.</p>
+
+<p>The other system is Commands. These are basically programmer-defined events that are propagated
+through the widget graph like keyboard and mouse events. They can also be sent to a specific widget.
+This results in a sort of side-channel by which widgets can talk to each other. This would be much
+more at-home in a retained-mode GUI system - in fact it&rsquo;s quite similar to the Events system in
+JavaFX.</p>
+
+<p>The main problem with this is that there&rsquo;s a lot of state in any GUI that isn&rsquo;t logically part of
+the application model or the widget configuration, and it&rsquo;s not really clear where Druid wants you
+to keep it. Consider my little auto-save timer - it needs somewhere to store which state it&rsquo;s in
+(saved, failed, invalid or ticking) and how much time is left before the editor is auto-saved.
+Where should that state live? It&rsquo;s not logically part of the application&rsquo;s data model, so it seems
+strange to force the application developer to include an AutoSaveTimerState field in their model
+structure. Should it be stored in the widget itself? But then outside code needs to send Commands
+to the widget to tell it to start ticking or to notify it that data was saved successfully. Rather
+than being a smooth hybrid of the retained and reactive GUI styles, Druid ends up forcing the
+programmer to pick one style or the other on a case-by-case basis - and the design and
+documentation give little guidance about which style should be used in which cases.</p>
+
+<p>In some discussions on the Druid Zulip channel I was told that the lens style is more idiomatic,
+but when I&rsquo;ve used it it&rsquo;s always seemed to me to be more complex. In my code so far, I&rsquo;ve kept all
+of my state inside widgets except where it should naturally come from the application&rsquo;s data model,
+with a small handful of Commands to keep things connected. Instead of writing custom lenses to
+transform my data to suit the widgets, I&rsquo;m only using the basic auto-generated lenses and writing
+my custom widgets to contain all of their own state and complexity. It&rsquo;s been working well enough
+for me so far.</p>
+
+<h3 id="other-minor-problems">Other minor problems</h3>
+
+<p>As much as I like the Widget trait it is rather complex. There are five different functions with
+different parameters that do different things, and it&rsquo;s not documented well enough to support that
+complexity.</p>
+
+<p><code>Widget::event</code> and <code>Widget::lifecycle</code> seem redundant - why do the lifecycle events need to be
+separate from the other events? Combining them could remove one fifth of the complexity of the
+widget trait.</p>
+
+<p>Druid has a WidgetPod structure which is used by containers to tell their children where they
+should be positioned on the screen. There are a few things I don&rsquo;t like about this. Why can&rsquo;t
+container widgets just lay out their children directly, without this wrapper? Further, for some
+reason WidgetPod doesn&rsquo;t work with Druid&rsquo;s normal <code>Widget::update</code> function for updating its data.
+Normal Druid widgets get a reference to the new state along with a reference to the old state for
+comparison. When I was implementing a widget that contained a WidgetPod, I was surprised to
+discover that it doesn&rsquo;t implement this interface - instead the caller provides the new data only.
+WidgetPod apparently contains its own clone of the old data, even though the widget which owns it
+must have been given the old-data reference. Neither the documentation nor source code makes it
+clear why this design choice was made, and it&rsquo;s particularly annoying to me because it seems to be
+a part of why my BetterParse widget is broken on newer versions of Druid. It must take up a good
+deal of memory too, if every widget in a container is keeping its own redundant clone of the data
+model. Even if there is a good reason why one would want to have this, this feels like two distinct
+responsibilities lumped together into one structure - what if I want to have layout, but without the
+old-data management?</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>So, that&rsquo;s my report on my first few weeks&rsquo; experience with Druid. It&rsquo;s usable, but very incomplete.
+I&rsquo;m optimistic about its future, though I am still trying to keep my GUI code decoupled from
+the other code in case I need to replace it with something else later.</p>
+
+<p>Because of Canadian Thanksgiving and tinkering with some other projects, I think I&rsquo;ve probably
+put in another 12-14 hours in the past two weeks to get the ingredient editor to its current state.
+It&rsquo;s definitely going slower than it might be with another toolkit, but then I am taking a lot of
+care to get things <em>just right</em>, where in JavaFX I&rsquo;d probably just go with the built-in widgets
+and not bother to customize things so much.</p>
+
+<p>As I&rsquo;m developing this code and writing this series, I find that I still have things to say, so
+stay tuned for the next post next Sunday. Right now I&rsquo;m thinking it will be about parsing user
+input and how hard it is to do it right.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2020-10-18T15:00:00-06:00">
+    18 Oct, 2020
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">3269</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/recipe-manager-part-1/">Building a Recipe Manager - Part 1</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/efficient-use-of-travis-ci-cache-for-rust/">Efficient Use of Travis-CI&#39;s Cache For Rust Builds</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-3/">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</a>
+        <time datetime="3M">3 minutes</time>
+      
+        <li><a href="/post/announcing-rustacuda/">Announcing RustaCUDA v0.1.0</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/state-of-gpgpu-in-rust/">The State of GPGPU in Rust</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/writing-gpu-accelerated-path-tracer-part-3/">Writing a GPU-Accelerated Path Tracer in Rust - Part 3</a>
+        <time datetime="17M">17 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
+</main>
+    <footer>
+  
+  <p class="muted">
+    This page was generated using
+    <a target="_blank" rel="noopener" href="https://comfusion.github.io/after-dark/">After Dark</a>
+    for
+    <a target="_blank" rel="noopener" href="https://gohugo.io/">Hugo</a>.
+  </p>
+
+
+</footer>
+  </body>
+</html>

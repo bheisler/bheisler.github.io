@@ -6,10 +6,20 @@
     <description>Recent content on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 04 Oct 2020 13:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Sun, 18 Oct 2020 15:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Building a Recipe Manager - Part 2 - Druid Experience Report</title>
+      <link>https://bheisler.github.io/post/recipe-manager-part-2-druid-experience-report/</link>
+      <pubDate>Sun, 18 Oct 2020 15:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/recipe-manager-part-2-druid-experience-report/</guid>
+      <description>It&amp;rsquo;s been a couple of weeks since the last post, and as promised I&amp;rsquo;m back with some progress on the ingredient editor. The last post talked about my goals for this project, technical design decisions based on those goals, and my philosophy on starting challenging projects. This post is more of an experience report from my first few weeks of working with Druid.
+Before we dig into Druid though, the progress in the last two weeks.</description>
+    </item>
     
     <item>
       <title>Building a Recipe Manager - Part 1</title>
