@@ -4,7 +4,7 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code | bheisler.github.io</title>
+    <title>Recipe Manager | bheisler.github.io</title>
     <meta name="description" content="">
     <meta name="keywords" content="code, props, ">
     
@@ -18,14 +18,14 @@
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Code" />
+    <meta property="og:title" content="Recipe Manager" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/categories/code/" />
+<meta property="og:url" content="https://bheisler.github.io/tags/recipe-manager/" />
 
 
 
-<meta property="og:updated_time" content="2017-03-27T00:00:00-06:00"/>
+<meta property="og:updated_time" content="2020-10-25T15:30:00-06:00"/>
 
 
 
@@ -49,9 +49,9 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/categories/code/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
+      <link href="https://bheisler.github.io/tags/recipe-manager/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
     
-    <link rel="canonical" href="https://bheisler.github.io/categories/code/">
+    <link rel="canonical" href="https://bheisler.github.io/tags/recipe-manager/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -205,7 +205,7 @@ a:hover {
     
       <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
     
-      <a itemprop="url" class="active" href="/categories/code/"><span itemprop="name">Code</span></a>
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
     
       <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
     
@@ -215,13 +215,13 @@ a:hover {
 </header>
     <main>
   <header>
-    <h1>Code</h1>
+    <h1>Recipe Manager</h1>
   </header>
   
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
     <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
+      <a href="/post/recipe-manager-part-3-parsing-and-more-druid/">Building a Recipe Manager - Part 3 - Parsing and more Druid</a>
     </h2>
     
       <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
@@ -233,24 +233,22 @@ a:hover {
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2017-03-27T00:00:00-06:00">27 Mar, 2017</time>
+  Published: <time datetime="2020-10-25T15:30:00-06:00">25 Oct, 2020</time>
 
 </p>
     
   </header>
   
   <div itemprop="description">
-    Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
-First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.
+    Hello! This post will likely be a bit shorter than the last. Today&rsquo;s topic is a few thoughts about how complex it can be to parse human input, and how that interacts with Druid&rsquo;s data model.
+Progress I think I&rsquo;m nearly finished tweaking the ingredient editor. I&rsquo;ve spent the better part of a month on just this one view and that might seem like overkill, but for software like this the user experience is the whole point so it&rsquo;s important to get it right.
   </div>
   
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-3/">Read More&nbsp;&raquo;</a></nav>
+    <nav class="readmore"><a itemprop="url" href="/post/recipe-manager-part-3-parsing-and-more-druid/">Read More&nbsp;&raquo;</a></nav>
   
   <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-27T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
+  <meta itemprop="datePublished" content="2020-10-25T15:30:00-06:00">
+  <meta itemprop="dateModified" content="2020-10-25T15:30:00-06:00">
   
 </article>
 
@@ -258,36 +256,34 @@ First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separ
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
     <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
+      <a href="/post/recipe-manager-part-2-druid-experience-report/">Building a Recipe Manager - Part 2 - Druid Experience Report</a>
     </h2>
     
       <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>9 minute read</span>
+<span>16 minute read</span>
 <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time>
+  Published: <time datetime="2020-10-18T15:00:00-06:00">18 Oct, 2020</time>
 
 </p>
     
   </header>
   
   <div itemprop="description">
-    Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.
+    It&rsquo;s been a couple of weeks since the last post, and as promised I&rsquo;m back with some progress on the ingredient editor. The last post talked about my goals for this project, technical design decisions based on those goals, and my philosophy on starting challenging projects. This post is more of an experience report from my first few weeks of working with Druid.
+Before we dig into Druid though, the progress in the last two weeks.
   </div>
   
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-2/">Read More&nbsp;&raquo;</a></nav>
+    <nav class="readmore"><a itemprop="url" href="/post/recipe-manager-part-2-druid-experience-report/">Read More&nbsp;&raquo;</a></nav>
   
   <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-20T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-20T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/spherical-lights.png">
+  <meta itemprop="datePublished" content="2020-10-18T15:00:00-06:00">
+  <meta itemprop="dateModified" content="2020-10-18T15:00:00-06:00">
   
 </article>
 
@@ -295,36 +291,34 @@ Multiple Objects It&rsquo;s pretty easy to change our scene definition to contai
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
     <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
+      <a href="/post/recipe-manager-part-1/">Building a Recipe Manager - Part 1</a>
     </h2>
     
       <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>7 minute read</span>
+<span>13 minute read</span>
 <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time>
+  Published: <time datetime="2020-10-04T13:00:00-06:00">4 Oct, 2020</time>
 
 </p>
     
   </header>
   
   <div itemprop="description">
-    Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
-So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
+    Something you might not know about me is that I&rsquo;m an avid home cook. As such, I like to experiment in the kitchen, improvise new recipes, and modify existing ones. I also track my calorie and macronutrient intake. I have software tools for this, but I don&rsquo;t like them and eventually I got fed up and decided to write my own.
+I also thought it would be interesting to try working with the garage door up and writing more publicly about what I&rsquo;m working on, so this is part one of an ongoing series where I do just that.
   </div>
   
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></nav>
+    <nav class="readmore"><a itemprop="url" href="/post/recipe-manager-part-1/">Read More&nbsp;&raquo;</a></nav>
   
   <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-02-20T11:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-02-20T11:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/raytracer-first-render.png">
+  <meta itemprop="datePublished" content="2020-10-04T13:00:00-06:00">
+  <meta itemprop="dateModified" content="2020-10-04T13:00:00-06:00">
   
 </article>
 
@@ -334,9 +328,7 @@ So what is a raytracer anyway? The short version is it&rsquo;s a computer progra
   <nav>
   <p>
     
-      <a href="/categories/code/page/2/">&laquo; Previous</a> |
-    
-    <span>Page 3 of 3</span>
+    <span>Page 1 of 1</span>
     
   </p>
 </nav>

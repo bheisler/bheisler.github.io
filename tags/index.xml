@@ -66,6 +66,15 @@
     </item>
     
     <item>
+      <title>Druid</title>
+      <link>https://bheisler.github.io/tags/druid/</link>
+      <pubDate>Sun, 25 Oct 2020 15:30:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/druid/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Emulator</title>
       <link>https://bheisler.github.io/tags/emulator/</link>
       <pubDate>Sun, 20 Aug 2017 11:35:37 -0600</pubDate>
@@ -147,6 +156,15 @@
     </item>
     
     <item>
+      <title>Philosophy</title>
+      <link>https://bheisler.github.io/tags/philosophy/</link>
+      <pubDate>Sun, 04 Oct 2020 13:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/philosophy/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Python</title>
       <link>https://bheisler.github.io/tags/python/</link>
       <pubDate>Sun, 02 Apr 2017 00:00:00 -0600</pubDate>
@@ -165,9 +183,18 @@
     </item>
     
     <item>
+      <title>Recipe Manager</title>
+      <link>https://bheisler.github.io/tags/recipe-manager/</link>
+      <pubDate>Sun, 25 Oct 2020 15:30:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/tags/recipe-manager/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Rust</title>
       <link>https://bheisler.github.io/tags/rust/</link>
-      <pubDate>Sun, 18 Oct 2020 15:00:00 -0600</pubDate>
+      <pubDate>Sun, 25 Oct 2020 15:30:00 -0600</pubDate>
       
       <guid>https://bheisler.github.io/tags/rust/</guid>
       <description></description>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Philosophy on bheisler.github.io</title>
+    <link>https://bheisler.github.io/tags/philosophy/</link>
+    <description>Recent content in Philosophy on bheisler.github.io</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 04 Oct 2020 13:00:00 -0600</lastBuildDate>
+    
+	<atom:link href="https://bheisler.github.io/tags/philosophy/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Building a Recipe Manager - Part 1</title>
+      <link>https://bheisler.github.io/post/recipe-manager-part-1/</link>
+      <pubDate>Sun, 04 Oct 2020 13:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/recipe-manager-part-1/</guid>
+      <description>Something you might not know about me is that I&amp;rsquo;m an avid home cook. As such, I like to experiment in the kitchen, improvise new recipes, and modify existing ones. I also track my calorie and macronutrient intake. I have software tools for this, but I don&amp;rsquo;t like them and eventually I got fed up and decided to write my own.
+I also thought it would be interesting to try working with the garage door up and writing more publicly about what I&amp;rsquo;m working on, so this is part one of an ongoing series where I do just that.</description>
+    </item>
+    
+  </channel>
+</rss>

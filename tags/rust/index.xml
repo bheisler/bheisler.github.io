@@ -6,10 +6,20 @@
     <description>Recent content in Rust on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 18 Oct 2020 15:00:00 -0600</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2020 15:30:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/tags/rust/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Building a Recipe Manager - Part 3 - Parsing and more Druid</title>
+      <link>https://bheisler.github.io/post/recipe-manager-part-3-parsing-and-more-druid/</link>
+      <pubDate>Sun, 25 Oct 2020 15:30:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/recipe-manager-part-3-parsing-and-more-druid/</guid>
+      <description>Hello! This post will likely be a bit shorter than the last. Today&amp;rsquo;s topic is a few thoughts about how complex it can be to parse human input, and how that interacts with Druid&amp;rsquo;s data model.
+Progress I think I&amp;rsquo;m nearly finished tweaking the ingredient editor. I&amp;rsquo;ve spent the better part of a month on just this one view and that might seem like overkill, but for software like this the user experience is the whole point so it&amp;rsquo;s important to get it right.</description>
+    </item>
     
     <item>
       <title>Building a Recipe Manager - Part 2 - Druid Experience Report</title>
