@@ -57,6 +57,8 @@ ga('send', 'pageview');
       <link rel="prev" href="/post/recipe-manager-part-2-druid-experience-report/">
     
     
+      <link rel="next" href="/post/recipe-manager-part-4-async-std-and-even-more-druid/">
+    
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
 
     <style>
@@ -378,10 +380,11 @@ input; the structured form can be re-parsed on load if needed.</p>
 <p>I&rsquo;ve implemented that and it works exactly as expected.</p>
 
 <p>This raises a tension that I had mentioned in the previous post as well - how intrusive should
-widgets be into the user&rsquo;s data model? In my case, I want to be able to save the user&rsquo;s text input
-as well as (or instead of) the structured form, so this is logically part of my data model anyway.
-Not every application will want that; should they be required to keep a string in their data model
-anyway to bind the textbox to, or should the textbox try to hide that as an implementation detail?</p>
+widgets be into the application&rsquo;s data model? In my case, I want to be able to save the user&rsquo;s text
+input as well as (or instead of) the structured form, so this is logically part of my data model
+anyway. Not every application will want that; should they be required to keep a string in their
+data model anyway to bind the textbox to, or should the textbox try to hide that as an
+implementation detail?</p>
 
 <h3 id="parsing-user-input">Parsing User Input</h3>
 
@@ -449,7 +452,7 @@ add a comment to explain each piece. That would be helpful to have.</p>
 <h3 id="conclusion">Conclusion</h3>
 
 <p>OK, so it wasn&rsquo;t that much shorter. I hope you found this interesting! I&rsquo;m starting to think that
-weekly is a bit too much for these posts so I think I&rsquo;ll go for every two weeks for the next one.
+weekly is a bit too much for these posts so I think I&rsquo;ll go for every two weeks for the <a href="/post/recipe-manager-part-4-async-std-and-even-more-druid/">next one</a>.
 See you then!</p>
 <div class="footnotes">
 

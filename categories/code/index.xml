@@ -6,10 +6,20 @@
     <description>Recent content in Code on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 25 Oct 2020 15:30:00 -0600</lastBuildDate>
+    <lastBuildDate>Sun, 08 Nov 2020 15:00:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/categories/code/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Building a Recipe Manager - Part 4 - Async-std and Even More Druid</title>
+      <link>https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/</link>
+      <pubDate>Sun, 08 Nov 2020 15:00:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/</guid>
+      <description>Welcome back to my series of posts on the recipe-management software I&amp;rsquo;m building. If you haven&amp;rsquo;t been following along, you&amp;rsquo;ll probably want to start at the first post. This isn&amp;rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&amp;rsquo;s on my mind as I build out my vision of what a recipe manager should be.
+Progress In the last post I finished building the ingredient editor itself (at least for now).</description>
+    </item>
     
     <item>
       <title>Building a Recipe Manager - Part 3 - Parsing and more Druid</title>

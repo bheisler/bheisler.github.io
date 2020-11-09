@@ -4,28 +4,31 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tags | bheisler.github.io</title>
-    <meta name="description" content="">
-    <meta name="keywords" content="code, props, ">
+    <title>Building a Recipe Manager - Part 4 - Async-std and Even More Druid | bheisler.github.io</title>
+    <meta name="description" content="Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t been following along, you&rsquo;ll probably want to start at the first post. This isn&rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I build out my vision of what a recipe manager should be.
+Progress In the last post I finished building the ingredient editor itself (at least for now).">
+    <meta name="keywords" content="Rust, recipe-manager, druid">
     
     
     
-    
-      <meta name="robots" content="noindex">
     
     
 
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Tags" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/tags/" />
+    <meta property="og:title" content="Building a Recipe Manager - Part 4 - Async-std and Even More Druid" />
+<meta property="og:description" content="Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t been following along, you&rsquo;ll probably want to start at the first post. This isn&rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I build out my vision of what a recipe manager should be.
+Progress In the last post I finished building the ingredient editor itself (at least for now)." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/" />
 
 
 
-<meta property="og:updated_time" content="2018-06-14T19:00:00-06:00"/>
+<meta property="article:published_time" content="2020-11-08T15:00:00-06:00"/>
+
+<meta property="article:modified_time" content="2020-11-08T15:00:00-06:00"/>
+
 
 
 
@@ -49,9 +52,9 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/tags/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
+    <link rel="canonical" href="https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/">
     
-    <link rel="canonical" href="https://bheisler.github.io/tags/">
+      <link rel="prev" href="/post/recipe-manager-part-3-parsing-and-more-druid/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -214,58 +217,236 @@ a:hover {
 
 </header>
     <main>
-  <header>
-    <h1>Tags</h1>
-  </header>
-  <ul>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
-      <li><a href="accel">accel</a> (1)
+<meta itemprop="name" content="Building a Recipe Manager - Part 4 - Async-std and Even More Druid">
+<meta itemprop="description" content="Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t been following along, you&rsquo;ll probably want to start at the first post. This isn&rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I build out my vision of what a recipe manager should be.
+Progress In the last post I finished building the ingredient editor itself (at least for now).">
+
+
+<meta itemprop="datePublished" content="2020-11-08T15:00:00-06:00" />
+<meta itemprop="dateModified" content="2020-11-08T15:00:00-06:00" />
+<meta itemprop="wordCount" content="1582">
+
+
+
+<meta itemprop="keywords" content="Rust,recipe-manager,druid," />
+
+    <header>
+      <h1 itemprop="headline">Building a Recipe Manager - Part 4 - Async-std and Even More Druid</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>8 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2020-11-08T15:00:00-06:00">8 Nov, 2020</time>
+
+
+      </p>
+    </header>
     
-      <li><a href="assembly">assembly</a> (1)
     
-      <li><a href="benchmarking">benchmarking</a> (4)
+
+    <div itemprop="articleBody">
+      
+
+<p>Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t
+been following along, you&rsquo;ll probably want to start at the <a href="/post/recipe-manager-part-1/">first post</a>. This isn&rsquo;t so much a
+tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I
+build out my vision of what a recipe manager should be.</p>
+
+<h3 id="progress">Progress</h3>
+
+<p>In the <a href="/post/recipe-manager-part-3-parsing-and-more-druid/">last post</a> I finished building the ingredient editor itself (at least for now). Since then,
+I&rsquo;ve gone one step up and added a searchable list of ingredients.</p>
+
+<p><img src="/static/ingredient-editor-v4.png" alt="Ingredient Editor" /></p>
+
+<p>As you can see, there&rsquo;s a searchable list of ingredients, as well as a menu. That double-line
+widget is a split-pane; it can be dragged back and forth to expand the list of ingredients. I was
+planning to write my own split-pane, but it turned out Druid actually did have the component I
+needed. The list filters in realtime (though the code backing it is pretty dumb at this point) and
+there&rsquo;s even context menus on the list to allow the user to create and delete ingredients. I&rsquo;ve
+also fixed a bunch of bugs and minor user-experience flaws (for example, if you leave text in the
+Aliases field it will be automatically added to the list of aliases and saved when you tab away to
+another field, rather than just being lost).</p>
+
+<p>Naturally, this means that the backend code is scanning and opening all of the ingredient files.
+Which leads me to&hellip;</p>
+
+<h3 id="wow-async-std-is-fast">Wow, async-std is fast!</h3>
+
+<p>I wrote a totally naive implementation of loading all of the ingredient files in parallel using
+async-std, and decided to see how fast it was. Pretty fast, as it turns out - it can load, parse,
+and collect 500,000 test files in ~45s, for a throughput of a bit over 11k/second.</p>
+
+<p>OK, yes, 11k records/second using all 4 cores/8 threads of my ~5-year-old gaming machine, loading
+from SSD might not seem that impressive. I&rsquo;m sure that if I had 8 threads querying the same data
+from a sqlite database it could go faster. Still though, consider how I&rsquo;m storing the data - one
+record per file, in TOML files rather than a structured binary format. I&rsquo;m deliberately sacrificing
+performance for the ability to read the records without special tools. In that context, 11,000
+records/second is darned solid performance, and the performance/effort ratio is awesome. Here&rsquo;s my
+entire code for parsing these files:</p>
+
+<script src="//gist.github.com/bheisler/7f48df58bece7a50f3817e0fc621fdb2.js"></script>
+
+<p>I&rsquo;m using the <a href="https://crates.io/crates/walkdir">walkdir crate</a> to traverse the directory and spawning an async-std task for each
+file. It pushes each spawned task into a FuturesUnordered collection (because I don&rsquo;t care what
+order they complete in) and collects that into a vector. It&rsquo;s almost exactly the same code as I
+would write if I were doing it entirely sequentially - the only difference is the presence of the
+async/await keywords and the fact that I&rsquo;m pushing spawned futures into a FuturesUnordered and
+collecting to a Vec instead of just pushing the Results into a Vec directly.</p>
+
+<p>Incidentally, this is one of the things I love most about the Rust ecosystem - it&rsquo;s so often
+possible to get really great performance for barely any effort because all of the clever parts were
+already written by someone else. I just have to glue them together and watch them go.</p>
+
+<p>I&rsquo;m not sure whether I&rsquo;ll even bother building a loading screen, considering this performance. It&rsquo;s
+going to take me an awfully long time to accumulate enough recipes for it to take any appreciable
+time to load at all. Maybe parsing recipes will take more time than parsing ingredients?</p>
+
+<p>I used to be skeptical about async/await. It took a lot of work for the compiler team to build, a
+lot of work for other teams to build the reactors, and there&rsquo;s still the confusing ecosystem-split
+between async-std and tokio. I thought that async/await was mostly only useful for bleeding-edge
+networking performance and I figured that most services would be better off with the simple
+approach of forking a thread to handle every request. I was totally wrong on how much effort
+async/await adds, and consequently I was wrong about the rest of it as well.The ecosystem
+fragmentation is still a problem though; I hope that can be improved going forward somehow.</p>
+
+<p>Although I did notice that if I remove the <code>spawn</code> call from that code and just push the
+<code>load_ingredient</code> future directly into the <code>FuturesUnordered</code> it goes way slower (160s instead of
+45s) and I don&rsquo;t really know why? Let me know if you do.</p>
+
+<h3 id="even-more-druid">Even more Druid</h3>
+
+<p>If you&rsquo;ve been following this series, one of the things I&rsquo;ve brought up a few times is that I&rsquo;m
+not sure how intrusive Druid&rsquo;s widgets should be on the application&rsquo;s data model. After five weeks
+of working with Druid, I think I&rsquo;m starting to get a better sense of the answer to that.</p>
+
+<p>As usual, my example is my autosave timer widget. You can see it in the screenshot above, the
+&ldquo;Saved&rdquo; text in the corner of the window. It switches between Saved, Failed (meaning there was
+a file system error or similar on attempting to save the data), Invalid (the data in the editor
+can&rsquo;t be saved because it&rsquo;s invalid) and Ticking (which shows an animated timer counting down to
+when it autosaves).</p>
+
+<p>When I built it, I figured that the state of the timer shouldn&rsquo;t intrude into the application&rsquo;s
+data model, but instead should remain compartmentalized into the widget itself. Instead, there was
+another component which observed changes to the application model and sent Commands to the widget
+to tell it to start ticking, or that the save had failed, etc. Druid&rsquo;s developers advised me that
+using Lenses was more idiomatic than relying on Commands, but that approach seemed more complex
+to me for no particular gain.</p>
+
+<p>In adding the ability to load multiple ingredients, though, I&rsquo;ve found the limits of my initial
+approach and converted it to use lenses and keep the timer state in the application model instead.</p>
+
+<p>With the original implementation, when I clicked around on the list of ingredients, each ingredient
+that I loaded would trigger an update through Druid. That makes sense, the data in the model has
+changed and so it needs to be rendered. The problem is that there&rsquo;s no distinction between the user
+loading new data and the user editing the data directly, so my code would detect each load as a
+change and start the auto-save timer ticking. Now, I could have fixed that by having it send a
+&ldquo;wait, no, ignore that last change, that was loading new data&rdquo; command after every load, but then I
+have to remember to do that, and if I forget then the compiler can&rsquo;t help me. By baking the timer
+state into the application model, when I build the model object the compiler forces me to specify
+what state the timer should be in. I still think it&rsquo;s more complex than my first approach, but it
+turns out that complexity was there for a reason.</p>
+
+<p>The solution I&rsquo;ve settled on for now is as follows. I have a model structure for the ingredient
+editor, which contains the text strings, the nutritional information, etc. - all the things which
+&ldquo;logically&rdquo; part of the ingredient editor&rsquo;s model. Then, as a wrapper on top of that, I add a
+<code>EditorState&lt;T&gt;</code> model struct that stores the ingredient editor&rsquo;s model and the timer state, and an
+<code>Editor</code> widget which handles most of the logic for the autosave - it detects changes to the
+underlying editor data and starts the timer ticking, receives Ctrl-S commands if the user chooses
+to save early, handles most of the code to submit the saved data back to the backend to be saved
+asynchronously, and so on.</p>
+
+<p>Then the all-ingredients view contains an <code>EditorState&lt;IngredientEditorModel&gt;</code>. When it loads data
+from the backend, it can call
+<code>EditorState::loaded(IngredientEditorModel::from_backend(ingredient))</code> to get back a state where
+the timer will read &ldquo;saved&rdquo;. When the user creates a new ingredient, it calls <code>EditorState::new</code>
+and gets one in the invalid state - which is appropriate because the user hasn&rsquo;t filled in enough
+data to save yet. The code change in making this switch was pretty large and introduced a number of
+bugs, but I think I&rsquo;ve got them all ironed out. And, yes, there&rsquo;s even some lenses - I use a lens
+to automatically set the timer ticking if the editor contents change without resetting it when the
+timer itself changes.</p>
+
+<p>In other Druid news, I&rsquo;ve had a <a href="https://github.com/linebender/druid/pull/1370">small patch</a> accepted into Druid to allow the user of the Split
+widget to set the minimum size for each side separately, rather than assuming one minimum size would
+work for both sides.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>The all-ingredients editor is pretty much finished at this point. Now that I can edit and save
+ingredient data, the next thing is to start working on the recipe editor itself. All of the widgets
+and design ideas I&rsquo;ve built up so far for the ingredient editor will come in handy for the recipe
+editor, but there are still plenty of problems to solve.</p>
+
+<p>I had a bunch of vacation time at work that I needed to use up. What with the whole pandemic
+situation (and the blizzard raging outside my window right now - Oh, Canada&hellip;) there&rsquo;s not much
+else to do with it at the moment, so I&rsquo;m taking a week off work and I plan to spend a bunch of time
+on the recipe manager. Can&rsquo;t leave the house anyway, might as well get coding.</p>
+
+    </div>
     
-      <li><a href="c">c</a> (1)
+    <footer>
+      <hr>
+      <p>
+  Published
+  
     
-      <li><a href="criterion.rs">criterion.rs</a> (3)
+      by <span itemprop="author"></span>
     
-      <li><a href="cuda">cuda</a> (1)
-    
-      <li><a href="druid">druid</a> (3)
-    
-      <li><a href="emulator">emulator</a> (2)
-    
-      <li><a href="ffi">ffi</a> (1)
-    
-      <li><a href="gpgpu">gpgpu</a> (8)
-    
-      <li><a href="jarvis">jarvis</a> (1)
-    
-      <li><a href="jit">jit</a> (1)
-    
-      <li><a href="nes">nes</a> (2)
-    
-      <li><a href="nom">nom</a> (1)
-    
-      <li><a href="pathtracer">pathtracer</a> (3)
-    
-      <li><a href="pennys-sword">pennys-sword</a> (2)
-    
-      <li><a href="philosophy">philosophy</a> (1)
-    
-      <li><a href="python">python</a> (1)
-    
-      <li><a href="raytracer">raytracer</a> (7)
-    
-      <li><a href="recipe-manager">recipe-manager</a> (4)
-    
-      <li><a href="rust">rust</a> (23)
-    
-      <li><a href="rustacuda">rustacuda</a> (1)
-    
-      <li><a href="rwby">rwby</a> (2)
-    
-  </ul>
+  
+  <time itemprop="datePublished" datetime="2020-11-08T15:00:00-06:00">
+    8 Nov, 2020
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/rust/">Rust</a>, <a href="/tags/druid/">druid</a> and <a href="/tags/recipe-manager/">recipe-manager</a>
+  
+  using <span itemprop="wordCount">1582</span> words.
+</p>
+
+      
+
+
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/recipe-manager-part-3-parsing-and-more-druid/">Building a Recipe Manager - Part 3 - Parsing and more Druid</a>
+        <time datetime="12M">12 minutes</time>
+      
+        <li><a href="/post/recipe-manager-part-2-druid-experience-report/">Building a Recipe Manager - Part 2 - Druid Experience Report</a>
+        <time datetime="16M">16 minutes</time>
+      
+        <li><a href="/post/recipe-manager-part-1/">Building a Recipe Manager - Part 1</a>
+        <time datetime="13M">13 minutes</time>
+      
+        <li><a href="/post/efficient-use-of-travis-ci-cache-for-rust/">Efficient Use of Travis-CI&#39;s Cache For Rust Builds</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-3/">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</a>
+        <time datetime="3M">3 minutes</time>
+      
+        <li><a href="/post/announcing-rustacuda/">Announcing RustaCUDA v0.1.0</a>
+        <time datetime="7M">7 minutes</time>
+      
+        <li><a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
+        <time datetime="8M">8 minutes</time>
+      
+    </ul>
+  </aside>
+
+
+    </footer>
+  </article>
 </main>
     <footer>
   

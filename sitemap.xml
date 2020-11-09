@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/</loc>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://bheisler.github.io/post/recipe-manager-part-3-parsing-and-more-druid/</loc>
     <lastmod>2020-10-25T15:30:00-06:00</lastmod>
   </url>
@@ -167,7 +172,7 @@
   
   <url>
     <loc>https://bheisler.github.io/categories/code/</loc>
-    <lastmod>2020-10-25T15:30:00-06:00</lastmod>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -185,7 +190,7 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/druid/</loc>
-    <lastmod>2020-10-25T15:30:00-06:00</lastmod>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -251,7 +256,7 @@
   
   <url>
     <loc>https://bheisler.github.io/post/</loc>
-    <lastmod>2020-10-25T15:30:00-06:00</lastmod>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -275,13 +280,13 @@
   
   <url>
     <loc>https://bheisler.github.io/tags/recipe-manager/</loc>
-    <lastmod>2020-10-25T15:30:00-06:00</lastmod>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://bheisler.github.io/tags/rust/</loc>
-    <lastmod>2020-10-25T15:30:00-06:00</lastmod>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -305,7 +310,7 @@
   
   <url>
     <loc>https://bheisler.github.io/</loc>
-    <lastmod>2020-10-25T15:30:00-06:00</lastmod>
+    <lastmod>2020-11-08T15:00:00-06:00</lastmod>
     <priority>0</priority>
   </url>
   
