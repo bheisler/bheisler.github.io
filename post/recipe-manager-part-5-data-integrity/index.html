@@ -4,9 +4,9 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Building a Recipe Manager - Part 4 - Async-std and Even More Druid | bheisler.github.io</title>
+    <title>Building a Recipe Manager - Part 5 - Data Integrity | bheisler.github.io</title>
     <meta name="description" content="Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t been following along, you&rsquo;ll probably want to start at the first post. This isn&rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I build out my vision of what a recipe manager should be.
-Progress In the last post I finished building the ingredient editor itself (at least for now).">
+Progress In the last post I finished building the ingredient editor, meaning that I could move on to the recipe editor - probably the most important view in the whole application.">
     <meta name="keywords" content="Rust, recipe-manager, druid">
     
     
@@ -17,17 +17,17 @@ Progress In the last post I finished building the ingredient editor itself (at l
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Building a Recipe Manager - Part 4 - Async-std and Even More Druid" />
+    <meta property="og:title" content="Building a Recipe Manager - Part 5 - Data Integrity" />
 <meta property="og:description" content="Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t been following along, you&rsquo;ll probably want to start at the first post. This isn&rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I build out my vision of what a recipe manager should be.
-Progress In the last post I finished building the ingredient editor itself (at least for now)." />
+Progress In the last post I finished building the ingredient editor, meaning that I could move on to the recipe editor - probably the most important view in the whole application." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/" />
+<meta property="og:url" content="https://bheisler.github.io/post/recipe-manager-part-5-data-integrity/" />
 
 
 
-<meta property="article:published_time" content="2020-11-08T15:00:00-06:00"/>
+<meta property="article:published_time" content="2020-11-22T11:30:00-06:00"/>
 
-<meta property="article:modified_time" content="2020-11-08T15:00:00-06:00"/>
+<meta property="article:modified_time" content="2020-11-22T11:30:00-06:00"/>
 
 
 
@@ -52,12 +52,10 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-    <link rel="canonical" href="https://bheisler.github.io/post/recipe-manager-part-4-async-std-and-even-more-druid/">
+    <link rel="canonical" href="https://bheisler.github.io/post/recipe-manager-part-5-data-integrity/">
     
-      <link rel="prev" href="/post/recipe-manager-part-3-parsing-and-more-druid/">
+      <link rel="prev" href="/post/recipe-manager-part-4-async-std-and-even-more-druid/">
     
-    
-      <link rel="next" href="/post/recipe-manager-part-5-data-integrity/">
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
 
@@ -221,32 +219,32 @@ a:hover {
     <main>
   <article itemscope itemtype="http://schema.org/BlogPosting">
     
-<meta itemprop="name" content="Building a Recipe Manager - Part 4 - Async-std and Even More Druid">
+<meta itemprop="name" content="Building a Recipe Manager - Part 5 - Data Integrity">
 <meta itemprop="description" content="Welcome back to my series of posts on the recipe-management software I&rsquo;m building. If you haven&rsquo;t been following along, you&rsquo;ll probably want to start at the first post. This isn&rsquo;t so much a tutorial series like my posts on raytracing, just me writing about whatever&rsquo;s on my mind as I build out my vision of what a recipe manager should be.
-Progress In the last post I finished building the ingredient editor itself (at least for now).">
+Progress In the last post I finished building the ingredient editor, meaning that I could move on to the recipe editor - probably the most important view in the whole application.">
 
 
-<meta itemprop="datePublished" content="2020-11-08T15:00:00-06:00" />
-<meta itemprop="dateModified" content="2020-11-08T15:00:00-06:00" />
-<meta itemprop="wordCount" content="1582">
+<meta itemprop="datePublished" content="2020-11-22T11:30:00-06:00" />
+<meta itemprop="dateModified" content="2020-11-22T11:30:00-06:00" />
+<meta itemprop="wordCount" content="2453">
 
 
 
 <meta itemprop="keywords" content="Rust,recipe-manager,druid," />
 
     <header>
-      <h1 itemprop="headline">Building a Recipe Manager - Part 4 - Async-std and Even More Druid</h1>
+      <h1 itemprop="headline">Building a Recipe Manager - Part 5 - Data Integrity</h1>
       <p class="muted">
         <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>8 minute read</span>
+<span>12 minute read</span>
 <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2020-11-08T15:00:00-06:00">8 Nov, 2020</time>
+  Published: <time datetime="2020-11-22T11:30:00-06:00">22 Nov, 2020</time>
 
 
       </p>
@@ -264,133 +262,196 @@ build out my vision of what a recipe manager should be.</p>
 
 <h3 id="progress">Progress</h3>
 
-<p>In the <a href="/post/recipe-manager-part-3-parsing-and-more-druid/">last post</a> I finished building the ingredient editor itself (at least for now). Since then,
-I&rsquo;ve gone one step up and added a searchable list of ingredients.</p>
+<p>In the <a href="/post/recipe-manager-part-4-async-std-and-even-more-druid/">last post</a> I finished building the ingredient editor, meaning that I could move on to the
+recipe editor - probably the most important view in the whole application. Since then, I&rsquo;ve
+completed the recipe editor and moved on to start working on a page for searching and filtering
+the recipes.</p>
 
-<p><img src="/static/ingredient-editor-v4.png" alt="Ingredient Editor" /></p>
+<p><img src="/static/recipe-editor-v1.png" alt="Recipe Editor" /></p>
 
-<p>As you can see, there&rsquo;s a searchable list of ingredients, as well as a menu. That double-line
-widget is a split-pane; it can be dragged back and forth to expand the list of ingredients. I was
-planning to write my own split-pane, but it turned out Druid actually did have the component I
-needed. The list filters in realtime (though the code backing it is pretty dumb at this point) and
-there&rsquo;s even context menus on the list to allow the user to create and delete ingredients. I&rsquo;ve
-also fixed a bunch of bugs and minor user-experience flaws (for example, if you leave text in the
-Aliases field it will be automatically added to the list of aliases and saved when you tab away to
-another field, rather than just being lost).</p>
+<p>A lot of progress has happened in the last two weeks! First up, the recipe editor. It shows all of
+the recipe-level nutritional information and metadata at the top of the screen. The really cool
+part is the UI for editing the recipes themselves though. The user can insert ingredients, headers
+and instructions in any order. You can add, delete, or reorder recipe components using the button
+on the left, the Recipe menu at the top, or keyboard shortcuts. To minimize the friction of adding
+components, the keyboard focus is automatically placed exactly where the user will probably want it
+- in the main textbox of the new component.</p>
 
-<p>Naturally, this means that the backend code is scanning and opening all of the ingredient files.
-Which leads me to&hellip;</p>
+<p>The ingredient box is free-form text; beneath it the tool displays its best guess at which
+ingredient you meant (which includes aliases) but to save space it only shows that if it doesn&rsquo;t
+match what you typed. Pressing enter in the ingredient box auto-completes the text box with the
+best-guess ingredient. Hitting enter in the amount box will auto-complete with whatever the tool&rsquo;s
+best guess at which ingredient you wanted as well, so you can enter ingredients quickly directly
+from the keyboard - &ldquo;1 pound of butter&rdquo; might be &ldquo;b-u-t-&lt;enter&gt;-&lt;tab&gt;-1-p-o-u-&lt;enter&gt;&ldquo;. It&rsquo;s not
+quite as good as a real autocomplete dropdown - the user can&rsquo;t use the arrow keys to select the
+second or third guess - but it seems to work just fine so far. I&rsquo;m sure in the future Druid will
+make it easier to build a real autocomplete dropdown, and I&rsquo;ll update my code to do that instead.</p>
 
-<h3 id="wow-async-std-is-fast">Wow, async-std is fast!</h3>
+<p>As discussed in earlier posts, I prefer to measure things by mass when I can, so the recipe editor
+automatically calculates the mass in grams of all ingredients wherever possible. It also gives clear
+error messages when the user tries to specify a mass or volume but the ingredient doesn&rsquo;t specify
+the mass or volume of a serving.</p>
 
-<p>I wrote a totally naive implementation of loading all of the ingredient files in parallel using
-async-std, and decided to see how fast it was. Pretty fast, as it turns out - it can load, parse,
-and collect 500,000 test files in ~45s, for a throughput of a bit over 11k/second.</p>
+<p>Not only is it delightfully low-friction to use, but I like having the ability to separate out
+logical groupings of ingredients and the instructions that go with them. A lot of recipes come in
+the form of a big list of ingredients and then a big list of instructions, but that just seems like
+a poor way to structure recipes to me. This system can handle recipes like that, if that&rsquo;s what the
+user wants, but it also allows them to create logical groupings to make reading and following the
+recipe easier.</p>
 
-<p>OK, yes, 11k records/second using all 4 cores/8 threads of my ~5-year-old gaming machine, loading
-from SSD might not seem that impressive. I&rsquo;m sure that if I had 8 threads querying the same data
-from a sqlite database it could go faster. Still though, consider how I&rsquo;m storing the data - one
-record per file, in TOML files rather than a structured binary format. I&rsquo;m deliberately sacrificing
-performance for the ability to read the records without special tools. In that context, 11,000
-records/second is darned solid performance, and the performance/effort ratio is awesome. Here&rsquo;s my
-entire code for parsing these files:</p>
+<p>One thing that I haven&rsquo;t done (yet) is allow the ingredient box to auto-complete to other recipes.
+Especially in the world of baking, there are a lot of recipes for things that are then used in
+other recipes. Creme Patisserie (AKA pastry cream) is a kind of pudding often used for filling in
+things like cakes or cream puffs. Whip it together with butter and you get German Buttercream, a
+tasty cake frosting. Alternately, whip it with whipped cream and you get Creme Diplomat. One might
+have one or two standard recipes for Creme Patisserie and use them transitively in a bunch of
+different recipes. An analog for the savory cooking world might be the French mother sauces. Of the
+two apps I currently use, one simply does not allow this and the other requires a weird workaround.
+If I update my standard recipe for one of these reusable components, I want the resulting change in
+nutritional information to be automatically propagated to the recipes that use it. I will need to
+be careful to handle self-recursive recipes without an infinite loop - right now I&rsquo;m leaning
+towards allowing self-recursive recipes, but making it so the self-recursive components have no
+nutritional information. Recipes which contain themselves do exist, but they&rsquo;re rare. One example
+is confectioners&rsquo; fondant - a crystallized sugar syrup used in making chocolates (no, it&rsquo;s not the
+same stuff they make pretty-but-tasteless cakes out of). It&rsquo;s common for a bit of the last batch of
+fondant to be added to a new batch as a seed to speed up the crystallization process. I figure if
+you add 100g of fondant to the mixer, then take out 100g of the finished fondant and freeze it for
+next time, there should be no net effect on the overall nutritional contents.</p>
 
-<script src="//gist.github.com/bheisler/7f48df58bece7a50f3817e0fc621fdb2.js"></script>
+<p><img src="/static/recipe-search-v1.png" alt="Recipe Search" /></p>
 
-<p>I&rsquo;m using the <a href="https://crates.io/crates/walkdir">walkdir crate</a> to traverse the directory and spawning an async-std task for each
-file. It pushes each spawned task into a FuturesUnordered collection (because I don&rsquo;t care what
-order they complete in) and collects that into a vector. It&rsquo;s almost exactly the same code as I
-would write if I were doing it entirely sequentially - the only difference is the presence of the
-async/await keywords and the fact that I&rsquo;m pushing spawned futures into a FuturesUnordered and
-collecting to a Vec instead of just pushing the Results into a Vec directly.</p>
+<p>I&rsquo;ve also started building out the recipe search page. This is what I&rsquo;ll use when I&rsquo;m deciding what
+I want to cook. I haven&rsquo;t actually built the searching logic yet, but I&rsquo;ve laid out the search form.
+It will take some experience with using it to be sure, but these seem like the right search criteria.
+One thing to note is that I&rsquo;ve enhanced the &ldquo;bubble list&rdquo; widget to allow for autocompletion there
+as well, so you can hit &ldquo;b-r-&lt;enter&gt;&rdquo; and it will add &ldquo;Brown Sugar&rdquo; to the list.</p>
 
-<p>Incidentally, this is one of the things I love most about the Rust ecosystem - it&rsquo;s so often
-possible to get really great performance for barely any effort because all of the clever parts were
-already written by someone else. I just have to glue them together and watch them go.</p>
+<p>Filtering recipes by their nutritional content is one of those features that I&rsquo;ve wanted for a long
+time but it seems like nobody else has ever thought of. Certainly neither of the apps that I&rsquo;m
+looking to replace provides this feature. It seems like such an obvious thing - &ldquo;I have 453 calories
+left for today, what can I make?&rdquo; is the sort of question I ask fairly often, why not have the
+computer assist me in answering it?</p>
 
-<p>I&rsquo;m not sure whether I&rsquo;ll even bother building a loading screen, considering this performance. It&rsquo;s
-going to take me an awfully long time to accumulate enough recipes for it to take any appreciable
-time to load at all. Maybe parsing recipes will take more time than parsing ingredients?</p>
+<p>Although, I&rsquo;ve only just noticed that I don&rsquo;t have a field for tags here. Will have to add that.</p>
 
-<p>I used to be skeptical about async/await. It took a lot of work for the compiler team to build, a
-lot of work for other teams to build the reactors, and there&rsquo;s still the confusing ecosystem-split
-between async-std and tokio. I thought that async/await was mostly only useful for bleeding-edge
-networking performance and I figured that most services would be better off with the simple
-approach of forking a thread to handle every request. I was totally wrong on how much effort
-async/await adds, and consequently I was wrong about the rest of it as well.The ecosystem
-fragmentation is still a problem though; I hope that can be improved going forward somehow.</p>
+<p>I&rsquo;m also trying to establish a consistent color scheme for carbs/fat/protein. I don&rsquo;t know how
+useful that will be, but it seems to help with readability at-a-glance. They&rsquo;re also always
+displayed in the same order.</p>
 
-<p>Although I did notice that if I remove the <code>spawn</code> call from that code and just push the
-<code>load_ingredient</code> future directly into the <code>FuturesUnordered</code> it goes way slower (160s instead of
-45s) and I don&rsquo;t really know why? Let me know if you do.</p>
+<h3 id="data-integrity">Data Integrity</h3>
 
-<h3 id="even-more-druid">Even more Druid</h3>
+<p>One of the downsides of storing everything in text files rather than a mature database
+is that now I have to be more responsible for maintaining the integrity of the data. I can&rsquo;t set
+up foreign keys or constraints to automatically enforce that everything is self-consistent.
+I fully expect this to be the source of a lot of ongoing weird bugs and potentially data loss.
+This is starting to become more relevant as I work on building recipe features - unlike ingredients,
+recipes aren&rsquo;t just a collection of independent records. They refer to ingredients and (as
+discussed above) other recipes, and might need to be updated if those recipes change.</p>
 
-<p>If you&rsquo;ve been following this series, one of the things I&rsquo;ve brought up a few times is that I&rsquo;m
-not sure how intrusive Druid&rsquo;s widgets should be on the application&rsquo;s data model. After five weeks
-of working with Druid, I think I&rsquo;m starting to get a better sense of the answer to that.</p>
+<p>I think I&rsquo;ve come up with a way to mitigate this problem somewhat. In short, I intend to just not
+store anything but the most minimal possible representation necessary to reconstruct what the user
+meant.</p>
 
-<p>As usual, my example is my autosave timer widget. You can see it in the screenshot above, the
-&ldquo;Saved&rdquo; text in the corner of the window. It switches between Saved, Failed (meaning there was
-a file system error or similar on attempting to save the data), Invalid (the data in the editor
-can&rsquo;t be saved because it&rsquo;s invalid) and Ticking (which shows an animated timer counting down to
-when it autosaves).</p>
+<p>Allow me to explain in more detail. My thinking on this is influenced by <a href="https://www.youtube.com/watch?v=sd3Lg5qgTzw">this video</a>, about
+data redundancy bugs in classic video games. To summarize, a lot of famous bugs in classic games
+(such as the save-corruption glitch that allows for arbitrary code execution in Pokemon Red &amp; Blue)
+came about because the developers cached some important property such as the length of a
+sentinel-terminated list rather than re-deriving it from the list each time it was needed. This
+saves CPU cycles - which is important on a system as limited as the Game Boy - but it means that if
+the cached length of the player&rsquo;s item list ever disagrees with the <em>actual</em> length of that list,
+there are bugs.</p>
 
-<p>When I built it, I figured that the state of the timer shouldn&rsquo;t intrude into the application&rsquo;s
-data model, but instead should remain compartmentalized into the widget itself. Instead, there was
-another component which observed changes to the application model and sent Commands to the widget
-to tell it to start ticking, or that the save had failed, etc. Druid&rsquo;s developers advised me that
-using Lenses was more idiomatic than relying on Commands, but that approach seemed more complex
-to me for no particular gain.</p>
+<p>On old video-game systems, this was almost a necessary trade-off - the CPUs of those systems were
+so underpowered that recalculating everything all the time would have made the games unacceptably
+slow. We have much faster computers these days, though, and I have plenty of room to spend time
+computing things without noticeably impacting the user&rsquo;s flow.</p>
 
-<p>In adding the ability to load multiple ingredients, though, I&rsquo;ve found the limits of my initial
-approach and converted it to use lenses and keep the timer state in the application model instead.</p>
+<p>I realized that I had essentially the same problem - if I saved the nutritional breakdown of every
+ingredient in a recipe to disk, that could get out of sync with changes to the ingredient itself.
+Then what? I could recompute the nutrition when the user loads the recipe, but then what was the
+point of saving it? I could eagerly update all recipes that contain an ingredient each time an
+ingredient is saved, but what if the user edits an ingredient file with a text editor?</p>
 
-<p>With the original implementation, when I clicked around on the list of ingredients, each ingredient
-that I loaded would trigger an update through Druid. That makes sense, the data in the model has
-changed and so it needs to be rendered. The problem is that there&rsquo;s no distinction between the user
-loading new data and the user editing the data directly, so my code would detect each load as a
-change and start the auto-save timer ticking. Now, I could have fixed that by having it send a
-&ldquo;wait, no, ignore that last change, that was loading new data&rdquo; command after every load, but then I
-have to remember to do that, and if I forget then the compiler can&rsquo;t help me. By baking the timer
-state into the application model, when I build the model object the compiler forces me to specify
-what state the timer should be in. I still think it&rsquo;s more complex than my first approach, but it
-turns out that complexity was there for a reason.</p>
+<p>So what I&rsquo;m going to do instead is store <em>only</em> the text the user typed in for the ingredient and
+amount (which I have to store anyway because I don&rsquo;t want the software to change what I wrote),
+plus the ingredient ID that matched to. I don&rsquo;t store anything else about the ingredient or the
+amount in the recipe files. This does mean that when the software needs to determine the
+nutritional content of a recipe there will have to be a recursive process of resolving the
+nutrition of every ingredient. It will also have to re-parse the amount of each ingredient the
+recipe calls for by parsing the amount string. Doing it this way ensures that everything is always
+exactly up to date.</p>
 
-<p>The solution I&rsquo;ve settled on for now is as follows. I have a model structure for the ingredient
-editor, which contains the text strings, the nutritional information, etc. - all the things which
-&ldquo;logically&rdquo; part of the ingredient editor&rsquo;s model. Then, as a wrapper on top of that, I add a
-<code>EditorState&lt;T&gt;</code> model struct that stores the ingredient editor&rsquo;s model and the timer state, and an
-<code>Editor</code> widget which handles most of the logic for the autosave - it detects changes to the
-underlying editor data and starts the timer ticking, receives Ctrl-S commands if the user chooses
-to save early, handles most of the code to submit the saved data back to the backend to be saved
-asynchronously, and so on.</p>
+<p>It might seem strange that I save the ingredient string and the matching ingredient ID, but only
+save the amount as a string. This is a bit of a judgement call - mainly I&rsquo;m doing that because the
+amount parsing shouldn&rsquo;t change significantly, so I expect that any amount I care about will parse
+to the same value later as it did when I saved it. In fact, I actually want it to be recomputed -
+if I specify that a recipe contains 100g of peanut butter, and then switch to a different brand of
+peanut butter that 100g might now be a different number of servings, and so the number of servings
+should be recomputed from the updated ingredient and the text of the amount field. On the other
+hand, adding or renaming an ingredient could cause the fuzzy-matching to pick a totally different
+closest-match than what it did when I wrote the recipe to start with, which I don&rsquo;t want.</p>
 
-<p>Then the all-ingredients view contains an <code>EditorState&lt;IngredientEditorModel&gt;</code>. When it loads data
-from the backend, it can call
-<code>EditorState::loaded(IngredientEditorModel::from_backend(ingredient))</code> to get back a state where
-the timer will read &ldquo;saved&rdquo;. When the user creates a new ingredient, it calls <code>EditorState::new</code>
-and gets one in the invalid state - which is appropriate because the user hasn&rsquo;t filled in enough
-data to save yet. The code change in making this switch was pretty large and introduced a number of
-bugs, but I think I&rsquo;ve got them all ironed out. And, yes, there&rsquo;s even some lenses - I use a lens
-to automatically set the timer ticking if the editor contents change without resetting it when the
-timer itself changes.</p>
+<p>Every ingredient and recipe (and anything else I add to the system in the future) has a random UUID
+as a unique identifier. It&rsquo;s not perfect, though. For example, the user might copy a recipe file
+in the file system and not change the UUID. Probably the best thing I can do to deal with this sort
+of edge-case scenario is to detect it at startup and flag an error for the user to fix. Once I get
+around to integrating a Git repository for the data into the software itself, though, it would be
+possible to detect those sorts of changes and decide how best to resolve them.</p>
 
-<p>In other Druid news, I&rsquo;ve had a <a href="https://github.com/linebender/druid/pull/1370">small patch</a> accepted into Druid to allow the user of the Split
-widget to set the minimum size for each side separately, rather than assuming one minimum size would
-work for both sides.</p>
+<p>Doing this well does take some degree of domain knowledge though. For example, when I get around to
+implementing a daily calorie/macronutrient counter, I do intend to store the nutritional
+information in those records. The difference is that those are historical information - if for some
+reason I look back at what I ate six months ago, I want to see the nutritional information for
+precisely what I made back then, even if I&rsquo;ve changed the recipes or ingredient data since then.
+When I&rsquo;m looking at the recipes themselves, I&rsquo;m interested in what they would contain if I made
+them now.</p>
+
+<h3 id="a-bit-more-druid">A Bit More Druid</h3>
+
+<p>Last post I mentioned that I&rsquo;d changed my mind on how intrusive Druid widgets should be into the
+application&rsquo;s data model. That process has continued, and I&rsquo;m now settling on &ldquo;very intrusive
+indeed&rdquo;. I&rsquo;m coming to the conclusion that basically anything the user can change should be a part
+of the application model.</p>
+
+<p>I&rsquo;ve been continuing to expand my collection of custom widgets, and one pattern that I&rsquo;ve found to
+be useful is for a complex widget like my ersatz autocomplete-text-box to expose its own state
+struct and require that the application model contain one of those. For the autocomplete box, that
+struct includes the string the user typed in as well as the completed value. That way, when the user
+loads a recipe the software can populate the autocomplete state with <em>both</em> the saved text and the
+selected ingredient ID.</p>
+
+<p>Widgets which don&rsquo;t expose their user-editable state to the application model are forced to provide
+a more complicated Command-based interface to detect changes to it or allow the application to set
+it.</p>
+
+<p>Of particular note is the built-in Tabs widget, which does not expose the currently-selected tab.
+It also does not have the aforementioned Command-based interface, which means that it is currently
+impossible for the application to react to the user changing the current tab, or to switch tabs
+itself. I can&rsquo;t, for example, open a new tab and switch to it immediately, or automatically save
+the data in a tab when the user switches to another.</p>
+
+<p>As I develop this recipe manager, I keep running into cases where I wrote a custom widget to hide
+its state from the application and then regretted it and had to do more work to expose it again.
+I&rsquo;m starting to learn from my mistakes and just expose that state from the start.</p>
 
 <h3 id="conclusion">Conclusion</h3>
 
-<p>The all-ingredients editor is pretty much finished at this point. Now that I can edit and save
-ingredient data, the <a href="/post/recipe-manager-part-5-data-integrity/">next</a> thing is to start working on the recipe editor itself. All of the widgets
-and design ideas I&rsquo;ve built up so far for the ingredient editor will come in handy for the recipe
-editor, but there are still plenty of problems to solve.</p>
+<p>Well, that&rsquo;s about it for now. Over the next couple weeks I&rsquo;ll probably aim to finish up the recipe
+search.</p>
 
-<p>I had a bunch of vacation time at work that I needed to use up. What with the whole pandemic
-situation (and the blizzard raging outside my window right now - Oh, Canada&hellip;) there&rsquo;s not much
-else to do with it at the moment, so I&rsquo;m taking a week off work and I plan to spend a bunch of time
-on the recipe manager. Can&rsquo;t leave the house anyway, might as well get coding.</p>
+<p>I&rsquo;ll admit that I&rsquo;ve maybe been working harder on this and for longer than is really a good idea.
+The way I usually do hobby-project work (at least when it comes to software) is to work on it
+intensely for a relatively short period of time. This one is coming up on two months so far, so
+it&rsquo;s not that short. I don&rsquo;t really recommend this approach, but it&rsquo;s what I usually fall into
+doing anyway. So I&rsquo;m aiming to reach a point where it&rsquo;s minimally usable so I can call it good
+and set it aside for a while. I still have a <em>lot</em> more ideas for features I want to add, but
+those will have to wait.</p>
+
+<p>(Incidentally, this is why Criterion-rs tends to see short periods of intense work followed by
+months of total neglect.)</p>
+
+<p>Hopefully I&rsquo;ll be able to wrap this up by the Christmas holidays and then take some time to do other
+things (like actually do some cooking) before picking it up again in the new year.</p>
 
     </div>
     
@@ -403,8 +464,8 @@ on the recipe manager. Can&rsquo;t leave the house anyway, might as well get cod
       by <span itemprop="author"></span>
     
   
-  <time itemprop="datePublished" datetime="2020-11-08T15:00:00-06:00">
-    8 Nov, 2020
+  <time itemprop="datePublished" datetime="2020-11-22T11:30:00-06:00">
+    22 Nov, 2020
   </time>
   
     in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
@@ -412,7 +473,7 @@ on the recipe manager. Can&rsquo;t leave the house anyway, might as well get cod
   
     and tagged <a href="/tags/rust/">Rust</a>, <a href="/tags/druid/">druid</a> and <a href="/tags/recipe-manager/">recipe-manager</a>
   
-  using <span itemprop="wordCount">1582</span> words.
+  using <span itemprop="wordCount">2453</span> words.
 </p>
 
       
@@ -421,6 +482,9 @@ on the recipe manager. Can&rsquo;t leave the house anyway, might as well get cod
   <aside>
     <header>Related Content</header>
     <ul>
+      
+        <li><a href="/post/recipe-manager-part-4-async-std-and-even-more-druid/">Building a Recipe Manager - Part 4 - Async-std and Even More Druid</a>
+        <time datetime="8M">8 minutes</time>
       
         <li><a href="/post/recipe-manager-part-3-parsing-and-more-druid/">Building a Recipe Manager - Part 3 - Parsing and more Druid</a>
         <time datetime="12M">12 minutes</time>
@@ -439,9 +503,6 @@ on the recipe manager. Can&rsquo;t leave the house anyway, might as well get cod
       
         <li><a href="/post/announcing-rustacuda/">Announcing RustaCUDA v0.1.0</a>
         <time datetime="7M">7 minutes</time>
-      
-        <li><a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
-        <time datetime="8M">8 minutes</time>
       
     </ul>
   </aside>
