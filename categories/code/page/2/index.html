@@ -25,7 +25,7 @@
 
 
 
-<meta property="og:updated_time" content="2018-08-08T20:00:00-06:00"/>
+<meta property="og:updated_time" content="2018-10-01T19:00:00-06:00"/>
 
 
 
@@ -217,6 +217,41 @@ a:hover {
   <header>
     <h1>Code</h1>
   </header>
+  
+    <article itemscope itemtype="http://schema.org/CreativeWork">
+  <header>
+    <h2 itemprop="name">
+      <a href="/post/ptx-builder-and-linker/">Porting My CUDA Path Tracer to ptx-builder/linker</a>
+    </h2>
+    
+      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <circle cx="16" cy="16" r="14" />
+  <path d="M16 8 L16 16 20 20" />
+</svg>
+<span>8 minute read</span>
+<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
+</svg>
+
+  Published: <time datetime="2018-10-01T19:00:00-06:00">1 Oct, 2018</time>
+
+</p>
+    
+  </header>
+  
+  <div itemprop="description">
+    A bunch of stuff has happened since I published my post on The State of GPGPU in Rust. Most importantly, Denys Zariaiev (@denzp) released his work on a custom linker for Rust CUDA kernels, and a build.rs helper crate to make it easier to use.
+These two crates eliminate many of the problems I referred to in my previous post. The linker solves most of the &ldquo;invalid PTX file&rdquo; problems, while the ptx-builder crate does all of the magic that Accel was doing behind the scenes.
+  </div>
+  
+    <nav class="readmore"><a itemprop="url" href="/post/ptx-builder-and-linker/">Read More&nbsp;&raquo;</a></nav>
+  
+  <meta itemprop="inLanguage" content="en-us">
+  <meta itemprop="datePublished" content="2018-10-01T19:00:00-06:00">
+  <meta itemprop="dateModified" content="2018-10-01T19:00:00-06:00">
+  
+</article>
+
   
     <article itemscope itemtype="http://schema.org/CreativeWork">
   <header>
@@ -532,40 +567,6 @@ Cloud-CI pipelines have a lot of potential to introduce noise into the benchmark
   <meta itemprop="inLanguage" content="en-us">
   <meta itemprop="datePublished" content="2018-01-06T16:00:00-06:00">
   <meta itemprop="dateModified" content="2018-01-06T16:00:00-06:00">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>22 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-08-20T11:35:37-06:00">20 Aug, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Inspired by the always-incredible work on Dolphin, I decided to write myself an NES emulator called Corrosion a couple years ago. I managed to get it working well enough to play basic games, and then put the project aside. This post is not about the emulator itself, but rather the JIT compiler I added to it last year and the upgrades to said JIT compiler I&rsquo;ve made over the past few weeks.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/experiments-in-nes-jit-compilation/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-08-20T11:35:37-06:00">
-  <meta itemprop="dateModified" content="2017-08-20T11:35:37-06:00">
   
 </article>
 

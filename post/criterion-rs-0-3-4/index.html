@@ -4,28 +4,33 @@
     <meta name="generator" content="Hugo 0.36.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code | bheisler.github.io</title>
-    <meta name="description" content="">
-    <meta name="keywords" content="code, props, ">
+    <title>Criterion.rs v0.3.4 And Iai 0.1.0 | bheisler.github.io</title>
+    <meta name="description" content="Today I&rsquo;ve released Criterion 0.3.4 and Iai 0.1.0. I&rsquo;m particularly excited by Iai, so read on to find out what I&rsquo;ve been up to.
+Criterion Updates The main new feature in this release is that Criterion.rs now has built-in support for benchmarking async functions.
+ This feature requires the async feature to be enabled. In addition to this, four other features - async-std, async-tokio, async-smol, and async-futures can be enabled to add support for benchmarking with the respective futures executors.">
+    <meta name="keywords" content="Rust, Benchmarking, Criterion.rs">
     
     
     
-    
-      <meta name="robots" content="noindex">
     
     
 
   <meta name="author" content="">
 
 
-    <meta property="og:title" content="Code" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://bheisler.github.io/categories/code/" />
+    <meta property="og:title" content="Criterion.rs v0.3.4 And Iai 0.1.0" />
+<meta property="og:description" content="Today I&rsquo;ve released Criterion 0.3.4 and Iai 0.1.0. I&rsquo;m particularly excited by Iai, so read on to find out what I&rsquo;ve been up to.
+Criterion Updates The main new feature in this release is that Criterion.rs now has built-in support for benchmarking async functions.
+ This feature requires the async feature to be enabled. In addition to this, four other features - async-std, async-tokio, async-smol, and async-futures can be enabled to add support for benchmarking with the respective futures executors." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://bheisler.github.io/post/criterion-rs-0-3-4/" />
 
 
 
-<meta property="og:updated_time" content="2017-08-20T11:35:37-06:00"/>
+<meta property="article:published_time" content="2021-01-24T14:30:00-06:00"/>
+
+<meta property="article:modified_time" content="2021-01-24T14:30:00-06:00"/>
+
 
 
 
@@ -49,9 +54,7 @@ ga('send', 'pageview');
 <script async src='//www.google-analytics.com/analytics.js'></script>
 
     
-      <link href="https://bheisler.github.io/categories/code/index.xml" rel="alternate" type="application/rss+xml" title="bheisler.github.io" />
-    
-    <link rel="canonical" href="https://bheisler.github.io/categories/code/">
+    <link rel="canonical" href="https://bheisler.github.io/post/criterion-rs-0-3-4/">
     
     
     <link rel="icon" sizes="any" href="data:image/svg+xml,%3Csvg%20viewBox='0%200%2046%2045'%20xmlns='http://www.w3.org/2000/svg'%3E%3Ctitle%3EAfter%20Dark%3C/title%3E%3Cpath%20d='M.708%2045L23%20.416%2045.292%2045H.708zM35%2038L23%2019%2011%2038h24z'%20fill='%23000'/%3E%3C/svg%3E">
@@ -205,7 +208,7 @@ a:hover {
     
       <a itemprop="url" class="" href="/"><span itemprop="name">All</span></a>
     
-      <a itemprop="url" class="active" href="/categories/code/"><span itemprop="name">Code</span></a>
+      <a itemprop="url" class="" href="/categories/code/"><span itemprop="name">Code</span></a>
     
       <a itemprop="url" class="" href="/categories/props/"><span itemprop="name">Props</span></a>
     
@@ -214,238 +217,223 @@ a:hover {
 
 </header>
     <main>
-  <header>
-    <h1>Code</h1>
-  </header>
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/experiments-in-nes-jit-compilation/">Experiments In NES JIT Compilation</a>
-    </h2>
+  <article itemscope itemtype="http://schema.org/BlogPosting">
     
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+<meta itemprop="name" content="Criterion.rs v0.3.4 And Iai 0.1.0">
+<meta itemprop="description" content="Today I&rsquo;ve released Criterion 0.3.4 and Iai 0.1.0. I&rsquo;m particularly excited by Iai, so read on to find out what I&rsquo;ve been up to.
+Criterion Updates The main new feature in this release is that Criterion.rs now has built-in support for benchmarking async functions.
+ This feature requires the async feature to be enabled. In addition to this, four other features - async-std, async-tokio, async-smol, and async-futures can be enabled to add support for benchmarking with the respective futures executors.">
+
+
+<meta itemprop="datePublished" content="2021-01-24T14:30:00-06:00" />
+<meta itemprop="dateModified" content="2021-01-24T14:30:00-06:00" />
+<meta itemprop="wordCount" content="870">
+
+
+
+<meta itemprop="keywords" content="Rust,Benchmarking,Criterion.rs," />
+
+    <header>
+      <h1 itemprop="headline">Criterion.rs v0.3.4 And Iai 0.1.0</h1>
+      <p class="muted">
+        <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <circle cx="16" cy="16" r="14" />
   <path d="M16 8 L16 16 20 20" />
 </svg>
-<span>22 minute read</span>
+<span>5 minute read</span>
 <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
   <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
 </svg>
 
-  Published: <time datetime="2017-08-20T11:35:37-06:00">20 Aug, 2017</time>
+  Published: <time datetime="2021-01-24T14:30:00-06:00">24 Jan, 2021</time>
 
+
+      </p>
+    </header>
+    
+    
+
+    <div itemprop="articleBody">
+      
+
+<p>Today I&rsquo;ve released Criterion 0.3.4 and Iai 0.1.0. I&rsquo;m particularly excited by Iai, so read on to find
+out what I&rsquo;ve been up to.</p>
+
+<h2 id="criterion-updates">Criterion Updates</h2>
+
+<p>The main new feature in this release is that Criterion.rs now has built-in support for benchmarking
+async functions.</p>
+
+<script src="//gist.github.com/bheisler/ee60bf7374d4b1aa9daf73e6ffbc01ee.js"></script>
+
+<p>This feature requires the <code>async</code> feature to be enabled. In addition to this, four other features -
+<code>async-std</code>, <code>async-tokio</code>, <code>async-smol</code>, and <code>async-futures</code> can be enabled to add support for
+benchmarking with the respective futures executors. Additional executors can be plugged in by
+implementing a trait.</p>
+
+<p>The other major change in this release is that a number of things have been deprecated and are
+slated to be either deleted or will become compile-time optional features in version 0.4.0.</p>
+
+<ul>
+<li><code>Criterion::can_plot</code> is no longer useful and is deprecated pending deletion in 0.4.0.</li>
+<li><code>Benchmark</code> and <code>ParameterizedBenchmark</code> were already hidden from documentation, but are now
+formally deprecated pending deletion in 0.4.0. Callers should use <code>BenchmarkGroup</code> instead.</li>
+<li><code>Criterion::bench_function_over_inputs</code>, <code>Criterion::bench_functions</code>, and <code>Criterion::bench</code> were
+already hidden from documentation, but are now formally deprecated pending deletion in 0.4.0.
+Callers should use <code>BenchmarkGroup</code> instead.</li>
+<li>Three new optional features have been added; &ldquo;html_reports&rdquo;, &ldquo;csv_output&rdquo; and
+&ldquo;cargo_bench_support&rdquo;. These features currently do nothing except disable a warning message at
+runtime, but in version 0.4.0 they will be used to enable HTML report generation, CSV file
+generation, and the ability to run in cargo-bench (as opposed to <a href="https://github.com/bheisler/cargo-criterion">cargo-criterion</a>).
+&ldquo;cargo_bench_support&rdquo; is enabled by default, but &ldquo;html_reports&rdquo; and &ldquo;csv_output&rdquo;
+are not. If you use Criterion.rs&rsquo; HTML reports, it is recommended to switch to <a href="https://github.com/bheisler/cargo-criterion">cargo-criterion</a>.
+If you use CSV output, it is recommended to switch to <a href="https://github.com/bheisler/cargo-criterion">cargo-criterion</a> and use the
+<code>--message-format=json</code> option for machine-readable output instead. A warning message will be
+printed at the start of benchmark runs which do not have &ldquo;html_reports&rdquo; or &ldquo;cargo_bench_support&rdquo;
+enabled, but because CSV output is not widely used it has no warning.</li>
+</ul>
+
+<p>For more information on the changes in this release, see the <a href="https://github.com/bheisler/criterion.rs/blob/master/CHANGELOG.md">CHANGELOG</a></p>
+
+<h2 id="announcing-iai">Announcing Iai</h2>
+
+<p>Late last year, Nelson Elhage posted
+<a href="https://buttondown.email/nelhage/archive/f6e8eddc-b96c-4e66-a648-006f9ebb6678">an article</a> to his
+excellent newsletter on the difficulties of measuring the performance of software. In that article,
+he mentioned that the sqlite project runs their benchmarks in
+<a href="https://valgrind.org/docs/manual/cg-manual.html">Cachegrind</a> which gives them extremely precise and
+reliable performance measurements.</p>
+
+<p>Itamar Turner-Trauring <a href="https://pythonspeed.com/articles/consistent-benchmarking-in-ci/">followed that up</a>
+with an article suggesting this technique could be used for reliable benchmarking in cloud CI
+environments (note the cameo from yours truly!).</p>
+
+<p>In short, cloud CI environments run user builds in virtual machines where the
+VMs can be slowed down or even paused for periods of time depending on the load on the service.
+This makes them unreliable for precise wall-clock benchmarking, because this can result in large
+changes to the measured performance even if the code is exactly the same - differences of as much
+as 50% are common! Because of that, it&rsquo;s very difficult to make decisions based on benchmarks
+taken in cloud CI systems - if a pull request appears to have regressed the benchmarks, should it
+be rejected or was that just noise? Running benchmarks in Cachegrind solves this problem by
+measuring something more stable instead - Cachegrind counts the actual instructions and memory
+accesses of programs running under it, which gives an extremely precise measurement of the
+performance behavior of those programs. Cachegrind is normally used for profiling, but it can be
+applied for benchmarking as well.</p>
+
+<p><a href="https://github.com/bheisler/iai">Iai</a> is an experimental benchmarking harness that does exactly
+that. For right now, it&rsquo;s extremely simple. I&rsquo;d like to get it into the hands of the community and
+get some feedback before I sink too much effort into this idea. The long-term plan is to integrate
+Iai with cargo-criterion like Criterion.rs already is and use that to provide plots and history
+tracking like cargo-criterion already does for Criterion.rs. I might alternately integrate Iai
+into Criterion.rs itself, but for now I think they&rsquo;re different enough that it makes sense to have
+them be separate.</p>
+
+<p>I intend Iai to be a complement to Criterion.rs, not a replacement. Wall-clock benchmarks have
+their place too - for one thing, Criterion.rs measures the thing you care about (time to execute a
+function), rather than a good estimator of the thing you care about. For another, Cachegrind is
+only available on Linux and a few other Unix-like operating systems - it is not available for
+Windows. If possible, I&rsquo;d recommend using both Iai and Criterion.rs for your benchmarks. There&rsquo;s a
+full description of the pros and cons of each library in
+<a href="https://bheisler.github.io/criterion.rs/book/iai/comparison.html">the User Guide</a>.</p>
+
+<p>Anyway, using Iai should feel pretty familiar to anyone who&rsquo;s used Criterion. Add the following to
+your <code>Cargo.toml</code> file:</p>
+
+<pre><code>[dev-dependencies]
+iai = &quot;0.1&quot;
+
+[[bench]]
+name = &quot;my_benchmark&quot;
+harness = false
+</code></pre>
+
+<p>Next, define a benchmark by creating a file at $PROJECT/benches/my_benchmark.rs with the following contents:</p>
+
+<script src="//gist.github.com/bheisler/79e2da5f5bf86338c9da39bae9416f3a.js"></script>
+
+<p>Finally, run this benchmark with cargo bench. You should see output similar to the following:</p>
+
+<pre><code>     Running target/release/deps/test_regular_bench-8b173c29ce041afa
+
+bench_fibonacci_short
+  Instructions:                1735
+  L1 Accesses:                 2364
+  L2 Accesses:                    1
+  RAM Accesses:                   1
+  Estimated Cycles:            2404
+
+bench_fibonacci_long
+  Instructions:            26214735
+  L1 Accesses:             35638623
+  L2 Accesses:                    2
+  RAM Accesses:                   1
+  Estimated Cycles:        35638668
+</code></pre>
+
+<p>Iai will track and compare against the last run of a benchmark like Criterion.rs, but it doesn&rsquo;t
+yet support HTML reports or more complex historical information.</p>
+
+<p>Thanks to Itamar Turner-Trauring for the formula I used to calculate the &ldquo;estimated cycles&rdquo; count.</p>
+
+    </div>
+    
+    <footer>
+      <hr>
+      <p>
+  Published
+  
+    
+      by <span itemprop="author"></span>
+    
+  
+  <time itemprop="datePublished" datetime="2021-01-24T14:30:00-06:00">
+    24 Jan, 2021
+  </time>
+  
+    in <span itemprop="articleSection"><a href="/categories/code/">code</a></span>
+  
+  
+    and tagged <a href="/tags/benchmarking/">Benchmarking</a>, <a href="/tags/criterion.rs/">Criterion.rs</a> and <a href="/tags/rust/">Rust</a>
+  
+  using <span itemprop="wordCount">870</span> words.
 </p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Inspired by the always-incredible work on Dolphin, I decided to write myself an NES emulator called Corrosion a couple years ago. I managed to get it working well enough to play basic games, and then put the project aside. This post is not about the emulator itself, but rather the JIT compiler I added to it last year and the upgrades to said JIT compiler I&rsquo;ve made over the past few weeks.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/experiments-in-nes-jit-compilation/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-08-20T11:35:37-06:00">
-  <meta itemprop="dateModified" content="2017-08-20T11:35:37-06:00">
-  
-</article>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/nes-rom-parser-with-nom/">Parsing NES ROM Headers with nom</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>8 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
+      
 
-  Published: <time datetime="2017-07-30T02:11:19&#43;00:00">30 Jul, 2017</time>
 
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Long, long ago (December 2015) I wanted to learn how emulators worked, so I decided to write an NES emulator. Not only that, but I opted to write it in Rust, a language which I had never used before. A crazy idea, to be certain, but once I was done I had indeed learned a great deal about emulators, the NES, and Rust.
-Anyway, I&rsquo;ve been working on that project again lately, doing some maintenance work and upgrades.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/nes-rom-parser-with-nom/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-07-30T02:11:19&#43;00:00">
-  <meta itemprop="dateModified" content="2017-07-30T02:11:19&#43;00:00">
-  
-</article>
+  <aside>
+    <header>Related Content</header>
+    <ul>
+      
+        <li><a href="/post/criterion-rs-0-3/">Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</a>
+        <time datetime="3M">3 minutes</time>
+      
+        <li><a href="/post/criterion-rs-0-2/">Criterion.rs v0.2 - HTML, Throughput Measurements, API Changes</a>
+        <time datetime="4M">4 minutes</time>
+      
+        <li><a href="/post/benchmarking-with-criterion-rs/">Benchmarking In Stable Rust With Criterion.rs</a>
+        <time datetime="5M">5 minutes</time>
+      
+        <li><a href="/post/benchmarking-in-the-cloud/">Are Benchmarks From Cloud CI Services Reliable?</a>
+        <time datetime="6M">6 minutes</time>
+      
+        <li><a href="/post/recipe-manager-part-5-data-integrity/">Building a Recipe Manager - Part 5 - Data Integrity</a>
+        <time datetime="12M">12 minutes</time>
+      
+        <li><a href="/post/recipe-manager-part-4-async-std-and-even-more-druid/">Building a Recipe Manager - Part 4 - Async-std and Even More Druid</a>
+        <time datetime="8M">8 minutes</time>
+      
+        <li><a href="/post/recipe-manager-part-3-parsing-and-more-druid/">Building a Recipe Manager - Part 3 - Parsing and more Druid</a>
+        <time datetime="12M">12 minutes</time>
+      
+    </ul>
+  </aside>
 
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/calling-rust-in-python/">Calling Rust From Python</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>11 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
 
-  Published: <time datetime="2017-04-02T00:00:00-06:00">2 Apr, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! This is a detailed example of exposing Rust code to other languages (in this case, Python). Most articles I&rsquo;ve seen that cover this topic uses really trivial example functions, skipping over a lot of the complexity. Even the better ones out there typically don&rsquo;t have a pre-existing, reasonably complex program to work with. I&rsquo;m going to start with trivial functions and build my way up to being able to define a scene for my raytracer in Python using a series of calls to Rust, then render it and return the resulting image data back to Python.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/calling-rust-in-python/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-04-02T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-04-02T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/rendered-by-python.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-3/">Writing a Raytracer in Rust - Part 3 - Reflection and Refraction</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>12 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-03-27T00:00:00-06:00">27 Mar, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello again, and welcome to the final part of my series on writing a raytracer in Rust (Part 1, Part 2). Previously we implemented a basic raytracer which could handle diffuse shading of planes and spheres with multiple objects and multiple lights. This time, we&rsquo;ll add texturing, reflection and transparent objects.
-First, I&rsquo;ve refactored the common parts of Sphere and Plane out to a separate structure. Since this post is all about handling more complex surface properties, we&rsquo;ll need a structure to represent them and avoid duplication.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-3/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-27T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-27T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/complete-refraction.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-2/">Writing a Raytracer in Rust - Part 2 - Light and Shadow</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>9 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-03-20T00:00:00-06:00">20 Mar, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Welcome to Part 2 of my series on writing a raytracer in Rust. If you haven&rsquo;t already, you may wish to read Part 1. Previously, we implemented a basic raytracer which can render only a single sphere with no lighting. This time, we&rsquo;ll add multiple objects, planes, and basic lighting.
-Multiple Objects It&rsquo;s pretty easy to change our scene definition to contain a Vec of spheres instead of just a single one.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-2/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-03-20T00:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-03-20T00:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/spherical-lights.png">
-  
-</article>
-
-  
-    <article itemscope itemtype="http://schema.org/CreativeWork">
-  <header>
-    <h2 itemprop="name">
-      <a href="/post/writing-raytracer-in-rust-part-1/">Writing a Raytracer in Rust - Part 1 - First Rays</a>
-    </h2>
-    
-      <p class="muted"><svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <circle cx="16" cy="16" r="14" />
-  <path d="M16 8 L16 16 20 20" />
-</svg>
-<span>7 minute read</span>
-<svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32" width="16" height="16" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
-  <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z" />
-</svg>
-
-  Published: <time datetime="2017-02-20T11:00:00-06:00">20 Feb, 2017</time>
-
-</p>
-    
-  </header>
-  
-  <div itemprop="description">
-    Hello! This is part one of a short series of posts on writing a simple raytracer in Rust. I&rsquo;ve never written one of these before, so it should be a learning experience all around.
-So what is a raytracer anyway? The short version is it&rsquo;s a computer program that traces the paths of simulated rays of light through a scene to produce high-quality 3D-rendered images. Despite that, it also happens to be the simplest way to render 3D images.
-  </div>
-  
-    <nav class="readmore"><a itemprop="url" href="/post/writing-raytracer-in-rust-part-1/">Read More&nbsp;&raquo;</a></nav>
-  
-  <meta itemprop="inLanguage" content="en-us">
-  <meta itemprop="datePublished" content="2017-02-20T11:00:00-06:00">
-  <meta itemprop="dateModified" content="2017-02-20T11:00:00-06:00">
-  
-    <meta itemprop="image" content="https://bheisler.github.io/static/raytracer-first-render.png">
-  
-</article>
-
-  
+    </footer>
+  </article>
 </main>
     <footer>
-  <nav>
-  <p>
-    
-      <a href="/categories/code/page/2/">&laquo; Previous</a> |
-    
-    <span>Page 3 of 3</span>
-    
-  </p>
-</nav>
-
   
   <p class="muted">
     This page was generated using

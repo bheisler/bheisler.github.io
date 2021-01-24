@@ -6,10 +6,21 @@
     <description>Recent content in Criterion.rs on bheisler.github.io</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 25 Aug 2019 10:30:00 -0600</lastBuildDate>
+    <lastBuildDate>Sun, 24 Jan 2021 14:30:00 -0600</lastBuildDate>
     
 	<atom:link href="https://bheisler.github.io/tags/criterion.rs/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Criterion.rs v0.3.4 And Iai 0.1.0</title>
+      <link>https://bheisler.github.io/post/criterion-rs-0-3-4/</link>
+      <pubDate>Sun, 24 Jan 2021 14:30:00 -0600</pubDate>
+      
+      <guid>https://bheisler.github.io/post/criterion-rs-0-3-4/</guid>
+      <description>Today I&amp;rsquo;ve released Criterion 0.3.4 and Iai 0.1.0. I&amp;rsquo;m particularly excited by Iai, so read on to find out what I&amp;rsquo;ve been up to.
+Criterion Updates The main new feature in this release is that Criterion.rs now has built-in support for benchmarking async functions.
+ This feature requires the async feature to be enabled. In addition to this, four other features - async-std, async-tokio, async-smol, and async-futures can be enabled to add support for benchmarking with the respective futures executors.</description>
+    </item>
     
     <item>
       <title>Criterion.rs v0.3 - Custom Measurements, Profiling Hooks, Custom Test Framework, API Changes</title>
